@@ -1,0 +1,55 @@
+# Environment variables - NEVER commit!
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+.classpath
+.project
+.c9/
+*.launch
+
+# Sensitive files
+*-key.txt
+*-credentials.json
+supabase-credentials.txt
+firebase-key.json
+
+# Temp files
+*.tmp
+*.bak
+~*
+
+# IDE specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
