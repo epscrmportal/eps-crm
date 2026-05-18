@@ -1,18 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "echo 'Static HTML - no build needed'",
-  "outputDirectory": ".",
   "public": false,
+  "builds": [],
   "routes": [
     {
-      "src": "/",
-      "dest": "/eps-crm-cloud.html",
-      "methods": ["GET", "HEAD"]
-    },
-    {
       "src": "/(.*)",
-      "dest": "/eps-crm-cloud.html",
-      "methods": ["GET", "HEAD"]
+      "dest": "/eps-crm-cloud.html"
     }
   ]
 }
