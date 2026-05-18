@@ -3,23 +3,5 @@
   "version": "1.0.0",
   "description": "EPS CRM System - Cloud-based with Supabase",
   "main": "eps-crm-cloud.html",
-  "scripts": {
-    "dev": "python -m http.server 8000",
-    "build": "echo 'Static HTML - no build needed'",
-    "start": "python -m http.server 3000"
-  },
-  "keywords": [
-    "CRM",
-    "Telecaller",
-    "Field Executive",
-    "Sales",
-    "Contact Management",
-    "Cloud",
-    "Supabase"
-  ],
-  "author": "EPS Team",
-  "license": "PROPRIETARY",
-  "engines": {
-    "node": ">=14.0.0"
-  }
+  "private": true
 }
