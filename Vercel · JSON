@@ -1,19 +1,18 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "eps-crm-cloud.html",
-      "use": "@vercel/static"
-    }
-  ],
+  "buildCommand": "echo 'Static HTML - no build needed'",
+  "outputDirectory": ".",
+  "public": false,
   "routes": [
     {
+      "src": "/",
+      "dest": "/eps-crm-cloud.html",
+      "methods": ["GET", "HEAD"]
+    },
+    {
       "src": "/(.*)",
-      "dest": "/eps-crm-cloud.html"
+      "dest": "/eps-crm-cloud.html",
+      "methods": ["GET", "HEAD"]
     }
-  ],
-  "env": {
-    "SUPABASE_URL": "@supabase_url",
-    "SUPABASE_ANON_KEY": "@supabase_anon_key"
-  }
+  ]
 }
