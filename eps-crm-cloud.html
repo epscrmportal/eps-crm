@@ -552,7 +552,7 @@
     <!-- Auth Screen -->
     <div id="authScreen" class="auth-container">
         <h2>EPS CRM - Cloud System</h2>
-        <p style="color: #666; margin-bottom: 20px;">Sign in with email to access your cloud CRM</p>
+        <p style="color: #666; margin-bottom: 20px;">Sign in with your role credentials</p>
         
         <div id="authError"></div>
 
@@ -571,9 +571,31 @@
             <button class="btn-secondary" onclick="signup()">📝 Sign Up</button>
         </div>
 
-        <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
-            ℹ️ Demo: Use any email/password to get started
-        </p>
+        <div style="background: #f0f4ff; border: 1px solid #667eea; border-radius: 8px; padding: 15px; margin-top: 20px; font-size: 12px;">
+            <strong style="color: #667eea;">📋 Available Credentials:</strong>
+            <div style="margin-top: 10px; line-height: 1.8;">
+                <div>
+                    <strong>👨‍💼 Admin:</strong><br>
+                    Email: <code style="background: white; padding: 2px 6px; border-radius: 3px;">admin@eps.com</code><br>
+                    Password: <code style="background: white; padding: 2px 6px; border-radius: 3px;">admin123</code>
+                </div>
+                <div style="margin-top: 8px;">
+                    <strong>☎️ Telecaller:</strong><br>
+                    Email: <code style="background: white; padding: 2px 6px; border-radius: 3px;">telecaller@eps.com</code><br>
+                    Password: <code style="background: white; padding: 2px 6px; border-radius: 3px;">telecaller123</code>
+                </div>
+                <div style="margin-top: 8px;">
+                    <strong>🚀 Field Executive:</strong><br>
+                    Email: <code style="background: white; padding: 2px 6px; border-radius: 3px;">fieldexec@eps.com</code><br>
+                    Password: <code style="background: white; padding: 2px 6px; border-radius: 3px;">fieldexec123</code>
+                </div>
+                <div style="margin-top: 8px;">
+                    <strong>📦 Orders Generation:</strong><br>
+                    Email: <code style="background: white; padding: 2px 6px; border-radius: 3px;">orders@eps.com</code><br>
+                    Password: <code style="background: white; padding: 2px 6px; border-radius: 3px;">orders123</code>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Dashboard -->
@@ -780,8 +802,16 @@
         }
 
         // ============ AUTHENTICATION ============
+        // 🔑 HARDCODED LOGIN ACCOUNTS
+        const validAccounts = {
+            'admin@eps.com': { password: 'admin123', role: 'Admin', name: 'Admin User' },
+            'telecaller@eps.com': { password: 'telecaller123', role: 'Telecaller', name: 'Telecaller' },
+            'fieldexec@eps.com': { password: 'fieldexec123', role: 'Field Executive', name: 'Field Executive' },
+            'orders@eps.com': { password: 'orders123', role: 'Orders', name: 'Orders Generation' }
+        };
+
         async function login() {
-            const email = document.getElementById('authEmail').value;
+            const email = document.getElementById('authEmail').value.trim().toLowerCase();
             const password = document.getElementById('authPassword').value;
 
             if (!email || !password) {
@@ -789,44 +819,24 @@
                 return;
             }
 
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
-                if (error) throw error;
-                
-                currentUser = data.user;
-                console.log('✅ Logged in as:', email);
-                showDashboard();
-            } catch (error) {
-                showAuthError('Login failed: ' + error.message);
+            // Check against hardcoded accounts
+            if (validAccounts[email] && validAccounts[email].password === password) {
+                currentUser = {
+                    id: email,
+                    email: email,
+                    role: validAccounts[email].role,
+                    name: validAccounts[email].name
+                };
+                console.log('✅ Logged in as:', email, '- Role:', validAccounts[email].role);
+                showAuthError(`✅ Welcome ${validAccounts[email].name}! Logged in successfully.`);
+                setTimeout(() => showDashboard(), 500);
+            } else {
+                showAuthError('❌ Invalid email or password. Check credentials below.');
             }
         }
 
         async function signup() {
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-
-            if (!email || !password) {
-                showAuthError('Please enter email and password');
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password
-                });
-
-                if (error) throw error;
-                
-                showAuthError('✅ Sign up successful! You can now login.');
-                setTimeout(() => login(), 1500);
-            } catch (error) {
-                showAuthError('Sign up failed: ' + error.message);
-            }
+            showAuthError('❌ Signup disabled. Use existing credentials below.');
         }
 
         function logout() {
@@ -852,7 +862,7 @@
         function showDashboard() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainDashboard').classList.add('active');
-            document.getElementById('currentUser').textContent = currentUser?.email || 'User';
+            document.getElementById('currentUser').textContent = `${currentUser?.name || 'User'} (${currentUser?.role || 'Guest'})`;
         }
 
         function selectRole(role) {
