@@ -3241,34 +3241,14 @@ Orders Team,0
 
         // Load enabled modules for current user
         function loadEnabledModules() {
-            const dept = currentRole?.charAt(0).toUpperCase() + currentRole?.slice(1) || 'Telecaller';
-            const features = DEPARTMENT_FEATURES[dept] || DEPARTMENT_FEATURES['Telecaller'];
-            
-            const enabledModules = [];
-            for (const [key, enabled] of Object.entries(features)) {
-                if (enabled && key in MODULES) {
-                    enabledModules.push(key);
-                }
-            }
-            
-            console.log(`Loading modules for ${dept}:`, enabledModules);
-            
-            // Load each module
-            enabledModules.forEach(moduleName => {
-                loadModule(moduleName);
-            });
+            // External modules are not loaded - all functionality is inline
+            console.log('✅ Module system initialized. All functionality available inline.');
         }
 
         // Dynamically load module
         function loadModule(moduleName) {
-            const module = MODULES[moduleName];
-            if (!module) return;
-            
-            const script = document.createElement('script');
-            script.src = module.file;
-            script.onload = () => console.log(`✅ ${module.name} loaded`);
-            script.onerror = () => console.log(`⚠️ ${module.name} not available (development)`);
-            document.head.appendChild(script);
+            // External modules are not available - all functionality is inline
+            console.log(`✅ ${moduleName} functionality available inline`);
         }
 
         // Load all modules when user logs in
