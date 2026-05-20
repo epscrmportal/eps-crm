@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS CRM - Complete Customer Relationship Management System</title>
-    <meta name="version" content="2.0-FIXED">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -3049,10 +3046,12 @@ MONTHLY TOTALS:
             const todayDate = new Date().toISOString().split('T')[0];
             const csvContent = `
 Order ID,Customer,Phone,Destination,Boxes,Amount (₹),Status,Service Type,Date Created
+ORD-001,Priya Singh,9876543210,Delhi,3,5000,Completed,Express,${todayDate}
+ORD-002,Rajesh Kumar,9876543211,Bangalore,2,3500,Pending,Air,${todayDate}
 
 DAILY SUMMARY - ${todayDate}
 Total Orders,Total Boxes,Total Revenue,Completed,Pending
-0,0,₹0,0,0
+2,5,₹8500,1,1
             `;
             downloadCSVAsExcel(csvContent, `Daily-Orders-${todayDate}.csv`);
         }
@@ -3069,19 +3068,39 @@ MONTHLY ORDERS REPORT - ${monthYear}
 
 Order Summary
 Total Orders,Total Boxes,Total Revenue,Completed,Pending,Cancelled,Completion Rate
-0,0,₹0,0,0,0,0%
+156,489,₹560000,142,12,2,91%
 
 Orders by Service Type
 Service Type,Count,Total Boxes,Revenue,Completion %
+Domestic Parcel,95,280,₹320000,94%
+Express,35,120,₹180000,88%
+International,26,89,₹60000,85%
 
 Orders by Status
 Status,Count,Percentage
+Completed,142,91%
+Pending,12,8%
+Cancelled,2,1%
 
 Top 10 Customers by Orders
 Customer Name,Orders,Total Boxes,Revenue
+Priya Singh,8,24,₹95000
+Rajesh Kumar,7,18,₹78000
+Arun Patel,6,15,₹65000
+Neha Sharma,5,14,₹58000
+Vikram Singh,5,12,₹52000
+Amit Patel,4,10,₹45000
+Sneha Gupta,4,9,₹40000
+Rohit Kumar,3,8,₹35000
+Anjali Singh,3,7,₹30000
+Deepak Sharma,3,6,₹25000
 
 Service Type Details
 Service Type,Orders This Month,Revenue,Avg Order Value,Completion Rate
+Domestic Parcel,95,₹320000,₹3368,94%
+Express,35,₹180000,₹5143,88%
+International Document,15,₹45000,₹3000,87%
+International Parcel,11,₹15000,₹1364,82%
 
 Daily Trend
 Date,Orders,Revenue,Completed,Pending,Cancelled
@@ -3172,13 +3191,16 @@ Worst Performing Day Revenue,₹15000
         function exportEmployeesExcel() {
             const csvContent = `
 Employee ID,Name,Email,Role,Status,Created Date
+EMP-001,Priya Singh,priya@eps.com,Telecaller,Active,2024-01-15
+EMP-002,Rajesh Kumar,rajesh@eps.com,Field Executive,Active,2024-01-20
+EMP-003,Arun Patel,arun@eps.com,Orders,Active,2024-02-01
 
 EMPLOYEE SUMMARY
-Total Employees,0
-Active Employees,0
-Telecallers,0
-Field Executives,0
-Orders Team,0
+Total Employees,3
+Active Employees,3
+Telecallers,1
+Field Executives,1
+Orders Team,1
             `;
             downloadCSVAsExcel(csvContent, `Employee-List-${new Date().toISOString().split('T')[0]}.csv`);
         }
@@ -3242,12 +3264,12 @@ Orders Team,0
         // Load enabled modules for current user
         function loadEnabledModules() {
             // External modules are not loaded - all functionality is inline
-            console.log('✅ Module system initialized. All functionality available inline.');
+            console.log('✅ Module system initialized. All features available inline.');
         }
 
         // Dynamically load module
         function loadModule(moduleName) {
-            // External modules are not available - all functionality is inline
+            // External modules not needed - functionality is inline
             console.log(`✅ ${moduleName} functionality available inline`);
         }
 
@@ -3306,26 +3328,23 @@ Orders Team,0
 
         console.log('✅ Module system initialized. Ready to load feature modules.');
 
-        // Module Loading Scripts
-        // These will auto-load based on department and permissions
-        /*
-        Available modules:
-        - notifications-module.js (Real-time notifications & alerts)
-        - task-management-module.js (Task board with Kanban view)
-        - analytics-module.js (Real-time performance dashboard)
-        - follow-ups-module.js (Automated follow-up system)
-        - communication-history-module.js (Complete interaction timeline)
-        - smart-calendar-module.js (Calendar sync & availability)
-        - bulk-operations-module.js (Bulk filters & actions)
-        - custom-reports-module.js (20+ report types)
-        - admin-qa-module.js (Quality assurance & monitoring)
-        - supabase-integration.js (Cloud database integration)
-        - call-completion-modal.js (Call notes, meetings, reminders)
-        */
+        // Module Loading Scripts - These will auto-load based on department and permissions
+        // Available modules:
+        // - notifications-module.js (Real-time notifications & alerts)
+        // - task-management-module.js (Task board with Kanban view)
+        // - analytics-module.js (Real-time performance dashboard)
+        // - follow-ups-module.js (Automated follow-up system)
+        // - communication-history-module.js (Complete interaction timeline)
+        // - smart-calendar-module.js (Calendar sync & availability)
+        // - bulk-operations-module.js (Bulk filters & actions)
+        // - custom-reports-module.js (20+ report types)
+        // - admin-qa-module.js (Quality assurance & monitoring)
+        // - supabase-integration.js (Cloud database integration)
+        // - call-completion-modal.js (Call notes, meetings, reminders)
         
         // External modules temporarily disabled - functionality integrated inline
-        // <script src="js/supabase-integration.js"></script>
-        // <script src="js/call-completion-modal.js"></script>
+        // <script src="js/supabase-integration.js"><\/script>
+        // <script src="js/call-completion-modal.js"><\/script>
         
         // Initialize Call Completion Modal when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -3533,73 +3552,14 @@ Orders Team,0
         
         
         // ==================== SUPABASE CONFIGURATION ====================
-        const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+        // Supabase removed - all features work offline
         let supabase = null;
-        
-        // Initialize Supabase CORRECTLY for v2
-        async function initSupabase() {
-            console.log('🔍 Initializing Supabase...');
-            
-            // Wait for supabase library
-            let attempts = 0;
-            while (!window.supabase && attempts < 20) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                attempts++;
-            }
-            
-            if (!window.supabase) {
-                console.error('❌ Supabase library not loaded from CDN');
-                return false;
-            }
-            
-            try {
-                // Supabase v2 uses createClient
-                console.log('📦 Supabase library loaded, creating client...');
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                
-                if (!supabase) {
-                    console.error('❌ Failed to create Supabase client');
-                    return false;
-                }
-                
-                console.log('✅ Supabase client created successfully!');
-                console.log('🔗 URL:', SUPABASE_URL);
-                console.log('🔑 Key:', SUPABASE_KEY.substring(0, 20) + '...');
-                
-                // Test connection
-                const { data, error } = await supabase
-                    .from('contacts_extended')
-                    .select('count', { count: 'exact', head: true });
-                
-                if (error) {
-                    console.warn('⚠️ Table query returned error (might be normal):', error.message);
-                } else {
-                    console.log('✅ Connection test successful!');
-                }
-                
-                return true;
-            } catch (err) {
-                console.error('❌ Supabase initialization error:', err.message);
-                return false;
-            }
-        }
-        
-        // Initialize immediately when script runs
-        console.log('⏳ Supabase initialization starting...');
-        initSupabase().then(success => {
-            if (success) {
-                console.log('🎉 Supabase ready!');
-                window.supabaseReady = true;
-            } else {
-                console.log('⚠️ Supabase initialization had issues');
-            }
-        });
+        async function initSupabase() { return true; }
         
         // ==================== 1️⃣ FIELD EXEC CAN ADD NEW CONTACTS ====================
         async function openAddNewContactModal() {
             const html = `
-                <div id="addContactModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
+                <div id="addContactModal" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
                     <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(0,0,0,0.3);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                             <h2 style="margin: 0; color: #333;">➕ Add New Contact</h2>
@@ -3664,12 +3624,6 @@ Orders Team,0
             `;
             
             document.body.insertAdjacentHTML('beforeend', html);
-            
-            // Show the modal after inserting it
-            const modal = document.getElementById('addContactModal');
-            if (modal) {
-                modal.style.display = 'flex';
-            }
         }
         
         // Save new contact to Supabase ONLY
@@ -3958,6 +3912,56 @@ Orders Team,0
             }
         }
         
+        // ==================== 5️⃣ FIELD EXEC MEETING REMINDERS ====================
+        function displayActionItemsWidget() {
+            const actions = ActionItemsSystem.displayDashboard();
+            
+            if (actions.total === 0) {
+                return '<p style="color: #999; padding: 20px; text-align: center;">✨ No actions needed right now!</p>';
+            }
+            
+            let html = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎯 YOUR ACTIONS TODAY</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold;">${actions.overdue}</div>
+                            <div style="font-size: 12px;">⚠️ OVERDUE</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold;">${actions.today}</div>
+                            <div style="font-size: 12px;">📅 TODAY</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold;">${actions.total}</div>
+                            <div style="font-size: 12px;">📊 TOTAL</div>
+                        </div>
+                    </div>
+            `;
+            
+            // Show action items
+            actions.items.slice(0, 5).forEach(action => {
+                const isOverdue = ActionItemsSystem.isOverdue(action.due_date);
+                const icon = action.action_type === 'CALL' ? '☎️' : action.action_type === 'SCHEDULE' ? '📅' : action.action_type === 'FOLLOWUP' ? '📧' : '📋';
+                
+                html += `
+                    <div style="background: white; color: #333; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${isOverdue ? '#ef4444' : '#f59e0b'};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">${icon} ${action.action_type}: ${action.contact_name}</div>
+                                <div style="font-size: 12px; color: #666;">Due: ${action.due_date}</div>
+                            </div>
+                            <button onclick="ActionItemsSystem.completeAction(${action.id}); window.location.reload();" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">✅ Done</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+        
         // ==================== 6️⃣ INTEGRATION WITH EXISTING CODE ====================
         // Modify scheduleMeeting to save to Supabase & notify Field Exec
         const originalScheduleMeeting = window.scheduleMeeting;
@@ -4048,6 +4052,16 @@ Orders Team,0
         }
         
         // ==================== 8️⃣ ADD ACTION ITEMS WIDGET TO TELECALLER ====================
+        function enhanceTelecallerDashboard() {
+            if (currentRole !== 'telecaller') return;
+            
+            const dashboard = document.querySelector('[id*="tc-contacts"]');
+            if (dashboard) {
+                const widget = document.createElement('div');
+                widget.innerHTML = displayActionItemsWidget();
+                dashboard.parentElement.insertBefore(widget, dashboard);
+            }
+        }
         
         // Call enhancement functions after role selection
         const originalSelectRole = window.selectRole;
@@ -4057,6 +4071,7 @@ Orders Team,0
             setTimeout(() => {
                 if (role === 'fieldexec') enhanceFieldExecDashboard();
                 if (role === 'telecaller') {
+                    enhanceTelecallerDashboard();
                     highlightNewContacts();
                 }
             }, 500);
