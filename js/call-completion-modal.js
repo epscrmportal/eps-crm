@@ -366,9 +366,14 @@ window.CallCompletionModal = {
     }
 };
 
-// Initialize when page loads
+// Initialize when page loads - WITH DELAY
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => CallCompletionModal.init(), 1000);
+    setTimeout(() => {
+        if (window.CallCompletionModal && typeof window.CallCompletionModal.init === 'function') {
+            window.CallCompletionModal.init();
+            console.log('✅ Call Completion Modal Initialized');
+        }
+    }, 1500);
 });
 
-console.log('✅ Call Completion Modal Loaded');
+console.log('✅ Call Completion Modal Script Loaded');

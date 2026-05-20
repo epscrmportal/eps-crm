@@ -7,8 +7,22 @@
 const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
 
-// Initialize Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+
+// Wait for Supabase library to load
+function initSupabase() {
+    if (!window.supabase) {
+        setTimeout(initSupabase, 100);
+        return;
+    }
+    
+    // Initialize Supabase when library is ready
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase initialized');
+}
+
+// Start initialization
+initSupabase();
 
 window.CrmSupabase = {
     // Save call note
