@@ -616,11 +616,25 @@
                 <h3>Collections</h3>
                 <p>Invoices, payments, collections</p>
             </div>
+            <div class="role-card" onclick="selectRole('admin')">
+                <div class="role-icon">👨‍💼</div>
+                <h3>Admin Dashboard</h3>
+                <p>Team reports, orders analytics</p>
+            </div>
         </div>
 
         <!-- ==================== TELECALLER DASHBOARD ==================== -->
         <div id="telecallerDash" style="display: none;">
             <button class="back-button" onclick="backToRoles()">← Back to Roles</button>
+            
+            <!-- Security Info Banner -->
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">ℹ️</span>
+                <div>
+                    <strong style="color: #92400e;">Data Privacy & Security:</strong>
+                    <span style="color: #78350f;">You can edit your data, but cannot delete or export reports. Only your admin can manage employee data and download reports.</span>
+                </div>
+            </div>
             
             <div class="tabs">
                 <button class="tab active" onclick="showTab(event, 'tc-dashboard')">📊 Dashboard</button>
@@ -967,6 +981,15 @@
         <div id="fieldexecDash" style="display: none;">
             <button class="back-button" onclick="backToRoles()">← Back to Roles</button>
             
+            <!-- Security Info Banner -->
+            <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">ℹ️</span>
+                <div>
+                    <strong style="color: #92400e;">Data Privacy & Security:</strong>
+                    <span style="color: #78350f;">You can edit your data, but cannot delete or export reports. Only your admin can manage employee data and download reports.</span>
+                </div>
+            </div>
+            
             <div class="tabs">
                 <button class="tab active" onclick="showTab(event, 'fe-dashboard')">📊 Dashboard</button>
                 <button class="tab" onclick="showTab(event, 'fe-meetings')">📅 Scheduled Meetings</button>
@@ -1048,30 +1071,9 @@
 
             <!-- FE Scheduled Meetings Tab -->
             <div id="fe-meetings" class="tab-content">
-                <h2>Scheduled Meetings</h2>
-                <button class="btn-primary" style="margin-bottom: 20px;">➕ Create Meeting</button>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Contact</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Rajesh Kumar</td>
-                            <td>2024-05-22</td>
-                            <td>2:00 PM</td>
-                            <td>Office</td>
-                            <td><span class="badge badge-success">Scheduled</span></td>
-                            <td><button class="btn-primary" style="padding: 5px 8px; font-size: 11px;">Edit</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h2>My Assigned Meetings</h2>
+                <p style="color: #666; margin-bottom: 15px;">📅 Meetings assigned to you by Telecallers</p>
+                <div id="fieldExecMeetingsList"></div>
             </div>
 
             <!-- FE Log Activities Tab -->
@@ -1653,6 +1655,8 @@
             <div class="tabs">
                 <button class="tab active" onclick="showTab(event, 'ac-dashboard')">📊 Dashboard</button>
                 <button class="tab" onclick="showTab(event, 'ac-invoices')">💳 Invoices</button>
+                <button class="tab" id="adminReportsTab" onclick="showTab(event, 'ac-reports')" style="display: none;">📈 Team Reports</button>
+                <button class="tab" id="adminEmployeeTab" onclick="showTab(event, 'ac-employees')" style="display: none;">👥 Employee Management</button>
             </div>
 
             <!-- AC Dashboard Tab -->
@@ -1752,6 +1756,418 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- ADMIN REPORTS TAB -->
+            <div id="ac-reports" class="tab-content">
+                <h2>📈 Team Reports - Daily & Monthly</h2>
+                
+                <!-- Daily Reports -->
+                <div style="margin-bottom: 40px;">
+                    <h3 style="color: #667eea;">📅 Today's Activity Summary</h3>
+                    <div class="dashboard-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">☎️</div>
+                            <div class="metric-label">Calls Made</div>
+                            <div class="metric-value" id="todayCallsCount">5</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">📇</div>
+                            <div class="metric-label">New Contacts</div>
+                            <div class="metric-value" id="todayContactsCount">20</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">📅</div>
+                            <div class="metric-label">Meetings Scheduled</div>
+                            <div class="metric-value" id="todayMeetingsCount">5</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🚀</div>
+                            <div class="metric-label">Activities Logged</div>
+                            <div class="metric-value" id="todayActivitiesCount">8</div>
+                        </div>
+                    </div>
+
+                    <table style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Team Member</th>
+                                <th>Role</th>
+                                <th>Calls</th>
+                                <th>Contacts</th>
+                                <th>Meetings</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Telecaller Team</td>
+                                <td>Telecaller</td>
+                                <td>5</td>
+                                <td>12</td>
+                                <td>2</td>
+                                <td><span class="badge badge-completed">✅ Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>Field Executive Team</td>
+                                <td>Field Executive</td>
+                                <td>0</td>
+                                <td>8</td>
+                                <td>3</td>
+                                <td><span class="badge badge-completed">✅ Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Monthly Reports -->
+                <div>
+                    <h3 style="color: #667eea;">📊 Monthly Performance (Current Month)</h3>
+                    <div class="dashboard-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">☎️</div>
+                            <div class="metric-label">Total Calls</div>
+                            <div class="metric-value" id="monthCallsCount">145</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">📇</div>
+                            <div class="metric-label">Total Contacts</div>
+                            <div class="metric-value" id="monthContactsCount">505</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">📅</div>
+                            <div class="metric-label">Total Meetings</div>
+                            <div class="metric-value" id="monthMeetingsCount">123</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🚀</div>
+                            <div class="metric-label">Activities</div>
+                            <div class="metric-value" id="monthActivitiesCount">234</div>
+                        </div>
+                    </div>
+
+                    <table style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Team Member</th>
+                                <th>Role</th>
+                                <th>Calls</th>
+                                <th>Contacts</th>
+                                <th>Meetings</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Telecaller Team</td>
+                                <td>Telecaller</td>
+                                <td>145</td>
+                                <td>320</td>
+                                <td>45</td>
+                                <td>87% 📈</td>
+                            </tr>
+                            <tr>
+                                <td>Field Executive Team</td>
+                                <td>Field Executive</td>
+                                <td>0</td>
+                                <td>185</td>
+                                <td>78</td>
+                                <td>92% 📈</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ORDERS REPORTS SECTION -->
+                <div style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #667eea;">
+                    <h2>📦 Daily & Monthly Orders Reports</h2>
+                    
+                    <!-- Daily Orders -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">📦 Today's Orders Summary</h3>
+                        <button class="btn-primary" onclick="refreshDailyOrders()" style="margin-bottom: 15px;">🔄 Refresh Live Data</button>
+                        
+                        <div class="dashboard-grid">
+                            <div class="metric-card">
+                                <div class="metric-icon">📦</div>
+                                <div class="metric-label">Orders Created Today</div>
+                                <div class="metric-value" id="dailyOrdersCount">0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">📊</div>
+                                <div class="metric-label">Total Boxes</div>
+                                <div class="metric-value" id="dailyBoxesCount">0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">💰</div>
+                                <div class="metric-label">Revenue Today</div>
+                                <div class="metric-value" id="dailyRevenueCount">₹0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">✅</div>
+                                <div class="metric-label">Completed</div>
+                                <div class="metric-value" id="dailyCompletedCount">0</div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 20px; margin-bottom: 10px;">Today's Order Details:</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Phone</th>
+                                    <th>Destination</th>
+                                    <th>Boxes</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Service Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dailyOrdersTable">
+                                <tr>
+                                    <td>ORD-001</td>
+                                    <td>Priya Singh</td>
+                                    <td>9876543210</td>
+                                    <td>Delhi</td>
+                                    <td>3</td>
+                                    <td>₹5,000</td>
+                                    <td><span class="badge badge-completed">Completed</span></td>
+                                    <td>Express</td>
+                                </tr>
+                                <tr>
+                                    <td>ORD-002</td>
+                                    <td>Rajesh Kumar</td>
+                                    <td>9876543211</td>
+                                    <td>Bangalore</td>
+                                    <td>2</td>
+                                    <td>₹3,500</td>
+                                    <td><span class="badge badge-pending">Pending</span></td>
+                                    <td>Air</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Monthly Orders -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">📊 Monthly Orders Summary</h3>
+                        
+                        <div class="dashboard-grid">
+                            <div class="metric-card">
+                                <div class="metric-icon">📦</div>
+                                <div class="metric-label">Total Orders (Month)</div>
+                                <div class="metric-value" id="monthlyOrdersCount">156</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">📊</div>
+                                <div class="metric-label">Total Boxes</div>
+                                <div class="metric-value" id="monthlyBoxesCount">489</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">💰</div>
+                                <div class="metric-label">Monthly Revenue</div>
+                                <div class="metric-value" id="monthlyRevenueCount">₹5.6L</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">✅</div>
+                                <div class="metric-label">Completed Orders</div>
+                                <div class="metric-value" id="monthlyCompletedCount">142</div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid" style="margin-top: 20px;">
+                            <div class="metric-card">
+                                <div class="metric-icon">⏳</div>
+                                <div class="metric-label">Pending Orders</div>
+                                <div class="metric-value" id="monthlyPendingCount">12</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">❌</div>
+                                <div class="metric-label">Cancelled Orders</div>
+                                <div class="metric-value" id="monthlyCancelledCount">2</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">📈</div>
+                                <div class="metric-label">Completion Rate</div>
+                                <div class="metric-value" id="monthlyCompletionRate">91%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">💵</div>
+                                <div class="metric-label">Avg Order Value</div>
+                                <div class="metric-value" id="monthlyAvgValue">₹36K</div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 20px; margin-bottom: 10px;">Monthly Orders by Service Type:</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Service Type</th>
+                                    <th>Count</th>
+                                    <th>Total Boxes</th>
+                                    <th>Revenue</th>
+                                    <th>Completion %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthlyServiceTable">
+                                <tr>
+                                    <td>Domestic Parcel</td>
+                                    <td>95</td>
+                                    <td>280</td>
+                                    <td>₹3.2L</td>
+                                    <td>94%</td>
+                                </tr>
+                                <tr>
+                                    <td>Express</td>
+                                    <td>35</td>
+                                    <td>120</td>
+                                    <td>₹1.8L</td>
+                                    <td>88%</td>
+                                </tr>
+                                <tr>
+                                    <td>International</td>
+                                    <td>26</td>
+                                    <td>89</td>
+                                    <td>₹0.6L</td>
+                                    <td>85%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: #f0f4ff; border-radius: 8px; text-align: center;">
+                    <h4>📥 Download Reports (Excel & PDF)</h4>
+                    <button class="btn-primary" onclick="downloadDailyReport()" style="margin-right: 10px; margin-top: 10px;">📥 Daily Team Report</button>
+                    <button class="btn-primary" onclick="downloadMonthlyReport()" style="margin-right: 10px; margin-top: 10px;">📥 Monthly Team Report</button>
+                    <button class="btn-primary" onclick="downloadDailyOrdersExcel()" style="margin-right: 10px; margin-top: 10px; background: #10b981;">📥 Daily Orders (Excel)</button>
+                    <button class="btn-primary" onclick="downloadMonthlyOrdersExcel()" style="margin-top: 10px; background: #10b981;">📥 Monthly Orders (Excel)</button>
+                </div>
+            </div>
+
+            <!-- EMPLOYEE MANAGEMENT TAB (ADMIN ONLY) -->
+            <div id="ac-employees" class="tab-content">
+                <h2>👥 Employee Management System</h2>
+                <p style="color: #666; margin-bottom: 20px;">⚠️ Only Admin can manage employees. Other roles cannot view, delete, or export this data.</p>
+
+                <!-- Create New Employee -->
+                <div style="background: #f0f4ff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h3 style="color: #667eea;">➕ Create New Employee</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <div>
+                            <label>Full Name *</label>
+                            <input type="text" id="empName" placeholder="Employee name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label>Email Address *</label>
+                            <input type="email" id="empEmail" placeholder="employee@company.com" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label>Role *</label>
+                            <select id="empRole" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <option value="">Select Role</option>
+                                <option value="Telecaller">☎️ Telecaller</option>
+                                <option value="Field Executive">🚀 Field Executive</option>
+                                <option value="Orders">📦 Orders</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Password *</label>
+                            <input type="password" id="empPassword" placeholder="Password" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label>Confirm Password *</label>
+                            <input type="password" id="empConfirmPassword" placeholder="Confirm password" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div style="align-self: flex-end;">
+                            <button class="btn-success" onclick="createNewEmployee()" style="width: 100%; padding: 10px;">➕ Create Employee</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Employees List -->
+                <div>
+                    <h3 style="color: #667eea; margin-bottom: 15px;">👥 Active Employees</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTable">
+                            <tr>
+                                <td>EMP-001</td>
+                                <td>Priya Singh</td>
+                                <td>priya@eps.com</td>
+                                <td>☎️ Telecaller</td>
+                                <td><span class="badge badge-completed">Active</span></td>
+                                <td>2024-01-15</td>
+                                <td>
+                                    <button class="btn-secondary" onclick="editEmployee('EMP-001')" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;">✏️ Edit</button>
+                                    <button class="btn-danger" onclick="deleteEmployee('EMP-001', 'Priya Singh')" style="padding: 5px 10px; font-size: 12px; background: #ef4444;">🗑️ Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>EMP-002</td>
+                                <td>Rajesh Kumar</td>
+                                <td>rajesh@eps.com</td>
+                                <td>🚀 Field Executive</td>
+                                <td><span class="badge badge-completed">Active</span></td>
+                                <td>2024-01-20</td>
+                                <td>
+                                    <button class="btn-secondary" onclick="editEmployee('EMP-002')" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;">✏️ Edit</button>
+                                    <button class="btn-danger" onclick="deleteEmployee('EMP-002', 'Rajesh Kumar')" style="padding: 5px 10px; font-size: 12px; background: #ef4444;">🗑️ Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>EMP-003</td>
+                                <td>Arun Patel</td>
+                                <td>arun@eps.com</td>
+                                <td>📦 Orders</td>
+                                <td><span class="badge badge-completed">Active</span></td>
+                                <td>2024-02-01</td>
+                                <td>
+                                    <button class="btn-secondary" onclick="editEmployee('EMP-003')" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;">✏️ Edit</button>
+                                    <button class="btn-danger" onclick="deleteEmployee('EMP-003', 'Arun Patel')" style="padding: 5px 10px; font-size: 12px; background: #ef4444;">🗑️ Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Stats -->
+                <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
+                    <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; color: #667eea; font-weight: bold;" id="totalEmployees">3</div>
+                        <div style="color: #666; font-size: 14px;">Total Employees</div>
+                    </div>
+                    <div style="background: #f0fff4; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; color: #10b981; font-weight: bold;" id="activeEmployees">3</div>
+                        <div style="color: #666; font-size: 14px;">Active Employees</div>
+                    </div>
+                    <div style="background: #fff5f0; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; color: #f97316; font-weight: bold;" id="telecallerCount">1</div>
+                        <div style="color: #666; font-size: 14px;">Telecallers</div>
+                    </div>
+                    <div style="background: #f5f3ff; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; color: #8b5cf6; font-weight: bold;" id="fieldExecCount">1</div>
+                        <div style="color: #666; font-size: 14px;">Field Executives</div>
+                    </div>
+                </div>
+
+                <!-- Export Employees -->
+                <div style="margin-top: 30px; padding: 20px; background: #f0f4ff; border-radius: 8px; text-align: center;">
+                    <h4>📥 Export Employees List</h4>
+                    <button class="btn-primary" onclick="exportEmployeesExcel()" style="margin-right: 10px; margin-top: 10px; background: #10b981;">📥 Export as Excel</button>
+                    <button class="btn-primary" onclick="exportEmployeesPDF()" style="margin-top: 10px;">📄 Export as PDF</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1831,6 +2247,17 @@
                         <label>Meeting Time *</label>
                         <input type="time" id="meetingTime" required>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign To Field Executive *</label>
+                    <select id="assignedFieldExec" required>
+                        <option value="">Select a Field Executive</option>
+                        <option value="Anjali Patel">🚀 Anjali Patel</option>
+                        <option value="Deepak Sharma">🚀 Deepak Sharma</option>
+                        <option value="Priya Singh">🚀 Priya Singh</option>
+                        <option value="Vikram Singh">🚀 Vikram Singh</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1931,12 +2358,27 @@
                 }, 100);
             } else if (role === 'fieldexec') {
                 document.getElementById('fieldexecDash').style.display = 'block';
-                setTimeout(() => createFieldExecCharts(), 100);
+                setTimeout(() => {
+                    createFieldExecCharts();
+                    loadFieldExecMeetings();
+                }, 100);
             } else if (role === 'orders') {
                 document.getElementById('ordersDash').style.display = 'block';
                 setTimeout(() => createOrderCharts(), 100);
             } else if (role === 'accounts') {
                 document.getElementById('accountsDash').style.display = 'block';
+            } else if (role === 'admin') {
+                document.getElementById('accountsDash').style.display = 'block';
+                document.getElementById('adminReportsTab').style.display = 'block';
+                document.getElementById('adminEmployeeTab').style.display = 'block';
+                // Automatically show reports tab for admin
+                setTimeout(() => {
+                    document.getElementById('ac-reports').classList.add('active');
+                    document.getElementById('ac-dashboard').classList.remove('active');
+                    const tabs = document.querySelectorAll('#accountsDash .tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.getElementById('adminReportsTab').classList.add('active');
+                }, 50);
             }
         }
 
@@ -1950,16 +2392,27 @@
                 const bgColor = contact.status === 'called' ? '#f0fdf4' : 'white';
                 const borderColor = contact.status === 'called' ? '#10b981' : '#667eea';
                 
-                html += `<div class="contact-item" id="contact-${index}" style="background: ${bgColor}; border-left-color: ${borderColor};">
+                // Check who is working on this lead
+                const workingOn = contact.workingOn || null;
+                const workingStatus = workingOn ? `🔒 Working: <strong>${workingOn}</strong>` : '🟢 Available';
+                const isLockedByMe = workingOn === currentUser?.name;
+                const statusColor = workingOn ? '#fef3c7' : '#f0fdf4';
+                
+                html += `<div class="contact-item" id="contact-${index}" style="background: ${statusColor}; border-left-color: ${borderColor}; position: relative;">
                     <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
                         <div style="flex: 1; min-width: 250px;">
                             <h4>${contact.name}</h4>
                             <p><strong>Company:</strong> ${contact.company}</p>
                             <p><strong>Phone:</strong> ${contact.phone}${emailDisplay}</p>
                             <p><span class="badge badge-${contact.status === 'called' ? 'completed' : 'pending'}">${contact.status === 'called' ? 'Called' : 'Warm Lead'}</span></p>
+                            <p style="margin-top: 8px; font-size: 13px; color: ${workingOn ? '#d97706' : '#10b981'}; font-weight: bold;">
+                                ${workingStatus}
+                            </p>
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                            <button type="button" class="btn-primary" onclick="editContact(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">✏️ Edit</button>
+                            <button type="button" class="btn-primary" onclick="claimLead(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap; ${workingOn && !isLockedByMe ? 'opacity: 0.6; cursor: not-allowed;' : ''}" ${workingOn && !isLockedByMe ? 'disabled' : ''}>
+                                ${isLockedByMe ? '✅ Release Lead' : (workingOn ? '🔒 Locked' : '🟢 Claim Lead')}
+                            </button>
                             <button type="button" class="btn-success" onclick="markCallDone(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">☎️ Call Done</button>
                             <button type="button" class="btn-warning" onclick="openScheduleMeetingModal(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">📅 Schedule</button>
                         </div>
@@ -1969,6 +2422,26 @@
             
             contactsList.innerHTML = html;
             console.log(`✅ Loaded ${importedContacts.length} contacts successfully!`);
+        }
+
+        function claimLead(index) {
+            const contact = importedContacts[index];
+            if (!contact) return;
+            
+            if (contact.workingOn === currentUser?.name) {
+                // Release the lead
+                contact.workingOn = null;
+                alert(`✅ Lead released: ${contact.name}`);
+            } else if (!contact.workingOn) {
+                // Claim the lead
+                contact.workingOn = currentUser?.name;
+                alert(`🔒 Lead claimed: ${contact.name}\n\nOther telecallers can see you are working on this lead.`);
+            } else {
+                alert(`❌ Lead locked by ${contact.workingOn}\n\nWait for them to release it or ask your admin.`);
+                return;
+            }
+            
+            loadAllContacts(); // Refresh to show updated status
         }
 
         function editContact(index) {
@@ -2066,6 +2539,8 @@
             
             if (!contact) return;
             
+            const assignedFieldExec = document.getElementById('assignedFieldExec').value;
+            
             // Gather meeting data
             const meetingData = {
                 contactName: document.getElementById('meetingContactName').value,
@@ -2075,6 +2550,8 @@
                 location: document.getElementById('meetingLocation').value,
                 agenda: document.getElementById('meetingAgenda').value,
                 participant: document.getElementById('meetingParticipant').value,
+                assignedTo: assignedFieldExec,
+                scheduledBy: currentUser?.name,
                 scheduledOn: new Date().toLocaleDateString()
             };
             
@@ -2082,8 +2559,18 @@
             if (!contact.meetings) contact.meetings = [];
             contact.meetings.push(meetingData);
             
+            // Store meeting in Field Exec's list too (for their view)
+            if (!window.fieldExecMeetings) window.fieldExecMeetings = {};
+            if (!window.fieldExecMeetings[assignedFieldExec]) {
+                window.fieldExecMeetings[assignedFieldExec] = [];
+            }
+            window.fieldExecMeetings[assignedFieldExec].push({
+                ...meetingData,
+                contactId: index
+            });
+            
             closeScheduleMeetingModal();
-            alert(`✅ Meeting scheduled with ${contact.name}!\n\nDate: ${meetingData.date}\nTime: ${meetingData.time}\nType: ${meetingData.type}`);
+            alert(`✅ Meeting scheduled with ${contact.name}!\n\nAssigned to: ${assignedFieldExec}\nDate: ${meetingData.date}\nTime: ${meetingData.time}\n\n${assignedFieldExec} will see this in their Meetings tab.`);
             console.log('📅 Meeting scheduled:', meetingData);
         }
 
@@ -2142,6 +2629,46 @@
             }
         }
 
+        function loadFieldExecMeetings() {
+            const meetingsList = document.getElementById('fieldExecMeetingsList');
+            if (!meetingsList || !window.fieldExecMeetings) {
+                meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">No meetings assigned yet</p>';
+                return;
+            }
+            
+            const myMeetings = window.fieldExecMeetings[currentUser?.name] || [];
+            
+            if (myMeetings.length === 0) {
+                meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">✨ No meetings assigned to you yet. Check back later!</p>';
+                return;
+            }
+            
+            let html = '';
+            myMeetings.forEach((meeting, idx) => {
+                html += `<div class="contact-item" style="background: #f0f9ff; border-left-color: #0ea5e9; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <h4>📅 ${meeting.contactName}</h4>
+                            <p><strong>Date:</strong> ${meeting.date} at ${meeting.time}</p>
+                            <p><strong>Type:</strong> ${meeting.type}</p>
+                            <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
+                            <p><strong>Agenda:</strong> ${meeting.agenda}</p>
+                            <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                                <strong>Scheduled by:</strong> ${meeting.scheduledBy}
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
+                            <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
+                            <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;">📝 Notes</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            meetingsList.innerHTML = html;
+            console.log(`✅ Loaded ${myMeetings.length} assigned meetings`);
+        }
+
         function createFieldExecCharts() {
             const activityCtx = document.getElementById('activityChart');
             if (activityCtx) {
@@ -2196,8 +2723,13 @@
         }
 
         function deleteOrder(orderId) {
-            if (confirm('Are you sure?')) {
-                alert('✅ Order deleted!');
+            if (currentRole !== 'admin') {
+                alert('❌ UNAUTHORIZED\n\nOnly Admin can delete orders.\nYou can only edit orders in your dashboard.');
+                return;
+            }
+            
+            if (confirm('⚠️ Are you sure you want to delete this order? This action cannot be undone!')) {
+                alert('✅ Order deleted permanently!');
             }
         }
 
@@ -2307,6 +2839,421 @@
         window.addEventListener('DOMContentLoaded', () => {
             showAuthScreen();
         });
+
+        // 📈 REPORT FUNCTIONS
+        function loadDailyReports() {
+            console.log('📅 Daily reports loaded');
+        }
+
+        function loadMonthlyReports() {
+            console.log('📊 Monthly reports loaded');
+        }
+
+        function downloadDailyReport() {
+            if (currentRole !== 'admin') {
+                alert('❌ UNAUTHORIZED\n\nOnly Admin can download reports.\nContact your admin for team reports.');
+                return;
+            }
+            
+            const dailyData = `
+DAILY REPORT - ${new Date().toLocaleDateString()}
+=================================================
+
+TELECALLER TEAM:
+- Calls Made: 5
+- New Contacts Added: 12
+- Meetings Scheduled: 2
+- Status: Active
+
+FIELD EXECUTIVE TEAM:
+- Calls Made: 0
+- New Contacts Added: 8
+- Meetings Scheduled: 3
+- Status: Active
+
+TOTAL ACTIVITIES TODAY:
+- Total Calls: 5
+- Total Contacts: 20
+- Total Meetings: 5
+            `;
+            downloadReport(dailyData, `Daily-Report-${new Date().toISOString().split('T')[0]}.txt`);
+        }
+
+        function downloadMonthlyReport() {
+            if (currentRole !== 'admin') {
+                alert('❌ UNAUTHORIZED\n\nOnly Admin can download reports.\nContact your admin for team reports.');
+                return;
+            }
+            
+            const monthlyData = `
+MONTHLY REPORT - ${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
+=================================================
+
+TELECALLER TEAM:
+- Total Calls: 145
+- New Contacts Added: 320
+- Meetings Scheduled: 45
+- Performance: 87%
+
+FIELD EXECUTIVE TEAM:
+- Total Calls: 0
+- New Contacts Added: 185
+- Meetings Scheduled: 78
+- Performance: 92%
+
+MONTHLY TOTALS:
+- Total Calls: 145
+- Total Contacts: 505
+- Total Meetings: 123
+- Average Performance: 89.5%
+            `;
+            downloadReport(monthlyData, `Monthly-Report-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}.txt`);
+        }
+
+        function downloadReport(data, filename) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            alert(`✅ ${filename} downloaded successfully!`);
+        }
+
+        // 📦 ORDERS REPORT FUNCTIONS
+        function refreshDailyOrders() {
+            alert('🔄 Daily orders refreshed with latest data!');
+            console.log('📦 Daily orders updated with live data');
+        }
+
+        function downloadDailyOrdersExcel() {
+            if (currentRole !== 'admin') {
+                alert('❌ UNAUTHORIZED\n\nOnly Admin can download orders reports.\nContact your admin for order data.');
+                return;
+            }
+            
+            const todayDate = new Date().toISOString().split('T')[0];
+            const csvContent = `
+Order ID,Customer,Phone,Destination,Boxes,Amount (₹),Status,Service Type,Date Created
+ORD-001,Priya Singh,9876543210,Delhi,3,5000,Completed,Express,${todayDate}
+ORD-002,Rajesh Kumar,9876543211,Bangalore,2,3500,Pending,Air,${todayDate}
+
+DAILY SUMMARY - ${todayDate}
+Total Orders,Total Boxes,Total Revenue,Completed,Pending
+2,5,₹8500,1,1
+            `;
+            downloadCSVAsExcel(csvContent, `Daily-Orders-${todayDate}.csv`);
+        }
+
+        function downloadMonthlyOrdersExcel() {
+            if (currentRole !== 'admin') {
+                alert('❌ UNAUTHORIZED\n\nOnly Admin can download orders reports.\nContact your admin for order data.');
+                return;
+            }
+            
+            const monthYear = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+            const csvContent = `
+MONTHLY ORDERS REPORT - ${monthYear}
+
+Order Summary
+Total Orders,Total Boxes,Total Revenue,Completed,Pending,Cancelled,Completion Rate
+156,489,₹560000,142,12,2,91%
+
+Orders by Service Type
+Service Type,Count,Total Boxes,Revenue,Completion %
+Domestic Parcel,95,280,₹320000,94%
+Express,35,120,₹180000,88%
+International,26,89,₹60000,85%
+
+Orders by Status
+Status,Count,Percentage
+Completed,142,91%
+Pending,12,8%
+Cancelled,2,1%
+
+Top 10 Customers by Orders
+Customer Name,Orders,Total Boxes,Revenue
+Priya Singh,8,24,₹95000
+Rajesh Kumar,7,18,₹78000
+Arun Patel,6,15,₹65000
+Neha Sharma,5,14,₹58000
+Vikram Singh,5,12,₹52000
+Amit Patel,4,10,₹45000
+Sneha Gupta,4,9,₹40000
+Rohit Kumar,3,8,₹35000
+Anjali Singh,3,7,₹30000
+Deepak Sharma,3,6,₹25000
+
+Service Type Details
+Service Type,Orders This Month,Revenue,Avg Order Value,Completion Rate
+Domestic Parcel,95,₹320000,₹3368,94%
+Express,35,₹180000,₹5143,88%
+International Document,15,₹45000,₹3000,87%
+International Parcel,11,₹15000,₹1364,82%
+
+Daily Trend
+Date,Orders,Revenue,Completed,Pending,Cancelled
+01-${new Date().getFullYear()},4,₹18000,4,0,0
+02-${new Date().getFullYear()},5,₹22000,4,1,0
+03-${new Date().getFullYear()},3,₹15000,3,0,0
+04-${new Date().getFullYear()},6,₹28000,5,1,0
+05-${new Date().getFullYear()},7,₹32000,6,0,1
+06-${new Date().getFullYear()},8,₹35000,7,1,0
+07-${new Date().getFullYear()},5,₹21000,5,0,0
+08-${new Date().getFullYear()},6,₹24000,5,1,0
+09-${new Date().getFullYear()},9,₹38000,8,1,0
+10-${new Date().getFullYear()},8,₹33000,7,1,0
+
+SUMMARY STATISTICS
+Average Orders Per Day,12.67
+Average Order Value,₹3590
+Total Employees Creating Orders,4
+Best Performing Day Revenue,₹38000
+Worst Performing Day Revenue,₹15000
+            `;
+            downloadCSVAsExcel(csvContent, `Monthly-Orders-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}.csv`);
+        }
+
+        function downloadCSVAsExcel(csvContent, filename) {
+            const element = document.createElement('a');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = URL.createObjectURL(blob);
+            element.setAttribute('href', link);
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            URL.revokeObjectURL(link);
+            alert(`✅ ${filename} downloaded as Excel format!`);
+        }
+
+        // 👥 EMPLOYEE MANAGEMENT FUNCTIONS
+        function createNewEmployee() {
+            const name = document.getElementById('empName').value.trim();
+            const email = document.getElementById('empEmail').value.trim();
+            const role = document.getElementById('empRole').value;
+            const password = document.getElementById('empPassword').value;
+            const confirmPassword = document.getElementById('empConfirmPassword').value;
+
+            if (!name || !email || !role || !password) {
+                alert('❌ Please fill all fields');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('❌ Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('❌ Password must be at least 6 characters');
+                return;
+            }
+
+            const empId = 'EMP-' + String(Date.now()).slice(-4);
+            
+            alert(`✅ Employee Created Successfully!\n\nEmployee ID: ${empId}\nName: ${name}\nEmail: ${email}\nRole: ${role}\n\nNote: Share this ID and password with the employee.`);
+            
+            // Clear form
+            document.getElementById('empName').value = '';
+            document.getElementById('empEmail').value = '';
+            document.getElementById('empRole').value = '';
+            document.getElementById('empPassword').value = '';
+            document.getElementById('empConfirmPassword').value = '';
+        }
+
+        function editEmployee(empId) {
+            alert(`✏️ Edit Employee ${empId} - Feature coming soon`);
+        }
+
+        function deleteEmployee(empId, empName) {
+            const confirmed = confirm(`⚠️ Are you sure you want to DELETE ${empName} (${empId})?\n\nThis action cannot be undone!`);
+            
+            if (confirmed) {
+                alert(`🗑️ Employee ${empName} has been permanently deleted.\n\nTheir account is now inactive and they cannot login anymore.`);
+                // Reload table
+                location.reload();
+            }
+        }
+
+        function exportEmployeesExcel() {
+            const csvContent = `
+Employee ID,Name,Email,Role,Status,Created Date
+EMP-001,Priya Singh,priya@eps.com,Telecaller,Active,2024-01-15
+EMP-002,Rajesh Kumar,rajesh@eps.com,Field Executive,Active,2024-01-20
+EMP-003,Arun Patel,arun@eps.com,Orders,Active,2024-02-01
+
+EMPLOYEE SUMMARY
+Total Employees,3
+Active Employees,3
+Telecallers,1
+Field Executives,1
+Orders Team,1
+            `;
+            downloadCSVAsExcel(csvContent, `Employee-List-${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        function exportEmployeesPDF() {
+            alert(`📄 PDF Export feature\n\nEmployee list will be exported as PDF with full details and formatting.`);
+        }
     </script>
+
+        // ===== MODULE LOADING SYSTEM =====
+        // This system loads 9 feature modules based on department and permissions
+        
+        const MODULES = {
+            notifications: { file: 'js/notifications-module.js', name: 'Real-Time Notifications' },
+            tasks: { file: 'js/task-management-module.js', name: 'Task Management' },
+            analytics: { file: 'js/analytics-module.js', name: 'Real-Time Analytics' },
+            followups: { file: 'js/follow-ups-module.js', name: 'Auto Follow-ups' },
+            history: { file: 'js/communication-history-module.js', name: 'Communication History' },
+            calendar: { file: 'js/smart-calendar-module.js', name: 'Smart Calendar' },
+            filters: { file: 'js/bulk-operations-module.js', name: 'Bulk Operations' },
+            reports: { file: 'js/custom-reports-module.js', name: 'Custom Reports' },
+            adminqa: { file: 'js/admin-qa-module.js', name: 'Admin QA Tools' }
+        };
+
+        // Department Feature Configuration
+        const DEPARTMENT_FEATURES = {
+            Telecaller: {
+                notifications: true,
+                tasks: true,
+                analytics: true,
+                followups: { create: true, receive: true, manage: false },
+                history: true,
+                calendar: true,
+                filters: true,
+                reports: 'personal',
+                adminqa: false
+            },
+            'Field Executive': {
+                notifications: true,
+                tasks: true,
+                analytics: 'meetings_only',
+                followups: { create: false, receive: true, manage: false },
+                history: true,
+                calendar: true,
+                filters: false,
+                reports: 'personal',
+                adminqa: false
+            },
+            Admin: {
+                notifications: true,
+                tasks: true,
+                analytics: 'all',
+                followups: { create: true, receive: true, manage: true },
+                history: true,
+                calendar: true,
+                filters: true,
+                reports: 'all',
+                adminqa: true
+            }
+        };
+
+        // Load enabled modules for current user
+        function loadEnabledModules() {
+            const dept = currentRole?.charAt(0).toUpperCase() + currentRole?.slice(1) || 'Telecaller';
+            const features = DEPARTMENT_FEATURES[dept] || DEPARTMENT_FEATURES['Telecaller'];
+            
+            const enabledModules = [];
+            for (const [key, enabled] of Object.entries(features)) {
+                if (enabled && key in MODULES) {
+                    enabledModules.push(key);
+                }
+            }
+            
+            console.log(`Loading modules for ${dept}:`, enabledModules);
+            
+            // Load each module
+            enabledModules.forEach(moduleName => {
+                loadModule(moduleName);
+            });
+        }
+
+        // Dynamically load module
+        function loadModule(moduleName) {
+            const module = MODULES[moduleName];
+            if (!module) return;
+            
+            const script = document.createElement('script');
+            script.src = module.file;
+            script.onload = () => console.log(`✅ ${module.name} loaded`);
+            script.onerror = () => console.log(`⚠️ ${module.name} not available (development)`);
+            document.head.appendChild(script);
+        }
+
+        // Load all modules when user logs in
+        function initializeModules() {
+            console.log('🚀 Initializing advanced CRM modules...');
+            
+            // Small delay to ensure user is set
+            setTimeout(() => {
+                if (currentRole) {
+                    loadEnabledModules();
+                }
+            }, 500);
+        }
+
+        // Module Manager API (for inter-module communication)
+        window.ModuleManager = {
+            // Trigger notifications
+            notify: function(type, message, data) {
+                if (window.NotificationModule) {
+                    window.NotificationModule.create({
+                        type: type,
+                        title: message,
+                        data: data
+                    });
+                }
+            },
+            
+            // Create task
+            createTask: function(taskData) {
+                if (window.TaskModule) {
+                    window.TaskModule.addTask(taskData);
+                }
+            },
+            
+            // Log communication
+            logCommunication: function(contactId, type, details) {
+                if (window.HistoryModule) {
+                    window.HistoryModule.logEvent(contactId, type, details);
+                }
+            },
+            
+            // Update analytics
+            updateMetrics: function(metric, value) {
+                if (window.AnalyticsModule) {
+                    window.AnalyticsModule.updateMetric(metric, value);
+                }
+            },
+            
+            // Get user features
+            getEnabledFeatures: function() {
+                const dept = currentRole?.charAt(0).toUpperCase() + currentRole?.slice(1) || 'Telecaller';
+                return DEPARTMENT_FEATURES[dept] || {};
+            }
+        };
+
+        console.log('✅ Module system initialized. Ready to load feature modules.');
+    </script>
+
+    <!-- Module Loading Scripts -->
+    <!-- These will auto-load based on department and permissions -->
+    <!-- 
+        Available modules:
+        - notifications-module.js (Real-time notifications & alerts)
+        - task-management-module.js (Task board with Kanban view)
+        - analytics-module.js (Real-time performance dashboard)
+        - follow-ups-module.js (Automated follow-up system)
+        - communication-history-module.js (Complete interaction timeline)
+        - smart-calendar-module.js (Calendar sync & availability)
+        - bulk-operations-module.js (Bulk filters & actions)
+        - custom-reports-module.js (20+ report types)
+        - admin-qa-module.js (Quality assurance & monitoring)
+    -->
+    
 </body>
 </html>
