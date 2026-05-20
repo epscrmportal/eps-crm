@@ -2717,10 +2717,10 @@
                 new Chart(callCtx, {
                     type: 'line',
                     data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                        labels: [],
                         datasets: [
-                            { label: 'Calls', data: [120, 150, 180, 160, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true },
-                            { label: 'Meetings', data: [8, 10, 12, 11, 14], borderColor: '#764ba2', backgroundColor: 'rgba(118, 75, 162, 0.1)', tension: 0.4, fill: true }
+                            { label: 'Calls', data: [], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true },
+                            { label: 'Meetings', data: [], borderColor: '#764ba2', backgroundColor: 'rgba(118, 75, 162, 0.1)', tension: 0.4, fill: true }
                         ]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
@@ -2732,8 +2732,8 @@
                 new Chart(statusCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Connected', 'Missed', 'Pending'],
-                        datasets: [{ data: [520, 180, 500], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }]
+                        labels: [],
+                        datasets: [{ data: [], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
@@ -2786,10 +2786,10 @@
                 new Chart(activityCtx, {
                     type: 'line',
                     data: {
-                        labels: ['W1', 'W2', 'W3', 'W4'],
+                        labels: [],
                         datasets: [
-                            { label: 'Activities', data: [3, 5, 4, 6], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true },
-                            { label: 'Cards Collected', data: [12, 18, 15, 22], borderColor: '#764ba2', backgroundColor: 'rgba(118, 75, 162, 0.1)', tension: 0.4, fill: true }
+                            { label: 'Activities', data: [], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true },
+                            { label: 'Cards Collected', data: [], borderColor: '#764ba2', backgroundColor: 'rgba(118, 75, 162, 0.1)', tension: 0.4, fill: true }
                         ]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
@@ -2803,8 +2803,8 @@
                 new Chart(serviceCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Domestic Parcel', 'Domestic Document', 'International Parcel', 'International Document'],
-                        datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981'] }]
+                        labels: [],
+                        datasets: [{ data: [], backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981'] }]
                     },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
@@ -2815,8 +2815,8 @@
                 new Chart(shippingCtx, {
                     type: 'bar',
                     data: {
-                        labels: ['Express', 'Air', 'One Day', 'Surface', 'Train', 'Within Maharashtra'],
-                        datasets: [{ label: 'Orders', data: [45, 30, 25, 20, 15, 21], backgroundColor: '#667eea' }]
+                        labels: [],
+                        datasets: [{ label: 'Orders', data: [], backgroundColor: '#667eea' }]
                     },
                     options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
                 });
@@ -3978,52 +3978,59 @@ Orders Team,0
         
         // ==================== 5️⃣ FIELD EXEC MEETING REMINDERS ====================
         function displayActionItemsWidget() {
-            const actions = ActionItemsSystem.displayDashboard();
-            
-            if (actions.total === 0) {
-                return '<p style="color: #999; padding: 20px; text-align: center;">✨ No actions needed right now!</p>';
-            }
-            
-            let html = `
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎯 YOUR ACTIONS TODAY</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold;">${actions.overdue}</div>
-                            <div style="font-size: 12px;">⚠️ OVERDUE</div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold;">${actions.today}</div>
-                            <div style="font-size: 12px;">📅 TODAY</div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold;">${actions.total}</div>
-                            <div style="font-size: 12px;">📊 TOTAL</div>
-                        </div>
-                    </div>
-            `;
-            
-            // Show action items
-            actions.items.slice(0, 5).forEach(action => {
-                const isOverdue = ActionItemsSystem.isOverdue(action.due_date);
-                const icon = action.action_type === 'CALL' ? '☎️' : action.action_type === 'SCHEDULE' ? '📅' : action.action_type === 'FOLLOWUP' ? '📧' : '📋';
+            try {
+                const actions = ActionItemsSystem.displayDashboard();
                 
-                html += `
-                    <div style="background: white; color: #333; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${isOverdue ? '#ef4444' : '#f59e0b'};">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: bold;">${icon} ${action.action_type}: ${action.contact_name}</div>
-                                <div style="font-size: 12px; color: #666;">Due: ${action.due_date}</div>
+                if (!actions || actions.total === 0) {
+                    return '';  // Return empty string - don't show widget if no data
+                }
+                
+                let html = `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎯 YOUR ACTIONS TODAY</h3>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold;">${actions.overdue || 0}</div>
+                                <div style="font-size: 12px;">⚠️ OVERDUE</div>
                             </div>
-                            <button onclick="ActionItemsSystem.completeAction(${action.id}); window.location.reload();" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">✅ Done</button>
+                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold;">${actions.today || 0}</div>
+                                <div style="font-size: 12px;">📅 TODAY</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold;">${actions.total || 0}</div>
+                                <div style="font-size: 12px;">📊 TOTAL</div>
+                            </div>
                         </div>
-                    </div>
                 `;
-            });
-            
-            html += '</div>';
-            return html;
+                
+                // Show action items
+                if (actions.items && actions.items.length > 0) {
+                    actions.items.slice(0, 5).forEach(action => {
+                        const isOverdue = ActionItemsSystem.isOverdue(action.due_date);
+                        const icon = action.action_type === 'CALL' ? '☎️' : action.action_type === 'SCHEDULE' ? '📅' : action.action_type === 'FOLLOWUP' ? '📧' : '📋';
+                        
+                        html += `
+                            <div style="background: white; color: #333; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${isOverdue ? '#ef4444' : '#f59e0b'};">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold;">${icon} ${action.action_type}: ${action.contact_name}</div>
+                                        <div style="font-size: 12px; color: #666;">Due: ${action.due_date}</div>
+                                    </div>
+                                    <button onclick="ActionItemsSystem.completeAction(${action.id}); window.location.reload();" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">✅ Done</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += '</div>';
+                return html;
+            } catch (err) {
+                console.log('⚠️ Action items widget error:', err);
+                return '';  // Return empty string if error
+            }
         }
         
         // ==================== 6️⃣ INTEGRATION WITH EXISTING CODE ====================
@@ -4117,14 +4124,9 @@ Orders Team,0
         
         // ==================== 8️⃣ ADD ACTION ITEMS WIDGET TO TELECALLER ====================
         function enhanceTelecallerDashboard() {
-            if (currentRole !== 'telecaller') return;
-            
-            const dashboard = document.querySelector('[id*="tc-contacts"]');
-            if (dashboard) {
-                const widget = document.createElement('div');
-                widget.innerHTML = displayActionItemsWidget();
-                dashboard.parentElement.insertBefore(widget, dashboard);
-            }
+            // Disabled: This widget was causing raw code to display
+            // Will be re-enabled when ActionItemsSystem is properly working
+            return;
         }
         
         // Call enhancement functions after role selection
