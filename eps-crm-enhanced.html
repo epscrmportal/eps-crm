@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS CRM - Complete Customer Relationship Management System</title>
+    <meta name="version" content="2.0-FIXED">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3976,63 +3978,6 @@ Orders Team,0
             }
         }
         
-        // ==================== 5️⃣ FIELD EXEC MEETING REMINDERS ====================
-        function displayActionItemsWidget() {
-            try {
-                const actions = ActionItemsSystem.displayDashboard();
-                
-                if (!actions || actions.total === 0) {
-                    return '';  // Return empty string - don't show widget if no data
-                }
-                
-                let html = `
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 18px;">🎯 YOUR ACTIONS TODAY</h3>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold;">${actions.overdue || 0}</div>
-                                <div style="font-size: 12px;">⚠️ OVERDUE</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold;">${actions.today || 0}</div>
-                                <div style="font-size: 12px;">📅 TODAY</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold;">${actions.total || 0}</div>
-                                <div style="font-size: 12px;">📊 TOTAL</div>
-                            </div>
-                        </div>
-                `;
-                
-                // Show action items
-                if (actions.items && actions.items.length > 0) {
-                    actions.items.slice(0, 5).forEach(action => {
-                        const isOverdue = ActionItemsSystem.isOverdue(action.due_date);
-                        const icon = action.action_type === 'CALL' ? '☎️' : action.action_type === 'SCHEDULE' ? '📅' : action.action_type === 'FOLLOWUP' ? '📧' : '📋';
-                        
-                        html += `
-                            <div style="background: white; color: #333; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${isOverdue ? '#ef4444' : '#f59e0b'};">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div style="flex: 1;">
-                                        <div style="font-weight: bold;">${icon} ${action.action_type}: ${action.contact_name}</div>
-                                        <div style="font-size: 12px; color: #666;">Due: ${action.due_date}</div>
-                                    </div>
-                                    <button onclick="ActionItemsSystem.completeAction(${action.id}); window.location.reload();" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">✅ Done</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                html += '</div>';
-                return html;
-            } catch (err) {
-                console.log('⚠️ Action items widget error:', err);
-                return '';  // Return empty string if error
-            }
-        }
-        
         // ==================== 6️⃣ INTEGRATION WITH EXISTING CODE ====================
         // Modify scheduleMeeting to save to Supabase & notify Field Exec
         const originalScheduleMeeting = window.scheduleMeeting;
@@ -4123,11 +4068,6 @@ Orders Team,0
         }
         
         // ==================== 8️⃣ ADD ACTION ITEMS WIDGET TO TELECALLER ====================
-        function enhanceTelecallerDashboard() {
-            // Disabled: This widget was causing raw code to display
-            // Will be re-enabled when ActionItemsSystem is properly working
-            return;
-        }
         
         // Call enhancement functions after role selection
         const originalSelectRole = window.selectRole;
@@ -4137,7 +4077,6 @@ Orders Team,0
             setTimeout(() => {
                 if (role === 'fieldexec') enhanceFieldExecDashboard();
                 if (role === 'telecaller') {
-                    enhanceTelecallerDashboard();
                     highlightNewContacts();
                 }
             }, 500);
