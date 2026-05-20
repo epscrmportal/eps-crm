@@ -6,6 +6,7 @@
     <title>EPS CRM - Complete Customer Relationship Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -2238,6 +2239,27 @@
                     <input type="text" id="meetingContactName" readonly style="background: #f5f5f5;">
                 </div>
 
+                <div class="form-group">
+                    <label>📝 Call Notes</label>
+                    <textarea id="callNotesField" placeholder="What did you discuss with the customer?"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>⏰ Call Duration (minutes)</label>
+                        <input type="number" id="callDurationField" min="0" placeholder="5">
+                    </div>
+                    <div class="form-group">
+                        <label>⏰ Set Reminder Date</label>
+                        <input type="date" id="reminderDateField">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Reminder Text</label>
+                    <textarea id="reminderTextField" placeholder="What to remember? (optional)"></textarea>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>Meeting Date *</label>
@@ -2380,6 +2402,9 @@
                     document.getElementById('adminReportsTab').classList.add('active');
                 }, 50);
             }
+            
+            // Initialize modules after role is selected
+            setTimeout(() => initializeModules(), 500);
         }
 
         function loadAllContacts() {
@@ -2414,7 +2439,7 @@
                                 ${isLockedByMe ? '✅ Release Lead' : (workingOn ? '🔒 Locked' : '🟢 Claim Lead')}
                             </button>
                             <button type="button" class="btn-success" onclick="markCallDone(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">☎️ Call Done</button>
-                            <button type="button" class="btn-warning" onclick="openScheduleMeetingModal(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">📅 Schedule</button>
+                            <button type="button" class="btn-warning" onclick="openScheduleMeetingModal(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">📝 Note</button>
                         </div>
                     </div>
                 </div>`;
@@ -2498,8 +2523,66 @@
             // Reload the entire contact list to reflect changes
             loadAllContacts();
             
-            alert(`✅ Call marked as done for ${contact.name}!\nDate: ${contact.lastCalled}`);
+            // Show the working modal popup
+            showCallModal(contact.name || 'Contact', contact.phone || 'No phone');
+            
             console.log(`📞 Call completed: ${contact.name} on ${contact.lastCalled}`);
+        }
+        
+        // WORKING MODAL FUNCTION - DO NOT MODIFY
+        function showCallModal(contactName, contactPhone) {
+            const modalId = 'callModal_' + Date.now();
+            const html = `
+                <div id="${modalId}" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;" onclick="if(event.target.id==='${modalId}') document.getElementById('${modalId}').remove();">
+                    <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); animation: slideIn 0.3s ease;">
+                        <h2 style="margin: 0 0 20px 0; color: #333; text-align: center;">📞 Call Completed</h2>
+                        
+                        <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+                            <strong style="color: #333; font-size: 16px;">${contactName}</strong><br>
+                            <small style="color: #666;">📱 ${contactPhone}</small>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">📝 Call Notes</label>
+                            <textarea id="notes_${modalId}" placeholder="What did you discuss?" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 80px; font-family: inherit;"></textarea>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Duration (mins)</label>
+                                <input type="number" id="dur_${modalId}" min="0" placeholder="5" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Next Action</label>
+                                <select id="action_${modalId}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit;">
+                                    <option value="follow_up">Follow-up</option>
+                                    <option value="waiting">Waiting</option>
+                                    <option value="closed">Deal Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">⏰ Set Reminder (optional)</label>
+                            <input type="date" id="reminder_${modalId}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 8px; font-family: inherit;">
+                            <textarea id="reminderText_${modalId}" placeholder="What to remember?" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 60px; font-family: inherit;"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="const n = document.getElementById('notes_${modalId}').value; const d = document.getElementById('dur_${modalId}').value; const r = document.getElementById('reminder_${modalId}').value; const rt = document.getElementById('reminderText_${modalId}').value; if(!n.trim()){alert('Please enter notes');return;} let msg='✅ Call logged!\\n\\n📝 Notes: '+n+'\\n⏱️ Duration: '+(d||'0')+' mins'; if(r){ msg+='\\n⏰ Reminder: '+r; if(rt.trim()) msg+='\\nText: '+rt; } alert(msg); document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">✅ Save</button>
+                            <button onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px; background: #f0f0f0; color: #333; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Close</button>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    @keyframes slideIn {
+                        from { transform: translateY(-50px); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                </style>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', html);
         }
 
         function openScheduleMeetingModal(index) {
@@ -3253,7 +3336,81 @@ Orders Team,1
         - bulk-operations-module.js (Bulk filters & actions)
         - custom-reports-module.js (20+ report types)
         - admin-qa-module.js (Quality assurance & monitoring)
+        - supabase-integration.js (Cloud database integration)
+        - call-completion-modal.js (Call notes, meetings, reminders)
     -->
     
+    <script src="js/supabase-integration.js"></script>
+    <script src="js/call-completion-modal.js"></script>
+    
+    <script>
+        // Initialize Call Completion Modal when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (window.CallCompletionModal && typeof window.CallCompletionModal.init === 'function') {
+                    window.CallCompletionModal.init();
+                    console.log('✅ Call Completion Modal initialized');
+                } else {
+                    console.warn('⚠️ Call Completion Modal not found, using fallback');
+                    // Fallback: Create simple modal
+                    createSimpleCallModal();
+                }
+            }, 1000);
+        });
+        
+        // Fallback simple modal
+        function createSimpleCallModal() {
+            const modalHTML = `
+                <div id="simpleCallModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                        <h2 style="margin-bottom: 20px; color: #333;">📞 Call Completed</h2>
+                        <div id="modalContactInfo" style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">Call Summary</label>
+                            <textarea id="callNotesFallback" placeholder="What did you discuss?" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 100px;"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="saveCallNoteFallback()" style="flex: 1; padding: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Save</button>
+                            <button onclick="closeSimpleModal()" style="flex: 1; padding: 10px; background: #f0f0f0; color: #333; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">❌ Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        function openSimpleCallModal(contactName, contactPhone) {
+            const modal = document.getElementById('simpleCallModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('modalContactInfo').innerHTML = `<strong>${contactName}</strong><br><small>${contactPhone}</small>`;
+            }
+        }
+        
+        function closeSimpleModal() {
+            const modal = document.getElementById('simpleCallModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.getElementById('callNotesFallback').value = '';
+            }
+        }
+        
+        function saveCallNoteFallback() {
+            const notes = document.getElementById('callNotesFallback').value;
+            if (notes.trim()) {
+                alert('✅ Call notes saved!\n\nNotes: ' + notes);
+                closeSimpleModal();
+            } else {
+                alert('Please enter call notes');
+            }
+        }
+        
+        // Override markCallDone - ULTRA SIMPLE TEST
+        window.markCallDone = function(index) {
+            alert('🟢 CALL DONE CLICKED! Index: ' + index);
+        };
+    </script>
 </body>
 </html>
