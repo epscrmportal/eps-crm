@@ -3772,7 +3772,7 @@ Orders Team,1
             document.body.insertAdjacentHTML('beforeend', html);
         }
         
-        // Save new contact to Supabase
+        // Save new contact to Supabase ONLY
         async function saveNewContact(event) {
             event.preventDefault();
             
@@ -3788,45 +3788,62 @@ Orders Team,1
                 is_new: true
             };
             
-            // Save to Supabase
-            if (supabase) {
-                try {
-                    const { data, error } = await supabase
-                        .from('contacts_extended')
-                        .insert([contactData]);
-                    
-                    if (error) throw error;
-                    console.log('✅ Contact saved to Supabase:', data);
-                } catch (err) {
-                    console.log('⚠️ Supabase error (using memory fallback):', err);
-                }
+            // Show loading message
+            const modal = document.getElementById('addContactModal');
+            const origHTML = modal.innerHTML;
+            modal.innerHTML = '<div style="padding: 40px; text-align: center;"><p style="font-size: 18px;">⏳ Saving to Supabase...</p></div>';
+            
+            // ONLY save to Supabase (no localStorage)
+            if (!supabase) {
+                alert('❌ Error: Supabase not initialized. Please refresh the page and try again.');
+                modal.innerHTML = origHTML;
+                return;
             }
             
-            // Also save locally for immediate use
-            if (!window.newContacts) window.newContacts = [];
-            window.newContacts.push({
-                ...contactData,
-                id: Date.now(),
-                created_at: new Date().toLocaleDateString()
-            });
-            
-            // Create automatic action item
-            createActionItem(
-                contactData.contact_name,
-                'CALL',
-                new Date().toISOString().split('T')[0],
-                'Telecaller',
-                contactData.priority === 'High'
-            );
-            
-            // Notify all telecallers
-            notifyTelecallers(`🆕 NEW CONTACT: ${contactData.contact_name} from ${contactData.company} (${contactData.priority} Priority) added by ${contactData.added_by}`);
-            
-            // Refresh telecaller dashboard
-            if (window.loadAllContacts) loadAllContacts();
-            
-            alert(`✅ Contact "${contactData.contact_name}" created successfully!\\n\\nTelecallers have been notified.`);
-            document.getElementById('addContactModal').remove();
+            try {
+                const { data, error } = await supabase
+                    .from('contacts_extended')
+                    .insert([contactData])
+                    .select();
+                
+                if (error) {
+                    console.error('❌ Supabase error:', error);
+                    alert('❌ Error saving contact: ' + error.message + '\\n\\nMake sure the contacts_extended table exists in Supabase!');
+                    modal.innerHTML = origHTML;
+                    return;
+                }
+                
+                console.log('✅ Contact saved to Supabase:', data);
+                
+                // Create automatic action item
+                createActionItem(
+                    contactData.contact_name,
+                    'CALL',
+                    new Date().toISOString().split('T')[0],
+                    'Telecaller',
+                    contactData.priority === 'High'
+                );
+                
+                // Notify all telecallers
+                notifyTelecallers(`🆕 NEW CONTACT: ${contactData.contact_name} from ${contactData.company} (${contactData.priority} Priority) added by ${contactData.added_by}`);
+                
+                // Refresh telecaller dashboard
+                setTimeout(() => {
+                    if (window.loadAllContacts) {
+                        loadAllContacts();
+                        highlightNewContacts();
+                        console.log('✅ Dashboard refreshed with new contact from Supabase');
+                    }
+                }, 500);
+                
+                alert(`✅ Contact "${contactData.contact_name}" created successfully!\\n\\nSaved to Supabase ✓\\nTelecallers notified ✓\\n\\nRefreshing dashboard...`);
+                document.getElementById('addContactModal').remove();
+                
+            } catch (err) {
+                console.error('❌ Error:', err);
+                alert('❌ Error: ' + err.message);
+                modal.innerHTML = origHTML;
+            }
         }
         
         // ==================== 2️⃣ ACTION ITEMS SYSTEM ====================
@@ -3905,11 +3922,39 @@ Orders Team,1
         }
         
         // ==================== 3️⃣ HIGHLIGHTING NEW CONTACTS ====================
-        function highlightNewContacts() {
+        async function highlightNewContacts() {
+            // Load NEW CONTACTS FROM SUPABASE
+            if (!supabase) {
+                console.log('⚠️ Supabase not available for loading new contacts');
+                return;
+            }
+            
+            try {
+                const { data: newContactsData, error } = await supabase
+                    .from('contacts_extended')
+                    .select('*')
+                    .eq('is_new', true)
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.log('⚠️ Error loading new contacts from Supabase:', error);
+                    return;
+                }
+                
+                if (newContactsData && newContactsData.length > 0) {
+                    window.newContacts = newContactsData;
+                    console.log('✅ Loaded ' + newContactsData.length + ' new contacts from Supabase');
+                }
+            } catch (err) {
+                console.log('⚠️ Error:', err);
+                return;
+            }
+            
+            // Now highlight them
             const contacts = document.querySelectorAll('.contact-item');
             contacts.forEach(contact => {
                 const text = contact.textContent;
-                // Check if this is a new contact from our newContacts array
+                // Check if this is a new contact from Supabase
                 if (window.newContacts) {
                     window.newContacts.forEach(newContact => {
                         if (text.includes(newContact.contact_name)) {
@@ -3927,7 +3972,8 @@ Orders Team,1
                             // Add "Added by" info
                             const infoDiv = document.createElement('div');
                             infoDiv.style.cssText = 'font-size: 12px; color: #666; margin-top: 8px; padding: 8px; background: #fff3cd; border-left: 3px solid #ffc107; border-radius: 3px;';
-                            infoDiv.innerHTML = `<strong>🆕 Added by:</strong> ${newContact.added_by} (${newContact.created_at})<br><strong>Priority:</strong> ${newContact.priority}`;
+                            const createdDate = new Date(newContact.created_at).toLocaleDateString();
+                            infoDiv.innerHTML = `<strong>🆕 Added by:</strong> ${newContact.added_by} (${createdDate})<br><strong>Priority:</strong> ${newContact.priority}<br><strong>Source:</strong> ${newContact.source}`;
                             contact.appendChild(infoDiv);
                         }
                     });
