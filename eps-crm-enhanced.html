@@ -3617,7 +3617,7 @@ Orders Team,0
         // ==================== 1️⃣ FIELD EXEC CAN ADD NEW CONTACTS ====================
         async function openAddNewContactModal() {
             const html = `
-                <div id="addContactModal" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
+                <div id="addContactModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
                     <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(0,0,0,0.3);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                             <h2 style="margin: 0; color: #333;">➕ Add New Contact</h2>
@@ -3682,6 +3682,12 @@ Orders Team,0
             `;
             
             document.body.insertAdjacentHTML('beforeend', html);
+            
+            // Show the modal after inserting it
+            const modal = document.getElementById('addContactModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
         }
         
         // Save new contact to Supabase ONLY
