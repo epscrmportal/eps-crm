@@ -5,7 +5,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/eps-crm-cloud.html"
+      "dest": "/eps-crm-enhanced.html"
     }
   ]
 }
