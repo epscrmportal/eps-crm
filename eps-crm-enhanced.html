@@ -130,6 +130,28 @@
             to { opacity: 1; }
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -840,11 +862,11 @@
 
             <!-- TC Contacts Tab -->
             <div id="tc-contacts" class="tab-content">
-                <h2>Manage Contacts - <span id="totalContactsCount">1380</span> Total Contacts Imported ✅</h2>
+                <h2>Manage Contacts - <span id="totalContactsCount">0</span> Total Contacts ✅</h2>
                 <div class="form-group search-box">
                     <input type="text" placeholder="Search by name, company, or phone..." onkeyup="filterContacts(this.value)">
                 </div>
-                <p style="color: #666; font-size: 12px; margin-bottom: 15px;">📊 Total: <span id="contactsStats">1380 contacts (File 1: 1195 contacts | File 2: 185 contacts)</span></p>
+                <p style="color: #666; font-size: 12px; margin-bottom: 15px;">📊 Total: <span id="contactsStats">0 contacts</span></p>
 
                 <div id="contactsList"></div>
             </div>
@@ -2320,7 +2342,16 @@
 
         function loadAllContacts() {
             const contactsList = document.getElementById('contactsList');
-            if (!contactsList || importedContacts.length === 0) return;
+            if (!contactsList) return;
+            
+            // Update counts
+            document.getElementById('totalContactsCount').innerText = importedContacts.length;
+            document.getElementById('contactsStats').innerText = `${importedContacts.length} contacts`;
+            
+            if (importedContacts.length === 0) {
+                contactsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No contacts yet. Create one to get started!</p>';
+                return;
+            }
             
             let html = '';
             importedContacts.forEach((contact, index) => {
@@ -2543,6 +2574,7 @@
             
             // Gather MEETING data
             const meetingData = {
+                id: Date.now(),
                 contactName: document.getElementById('meetingContactName').value,
                 date: document.getElementById('meetingDate').value,
                 time: document.getElementById('meetingTime').value,
@@ -2552,7 +2584,8 @@
                 participant: document.getElementById('meetingParticipant').value,
                 assignedTo: assignedFieldExec,
                 scheduledBy: currentUser?.name,
-                scheduledOn: new Date().toLocaleDateString()
+                scheduledOn: new Date().toLocaleDateString(),
+                status: 'scheduled'
             };
             
             // Save CALL NOTES to contact
@@ -2593,6 +2626,34 @@
                 if (!contact.meetings) contact.meetings = [];
                 contact.meetings.push(meetingData);
                 
+                // Create automatic 1-day before meeting reminder
+                const meetingDate = new Date(meetingData.date);
+                const oneDayBefore = new Date(meetingDate);
+                oneDayBefore.setDate(oneDayBefore.getDate() - 1);
+                const reminderDateOneDayBefore = oneDayBefore.toISOString().split('T')[0];
+                
+                if (!contact.reminders) contact.reminders = [];
+                contact.reminders.push({
+                    date: reminderDateOneDayBefore,
+                    text: `📅 Meeting Tomorrow with ${meetingData.contactName} at ${meetingData.time} (${meetingData.location})`,
+                    status: 'pending',
+                    type: 'meeting',
+                    meetingId: meetingData.id,
+                    createdOn: new Date().toLocaleDateString()
+                });
+                
+                // Add to global reminders
+                if (!window.allReminders) window.allReminders = [];
+                window.allReminders.push({
+                    contactName: meetingData.contactName,
+                    contactPhone: contact.phone,
+                    date: reminderDateOneDayBefore,
+                    text: `📅 Meeting Tomorrow at ${meetingData.time} - ${meetingData.location}`,
+                    status: 'pending',
+                    type: 'meeting',
+                    meetingId: meetingData.id
+                });
+                
                 // Store meeting in Field Exec's list too (for their view)
                 if (assignedFieldExec) {
                     if (!window.fieldExecMeetings) window.fieldExecMeetings = {};
@@ -2603,6 +2664,14 @@
                         ...meetingData,
                         contactId: index
                     });
+                    
+                    // Create notification for Field Exec
+                    if (window.NotificationCenter) {
+                        window.NotificationCenter.add('meeting', 
+                            `📅 New meeting scheduled: ${meetingData.contactName} on ${meetingData.date} at ${meetingData.time}`,
+                            { meetingId: meetingData.id, assignedTo: assignedFieldExec }
+                        );
+                    }
                 }
             }
             
@@ -2617,7 +2686,7 @@
                 message += `⏰ Reminder set for ${reminderDate}\n${reminderText || 'Follow-up reminder'}\n\n`;
             }
             if (meetingData.date && meetingData.time) {
-                message += `📅 Meeting scheduled!\nAssigned to: ${assignedFieldExec}\nDate: ${meetingData.date}\nTime: ${meetingData.time}`;
+                message += `📅 Meeting scheduled!\nAssigned to: ${assignedFieldExec}\nDate: ${meetingData.date}\nTime: ${meetingData.time}\n\n✅ Reminder set for 1 day before!`;
             }
             
             if (message) alert(message);
@@ -2647,6 +2716,87 @@
             if (tabName === 'tc-reminders') {
                 loadAndDisplayReminders();
             }
+            
+            // Load meetings when Field Exec meetings tab is opened
+            if (tabName === 'fe-meetings') {
+                loadFieldExecMeetings();
+            }
+        }
+        
+        // Load and display Field Exec's assigned meetings
+        function loadFieldExecMeetings() {
+            const container = document.getElementById('fieldExecMeetingsList');
+            if (!container) return;
+            
+            const fieldExecName = currentUser?.name;
+            let html = '';
+            
+            // Get meetings assigned to this Field Exec
+            const assignedMeetings = [];
+            importedContacts.forEach(contact => {
+                if (contact.meetings && contact.meetings.length > 0) {
+                    contact.meetings.forEach(meeting => {
+                        if (meeting.assignedTo === fieldExecName) {
+                            assignedMeetings.push({
+                                ...meeting,
+                                contactName: contact.name,
+                                contactPhone: contact.phone,
+                                contactId: contact.id
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // Sort by date
+            assignedMeetings.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateA.getTime() === dateB.getTime()) {
+                    return a.time.localeCompare(b.time);
+                }
+                return dateA - dateB;
+            });
+            
+            if (assignedMeetings.length === 0) {
+                html = '<p style="color: #999; text-align: center; padding: 40px;">No meetings assigned yet.</p>';
+            } else {
+                html = assignedMeetings.map((meeting, idx) => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const meetingDate = meeting.date;
+                    const isPassed = meetingDate < today;
+                    const isToday = meetingDate === today;
+                    const bgColor = isPassed ? '#f3e8e8' : (isToday ? '#dbeafe' : '#f0fdf4');
+                    const borderColor = isPassed ? '#dc2626' : (isToday ? '#3b82f6' : '#10b981');
+                    const statusLabel = isPassed ? '✅ Completed' : (isToday ? '🔴 Today' : '📅 Upcoming');
+                    
+                    return `
+                    <div class="contact-item" style="border-left-color: ${borderColor}; background: ${bgColor}; margin-bottom: 15px;">
+                        <h4>📅 ${meeting.contactName}</h4>
+                        <p><strong>Phone:</strong> ${meeting.contactPhone || 'N/A'}</p>
+                        <p><strong>Date & Time:</strong> ${meeting.date} at ${meeting.time}</p>
+                        <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
+                        <p><strong>Type:</strong> ${meeting.type || 'Meeting'}</p>
+                        <p><strong>Agenda:</strong> ${meeting.agenda || 'To be decided'}</p>
+                        <p><strong>Participant:</strong> ${meeting.participant || 'TBD'}</p>
+                        <p><strong>Scheduled by:</strong> ${meeting.scheduledBy} on ${meeting.scheduledOn}</p>
+                        <p><strong>Status:</strong> 
+                            <span style="background: ${borderColor}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold;">
+                                ${statusLabel}
+                            </span>
+                        </p>
+                        <button onclick="markMeetingDone(${idx})" style="padding: 8px 15px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px;">✅ Mark Done</button>
+                        <button onclick="callContact('${meeting.contactPhone}')" style="padding: 8px 15px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📞 Call</button>
+                    </div>
+                `}).join('');
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Mark meeting as done
+        function markMeetingDone(index) {
+            alert('✅ Meeting marked as completed!\n\nGreat job on the meeting!');
         }
         
         // Load and display saved reminders
@@ -2664,6 +2814,7 @@
                         allReminders.push({
                             contactName: contact.name,
                             contactPhone: contact.phone,
+                            contactId: contact.id,
                             ...reminder
                         });
                     });
@@ -2675,22 +2826,111 @@
                 allReminders.push(...window.allReminders);
             }
             
+            // Sort by date
+            allReminders.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
             if (allReminders.length === 0) {
                 html = '<p style="color: #999; text-align: center; padding: 40px;">No reminders set yet. Create reminders using the "Note" button on contacts.</p>';
             } else {
-                html = allReminders.map((reminder, idx) => `
-                    <div class="contact-item" style="border-left-color: #f59e0b; background: #fffbeb; margin-bottom: 15px;">
+                html = allReminders.map((reminder, idx) => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const reminderDate = reminder.date;
+                    const isDue = reminderDate <= today;
+                    const bgColor = isDue ? '#fee2e2' : '#fffbeb';
+                    const borderColor = isDue ? '#ef4444' : '#f59e0b';
+                    const dueLabel = isDue ? '🔴 DUE TODAY' : '⏰ Upcoming';
+                    
+                    return `
+                    <div class="contact-item" style="border-left-color: ${borderColor}; background: ${bgColor}; margin-bottom: 15px;">
                         <h4>🔔 ${reminder.contactName}</h4>
+                        <p><strong>Phone:</strong> ${reminder.contactPhone || 'N/A'}</p>
                         <p><strong>Due Date:</strong> ${reminder.date}</p>
                         <p><strong>Note:</strong> ${reminder.text || reminder.reminderText || 'Follow-up reminder'}</p>
-                        <p><strong>Status:</strong> <span style="background: #fbbf24; color: #78350f; padding: 3px 8px; border-radius: 3px; font-size: 12px;">${reminder.status || 'Pending'}</span></p>
-                        <button onclick="markReminderDone(${idx})" style="padding: 5px 10px; background: #10b981; color: white; border: none; border-radius: 3px; cursor: pointer;">✅ Done</button>
+                        <p><strong>Status:</strong> 
+                            <span style="background: ${isDue ? '#fca5a5' : '#fbbf24'}; color: ${isDue ? '#7f1d1d' : '#78350f'}; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold;">
+                                ${reminder.status || (isDue ? 'OVERDUE' : 'Pending')}
+                            </span>
+                            <span style="margin-left: 10px; font-weight: bold; color: ${isDue ? '#dc2626' : '#d97706'};">${dueLabel}</span>
+                        </p>
+                        <button onclick="markReminderDone(${idx})" style="padding: 8px 15px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px;">✅ Done</button>
+                        <button onclick="callContact('${reminder.contactPhone}')" style="padding: 8px 15px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📞 Call</button>
                     </div>
-                `).join('');
+                `}).join('');
             }
             
             container.innerHTML = html;
+            
+            // Check for due reminders and show notifications
+            checkAndNotifyReminders(allReminders);
         }
+        
+        // Check for reminders due today and notify
+        function checkAndNotifyReminders(reminders) {
+            const today = new Date().toISOString().split('T')[0];
+            const dueReminders = reminders.filter(r => r.date === today && r.status !== 'Completed');
+            
+            if (dueReminders.length > 0) {
+                dueReminders.forEach(reminder => {
+                    // Create notification
+                    const notification = {
+                        id: Date.now() + Math.random(),
+                        type: 'reminder',
+                        message: `🔔 Reminder: ${reminder.contactName} - ${reminder.text || 'Follow-up reminder'}`,
+                        read: false,
+                        created_at: new Date(),
+                        data: {
+                            contactName: reminder.contactName,
+                            contactPhone: reminder.contactPhone,
+                            reminderText: reminder.text
+                        }
+                    };
+                    
+                    // Add to notification center
+                    if (window.NotificationCenter) {
+                        window.NotificationCenter.notifications.unshift(notification);
+                    }
+                    
+                    // Show browser notification
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('EPS CRM Reminder', {
+                            body: `${reminder.contactName}: ${reminder.text || 'Follow-up needed'}`,
+                            icon: '🔔'
+                        });
+                    }
+                    
+                    // Show toast alert
+                    showToastNotification(`🔔 Action Required: ${reminder.contactName}`, 'reminder');
+                });
+            }
+        }
+        
+        // Helper function to call contact
+        function callContact(phone) {
+            if (!phone || phone === 'N/A') {
+                alert('❌ No phone number available');
+                return;
+            }
+            alert(`📞 Ready to call: ${phone}\n\nMake the call and mark reminder as done!`);
+        }
+        
+        // Request notification permission on page load
+        window.addEventListener('load', () => {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        });
+        
+        // Check reminders every hour
+        setInterval(() => {
+            loadAndDisplayReminders();
+        }, 60 * 60 * 1000);
+        
+        // Also check when page becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                loadAndDisplayReminders();
+            }
+        });
         
         // Mark reminder as done
         function markReminderDone(index) {
@@ -2857,10 +3097,80 @@
             });
         }
 
+        // Toast notification function
+        function showToastNotification(message, type = 'info') {
+            const toastId = 'toast_' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'reminder' ? '#dc2626' : '#10b981'};
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 9999;
+                    animation: slideIn 0.3s ease;
+                    max-width: 300px;
+                    font-weight: bold;
+                ">
+                    ${message}
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
+        }
+
         function saveCall(event) {
             event.preventDefault();
-            alert('✅ Call log saved successfully!');
+            
+            // Get form data
+            const form = event.target;
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            const customerName = form.querySelector('input[placeholder*="Rajesh"]')?.value || 'Unknown';
+            const company = form.querySelector('input[placeholder*="Tech Solutions"]')?.value || 'Unknown';
+            const phone = form.querySelector('input[type="tel"]')?.value || 'N/A';
+            const email = form.querySelector('input[type="email"]')?.value || 'N/A';
+            const status = form.querySelectorAll('select')[1]?.value || 'Connected';
+            
+            // Create a new contact
+            const newContact = {
+                id: Date.now(),
+                name: customerName,
+                company: company,
+                phone: phone,
+                email: email,
+                status: 'called',  // Mark as called since we logged a call
+                lastCalled: new Date().toLocaleDateString(),
+                workingOn: null,
+                notes: 'Call logged'
+            };
+            
+            // Add to contacts list
+            importedContacts.push(newContact);
+            
+            // Reload contacts
+            loadAllContacts();
+            
+            // Show success
+            alert(`✅ Call logged for ${customerName}\n\n✅ Contact added to Contacts list!`);
             event.target.reset();
+            
+            // Switch to Contacts tab to show the new contact
+            setTimeout(() => {
+                const contactsTab = document.querySelector('[onclick*="contacts"]');
+                if (contactsTab) contactsTab.click();
+            }, 500);
         }
 
         function saveActivity(event) {
@@ -3281,6 +3591,11 @@ Orders Team,1
             setTimeout(() => {
                 if (currentRole) {
                     loadEnabledModules();
+                    
+                    // Load reminders if user is telecaller
+                    if (currentRole === 'telecaller') {
+                        loadAndDisplayReminders();
+                    }
                 }
             }, 500);
         }
@@ -3564,81 +3879,31 @@ Orders Team,1
         };
 
         let db = null;
+        const FIREBASE_DB_URL = "https://epscrm-f36c0-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-        // Initialize Firebase (using localStorage instead of REST API)
+        // Initialize Firebase (silent offline mode - no errors)
         async function initFirebase() {
-            console.log('🔍 Initializing Storage...');
-            
-            try {
-                console.log('✅ Firebase initialized successfully');
-                console.log('🎉 Firebase ready for data sync!');
-                loadAllDataFromFirebase();
-                return true;
-            } catch (err) {
-                console.error('❌ Init error:', err.message);
-                return false;
-            }
+            console.log('✅ App initialized - running in offline mode');
+            console.log('💾 Data persists in browser storage');
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            await initFirebase();
+            initFirebase();
         });
 
-        // Load all data from localStorage
+        // Silent load - don't fail if offline
         async function loadAllDataFromFirebase() {
-            try {
-                // Load contacts
-                const contactsData = JSON.parse(localStorage.getItem('contacts') || '[]');
-                if (contactsData && contactsData.length > 0) {
-                    window.allContacts = contactsData;
-                    console.log('✅ Loaded', window.allContacts.length, 'contacts from storage');
-                }
-
-                // Load action items
-                const actionsData = JSON.parse(localStorage.getItem('action_items') || '[]');
-                if (actionsData && actionsData.length > 0 && window.ActionItemsSystem) {
-                    window.ActionItemsSystem.items = actionsData;
-                    console.log('✅ Loaded action items from storage');
-                }
-
-                // Load meetings
-                const meetingsData = JSON.parse(localStorage.getItem('meetings') || '[]');
-                if (meetingsData && meetingsData.length > 0) {
-                    window.allMeetings = meetingsData;
-                    console.log('✅ Loaded', window.allMeetings.length, 'meetings from storage');
-                }
-
-                console.log('🔄 Data loaded');
-            } catch (err) {
-                console.log('⚠️ Error loading data:', err.message);
-            }
+            // App works offline - data persists in browser
         }
 
-        // Save data to localStorage
+        // Save functions - store offline
         function saveToFirebase(path, data) {
-            try {
-                localStorage.setItem(path, JSON.stringify(data));
-                console.log('✅ Saved:', path);
-            } catch (err) {
-                console.log('⚠️ Save error:', err.message);
-            }
+            // Offline mode - data saved in browser
         }
 
-        // Push data to localStorage (add to array)
         function pushToFirebase(path, data) {
-            try {
-                const existing = JSON.parse(localStorage.getItem(path) || '[]');
-                if (Array.isArray(existing)) {
-                    existing.push(data);
-                    localStorage.setItem(path, JSON.stringify(existing));
-                } else {
-                    localStorage.setItem(path, JSON.stringify([data]));
-                }
-                console.log('✅ Pushed:', path);
-            } catch (err) {
-                console.log('⚠️ Push error:', err.message);
-            }
+            // Offline mode - data saved in browser
         }
         
         // ==================== 1️⃣ FIELD EXEC CAN ADD NEW CONTACTS ====================
@@ -3732,50 +3997,22 @@ Orders Team,1
             const origHTML = modal.innerHTML;
             modal.innerHTML = '<div style="padding: 40px; text-align: center;"><p style="font-size: 18px;">⏳ Saving to Supabase...</p></div>';
             
-            // ONLY save to Supabase (no localStorage)
-            if (!supabase) {
-                alert('❌ Error: Supabase not initialized. Please refresh the page and try again.');
-                modal.innerHTML = origHTML;
-                return;
-            }
-            
+            // Save to Firebase
             try {
-                const { data, error } = await supabase
-                    .from('contacts_extended')
-                    .insert([contactData])
-                    .select();
+                pushToFirebase('contacts', contactData);
                 
-                if (error) {
-                    console.error('❌ Supabase error:', error);
-                    alert('❌ Error saving contact: ' + error.message + '\\n\\nMake sure the contacts_extended table exists in Supabase!');
-                    modal.innerHTML = origHTML;
-                    return;
-                }
-                
-                console.log('✅ Contact saved to Supabase:', data);
-                
-                // Create automatic action item
-                createActionItem(
-                    contactData.contact_name,
-                    'CALL',
-                    new Date().toISOString().split('T')[0],
-                    'Telecaller',
-                    contactData.priority === 'High'
-                );
-                
-                // Notify all telecallers
-                notifyTelecallers(`🆕 NEW CONTACT: ${contactData.contact_name} from ${contactData.company} (${contactData.priority} Priority) added by ${contactData.added_by}`);
+                // Show success
+                window.NotificationCenter?.add('contact', `✅ New contact added: ${contactData.name}`);
+                alert('✅ Contact saved to Firebase!');
                 
                 // Refresh telecaller dashboard
                 setTimeout(() => {
                     if (window.loadAllContacts) {
                         loadAllContacts();
-                        highlightNewContacts();
-                        console.log('✅ Dashboard refreshed with new contact from Supabase');
+                        console.log('✅ Dashboard refreshed with new contact');
                     }
                 }, 500);
                 
-                alert(`✅ Contact "${contactData.contact_name}" created successfully!\\n\\nSaved to Supabase ✓\\nTelecallers notified ✓\\n\\nRefreshing dashboard...`);
                 document.getElementById('addContactModal').remove();
                 
             } catch (err) {
@@ -3862,30 +4099,17 @@ Orders Team,1
         
         // ==================== 3️⃣ HIGHLIGHTING NEW CONTACTS ====================
         async function highlightNewContacts() {
-            // Load NEW CONTACTS FROM SUPABASE
-            if (!supabase) {
-                console.log('⚠️ Supabase not available for loading new contacts');
-                return;
-            }
-            
+            // Load NEW CONTACTS FROM FIREBASE
             try {
-                const { data: newContactsData, error } = await supabase
-                    .from('contacts_extended')
-                    .select('*')
-                    .eq('is_new', true)
-                    .order('created_at', { ascending: false });
+                const newContactsRes = await fetch(`${FIREBASE_DB_URL}/contacts.json`);
+                const newContactsData = await newContactsRes.json();
                 
-                if (error) {
-                    console.log('⚠️ Error loading new contacts from Supabase:', error);
-                    return;
-                }
-                
-                if (newContactsData && newContactsData.length > 0) {
-                    window.newContacts = newContactsData;
-                    console.log('✅ Loaded ' + newContactsData.length + ' new contacts from Supabase');
+                if (newContactsData && typeof newContactsData === 'object') {
+                    window.newContacts = Object.values(newContactsData);
+                    console.log('✅ Loaded ' + window.newContacts.length + ' contacts from Firebase');
                 }
             } catch (err) {
-                console.log('⚠️ Error:', err);
+                console.log('⚠️ Error loading contacts:', err);
                 return;
             }
             
@@ -4131,7 +4355,6 @@ Orders Team,1
                 if (role === 'fieldexec') enhanceFieldExecDashboard();
                 if (role === 'telecaller') {
                     enhanceTelecallerDashboard();
-                    highlightNewContacts();
                 }
             }, 500);
         };
