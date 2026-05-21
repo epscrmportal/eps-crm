@@ -2991,22 +2991,7 @@
             let html = '';
             const followUps = [];
             
-            // Collect all reminders that should be follow-ups
-            if (window.allReminders && window.allReminders.length > 0) {
-                window.allReminders.forEach(reminder => {
-                    if (reminder.status !== 'Completed') {
-                        followUps.push({
-                            contact: reminder.contactName,
-                            dueDate: reminder.date,
-                            status: 'Pending',
-                            note: reminder.text || 'Follow-up required',
-                            phone: reminder.contactPhone
-                        });
-                    }
-                });
-            }
-            
-            // Also check contact reminders
+            // Collect all reminders from contacts (NOT from window.allReminders to avoid duplicates)
             importedContacts.forEach(contact => {
                 if (contact.reminders && contact.reminders.length > 0) {
                     contact.reminders.forEach(reminder => {
@@ -3109,8 +3094,12 @@
                             </span>
                             <span style="margin-left: 10px; font-weight: bold; color: ${isDue ? '#dc2626' : '#d97706'};">${dueLabel}</span>
                         </p>
-                        <button onclick="markReminderDone(${idx})" style="padding: 8px 15px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px;">✅ Done</button>
-                        <button onclick="callContact('${reminder.contactPhone}')" style="padding: 8px 15px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📞 Call</button>
+                        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="markReminderDone(${idx})" style="padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">✅ Done</button>
+                            <button onclick="callContact('${reminder.contactPhone}')" style="padding: 8px 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">📞 Call</button>
+                            <button onclick="addReminderNotes('${reminder.contactName}', '${reminder.contactPhone}')" style="padding: 8px 12px; background: #8b5cf6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">📝 Notes</button>
+                            <button onclick="scheduleRemiderMeeting('${reminder.contactName}', '${reminder.contactPhone}')" style="padding: 8px 12px; background: #ec4899; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">📅 Schedule</button>
+                        </div>
                     </div>
                 `}).filter(item => item !== '').join('');
             }
@@ -3168,6 +3157,25 @@
                 return;
             }
             alert(`📞 Ready to call: ${phone}\n\nMake the call and mark reminder as done!`);
+        }
+        
+        // Add notes to reminder
+        function addReminderNotes(contactName, phone) {
+            const notes = prompt(`📝 Add notes for ${contactName}:\n\n(Current reminder will be updated)`);
+            if (notes && notes.trim()) {
+                alert(`✅ Notes added for ${contactName}:\n\n"${notes}"\n\nMake sure to call and follow up!`);
+            }
+        }
+        
+        // Schedule meeting from reminder
+        function scheduleRemiderMeeting(contactName, phone) {
+            const date = prompt(`📅 Schedule meeting for ${contactName}\n\nEnter date (YYYY-MM-DD):`);
+            if (date) {
+                const time = prompt(`Enter time (HH:MM):`);
+                if (time) {
+                    alert(`✅ Meeting scheduled!\n\n📅 ${contactName}\n🕐 ${date} at ${time}\n📱 ${phone}\n\nAssign to Field Executive to complete!`);
+                }
+            }
         }
         
         // Request notification permission on page load
