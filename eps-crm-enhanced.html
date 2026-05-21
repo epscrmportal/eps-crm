@@ -735,21 +735,21 @@
                 <h3 style="margin-top: 30px;">Monthly Targets</h3>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <h3>0/1350</h3>
+                        <h3 id="tc-monthly-calls">0/1350</h3>
                         <p>Monthly Calls</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/30</h3>
+                        <h3 id="tc-monthly-meetings">0/30</h3>
                         <p>Monthly Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0%</h3>
+                        <h3 id="tc-call-conversion">0%</h3>
                         <p>Call Conversion</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
@@ -995,19 +995,19 @@
                 <h2>Performance Analytics</h2>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <h3>0</h3>
+                        <h3 id="analytics-total-calls">0</h3>
                         <p>Total Calls</p>
                     </div>
                     <div class="stat-box">
-                        <h3>0%</h3>
+                        <h3 id="analytics-call-conversion">0%</h3>
                         <p>Call Conversion</p>
                     </div>
                     <div class="stat-box">
-                        <h3>0</h3>
+                        <h3 id="analytics-meetings">0</h3>
                         <p>Meetings</p>
                     </div>
                     <div class="stat-box">
-                        <h3>0</h3>
+                        <h3 id="analytics-deals-closed">0</h3>
                         <p>Deals Closed</p>
                     </div>
                 </div>
@@ -1081,31 +1081,31 @@
                 <h3 style="margin-top: 30px;">Monthly Targets</h3>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <h3>2/2</h3>
+                        <h3 id="fe-daily-meetings">0/2</h3>
                         <p>Daily Meetings</p>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 100%;"></div>
+                            <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>12/12</h3>
+                        <h3 id="fe-weekly-meetings">0/12</h3>
                         <p>Weekly Meetings</p>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 100%;"></div>
+                            <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>35/48</h3>
+                        <h3 id="fe-monthly-meetings">0/48</h3>
                         <p>Monthly Meetings</p>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 73%;"></div>
+                            <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>18/20</h3>
+                        <h3 id="fe-lead-generation">0/20</h3>
                         <p>Lead Generation</p>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 90%;"></div>
+                            <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                 </div>
@@ -2521,9 +2521,44 @@
             const pendingFollowups = importedContacts.reduce((sum, c) => sum + (c.reminders?.length || 0), 0);
             const callConversion = totalContacts > 0 ? Math.round((calledContacts / totalContacts) * 100) : 0;
             
-            console.log('📊 Dashboard metrics:', { totalContacts, calledContacts, totalCalls, totalMeetings, callConversion });
+            console.log('📊 Updating metrics:', { totalContacts, calledContacts, totalCalls, totalMeetings, callConversion });
             
-            // Update metric cards
+            // Update TELECALLER Monthly Targets by ID
+            const tcCallsEl = document.getElementById('tc-monthly-calls');
+            if (tcCallsEl) {
+                tcCallsEl.textContent = `${totalCalls}/1350`;
+                const progress = Math.min((totalCalls / 1350) * 100, 100);
+                tcCallsEl.closest('.stat-box').querySelector('.progress-fill').style.width = progress + '%';
+                console.log('✅ Updated Telecaller Monthly Calls:', totalCalls);
+            }
+            
+            const tcMeetingsEl = document.getElementById('tc-monthly-meetings');
+            if (tcMeetingsEl) {
+                tcMeetingsEl.textContent = `${totalMeetings}/30`;
+                const progress = Math.min((totalMeetings / 30) * 100, 100);
+                tcMeetingsEl.closest('.stat-box').querySelector('.progress-fill').style.width = progress + '%';
+                console.log('✅ Updated Telecaller Monthly Meetings:', totalMeetings);
+            }
+            
+            const tcConversionEl = document.getElementById('tc-call-conversion');
+            if (tcConversionEl) {
+                tcConversionEl.textContent = `${callConversion}%`;
+                tcConversionEl.closest('.stat-box').querySelector('.progress-fill').style.width = callConversion + '%';
+                console.log('✅ Updated Telecaller Call Conversion:', callConversion);
+            }
+            
+            // Update FIELD EXEC Monthly Targets by ID
+            const feMonthlyEl = document.getElementById('fe-monthly-meetings');
+            if (feMonthlyEl) {
+                const myName = currentUser?.name;
+                const myMeetings = window.fieldExecMeetings?.[myName] || [];
+                feMonthlyEl.textContent = `${myMeetings.length}/48`;
+                const progress = Math.min((myMeetings.length / 48) * 100, 100);
+                feMonthlyEl.closest('.stat-box').querySelector('.progress-fill').style.width = progress + '%';
+                console.log('✅ Updated Field Exec Monthly Meetings:', myMeetings.length);
+            }
+            
+            // Update metric cards (dashboard overview)
             const metricCards = document.querySelectorAll('.metric-value');
             metricCards.forEach(card => {
                 const label = card.previousElementSibling?.textContent || '';
@@ -2535,36 +2570,6 @@
                     card.textContent = pendingFollowups;
                 } else if (label.includes('Meetings')) {
                     card.textContent = totalMeetings;
-                }
-            });
-            
-            // Update Monthly Targets for TELECALLER
-            document.querySelectorAll('#tc-dashboard .stat-box').forEach((box, idx) => {
-                const h3 = box.querySelector('h3');
-                const p = box.querySelector('p');
-                const fillBar = box.querySelector('.progress-fill');
-                if (!h3 || !p) return;
-                
-                if (p.textContent.includes('Monthly Calls')) {
-                    h3.textContent = `${totalCalls}/1350`;
-                    fillBar.style.width = Math.min((totalCalls / 1350) * 100, 100) + '%';
-                } else if (p.textContent.includes('Monthly Meetings')) {
-                    h3.textContent = `${totalMeetings}/30`;
-                    fillBar.style.width = Math.min((totalMeetings / 30) * 100, 100) + '%';
-                } else if (p.textContent.includes('Call Conversion')) {
-                    h3.textContent = `${callConversion}%`;
-                    fillBar.style.width = callConversion + '%';
-                }
-            });
-            
-            // Update Monthly Targets for FIELD EXEC
-            document.querySelectorAll('#fe-dashboard .stat-box').forEach((box, idx) => {
-                const h3 = box.querySelector('h3');
-                const p = box.querySelector('p');
-                if (!h3 || !p) return;
-                
-                if (p.textContent.includes('Monthly Meetings')) {
-                    h3.textContent = `${totalMeetings}/30`;
                 }
             });
             
@@ -3047,21 +3052,16 @@
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
             
-            // Update Field Exec dashboard metrics when dashboard tab is opened
-            if (tabName === 'fe-dashboard') {
-                console.log('📊 Updating Field Exec dashboard metrics...');
-                const myName = currentUser?.name;
-                const assignedMeetings = window.fieldExecMeetings?.[myName] || [];
-                
-                // Find and update dashboard cards
-                const metricCards = document.querySelectorAll('#fe-dashboard .metric-value');
-                metricCards.forEach((card, idx) => {
-                    const label = card.previousElementSibling?.textContent || '';
-                    if (label.includes('1:1 Meetings') || label.includes('Meetings')) {
-                        card.textContent = assignedMeetings.length;
-                        console.log('✅ Updated meetings count:', assignedMeetings.length);
-                    }
-                });
+            // Refresh dashboard when dashboard tabs are clicked
+            if (tabName === 'tc-dashboard' || tabName === 'fe-dashboard') {
+                console.log('📊 Dashboard tab clicked, refreshing metrics...');
+                loadAllContacts();
+            }
+            
+            // Create charts when analytics tab is opened
+            if (tabName === 'tc-analytics') {
+                console.log('📊 Analytics tab clicked, creating charts...');
+                setTimeout(() => createTelecallerCharts(), 100);
             }
             
             // Load reminders when reminders tab is opened
@@ -3347,39 +3347,53 @@
         window.charts = {};
         
         function createTelecallerCharts() {
-            const callCtx = document.getElementById('callChart');
-            if (callCtx) {
-                // Destroy old chart if exists
-                if (window.charts.callChart) {
-                    window.charts.callChart.destroy();
-                }
-                window.charts.callChart = new Chart(callCtx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [
-                            { label: 'Calls', data: [], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true },
-                            { label: 'Meetings', data: [], borderColor: '#764ba2', backgroundColor: 'rgba(118, 75, 162, 0.1)', tension: 0.4, fill: true }
-                        ]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
-
+            console.log('📊 Creating Telecaller charts with real data...');
+            
+            // Calculate metrics
+            const totalContacts = importedContacts.length;
+            const calledContacts = importedContacts.filter(c => c.status === 'called').length;
+            const pendingContacts = totalContacts - calledContacts;
+            const totalCalls = importedContacts.reduce((sum, c) => sum + (c.callNotes?.length || 0), 0);
+            const totalMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
+            const callConversion = totalContacts > 0 ? Math.round((calledContacts / totalContacts) * 100) : 0;
+            
+            console.log('Metrics:', { totalCalls, callConversion, totalMeetings, totalContacts, calledContacts, pendingContacts });
+            
+            // Update Performance Analytics numbers
+            const analyticsCallsEl = document.getElementById('analytics-total-calls');
+            const analyticsConversionEl = document.getElementById('analytics-call-conversion');
+            const analyticsMeetingsEl = document.getElementById('analytics-meetings');
+            const analyticsDealsEl = document.getElementById('analytics-deals-closed');
+            
+            if (analyticsCallsEl) analyticsCallsEl.textContent = totalCalls;
+            if (analyticsConversionEl) analyticsConversionEl.textContent = callConversion + '%';
+            if (analyticsMeetingsEl) analyticsMeetingsEl.textContent = totalMeetings;
+            if (analyticsDealsEl) analyticsDealsEl.textContent = '0';
+            
+            // Create Status Chart (Doughnut - Called vs Pending)
             const statusCtx = document.getElementById('statusChart');
             if (statusCtx) {
-                // Destroy old chart if exists
                 if (window.charts.statusChart) {
                     window.charts.statusChart.destroy();
                 }
                 window.charts.statusChart = new Chart(statusCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: [],
-                        datasets: [{ data: [], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }]
+                        labels: ['Called', 'Pending'],
+                        datasets: [{
+                            data: [calledContacts, pendingContacts],
+                            backgroundColor: ['#10b981', '#ef4444']
+                        }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
                 });
+                console.log('✅ Status chart created:', { called: calledContacts, pending: pendingContacts });
             }
         }
 
