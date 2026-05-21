@@ -2287,6 +2287,48 @@
         if (!window.allReminders) window.allReminders = [];
         if (!window.charts) window.charts = {};
         if (!window.fieldExecMeetings) window.fieldExecMeetings = {};
+        
+        // ============ PERSISTENT STORAGE ============
+        function saveContactsToStorage() {
+            try {
+                localStorage.setItem('eps_crm_contacts', JSON.stringify(importedContacts));
+                localStorage.setItem('eps_crm_fieldExecMeetings', JSON.stringify(window.fieldExecMeetings));
+                console.log('💾 Data saved to localStorage');
+            } catch (e) {
+                console.error('❌ Storage error:', e);
+            }
+        }
+        
+        function loadContactsFromStorage() {
+            try {
+                const saved = localStorage.getItem('eps_crm_contacts');
+                const savedMeetings = localStorage.getItem('eps_crm_fieldExecMeetings');
+                
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    importedContacts.push(...data);
+                    console.log('✅ Loaded', data.length, 'contacts from localStorage');
+                }
+                
+                if (savedMeetings) {
+                    window.fieldExecMeetings = JSON.parse(savedMeetings);
+                    console.log('✅ Loaded meetings from localStorage');
+                }
+            } catch (e) {
+                console.error('❌ Load error:', e);
+            }
+        }
+        
+        // Load on startup
+        window.addEventListener('load', () => {
+            loadContactsFromStorage();
+            console.log('📱 Total contacts after load:', importedContacts.length);
+        });
+        
+        // Auto-save when contacts change
+        window.addEventListener('beforeunload', () => {
+            saveContactsToStorage();
+        });
         const validAccounts = {
             'admin@eps.com': { password: 'admin123', role: 'Admin', name: 'Admin User' },
             'telecaller@eps.com': { password: 'telecaller123', role: 'Telecaller', name: 'Telecaller' },
@@ -2719,6 +2761,9 @@
             // Refresh UI displays to show the updated contact
             console.log('📢 Refreshing displays...');
             loadAllContacts();
+            
+            // SAVE TO STORAGE
+            saveContactsToStorage();
             
             setTimeout(() => {
                 console.log('📋 Refreshing reminders display...');
@@ -4368,6 +4413,9 @@ Orders Team,1
                 
                 // Refresh telecaller dashboard
                 loadAllContacts();
+                
+                // SAVE TO STORAGE
+                saveContactsToStorage();
                 
                 // Close modal
                 document.getElementById('addContactModal').remove();
