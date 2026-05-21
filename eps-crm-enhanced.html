@@ -2967,6 +2967,23 @@
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
             
+            // Update Field Exec dashboard metrics when dashboard tab is opened
+            if (tabName === 'fe-dashboard') {
+                console.log('📊 Updating Field Exec dashboard metrics...');
+                const myName = currentUser?.name;
+                const assignedMeetings = window.fieldExecMeetings?.[myName] || [];
+                
+                // Find and update dashboard cards
+                const metricCards = document.querySelectorAll('#fe-dashboard .metric-value');
+                metricCards.forEach((card, idx) => {
+                    const label = card.previousElementSibling?.textContent || '';
+                    if (label.includes('1:1 Meetings') || label.includes('Meetings')) {
+                        card.textContent = assignedMeetings.length;
+                        console.log('✅ Updated meetings count:', assignedMeetings.length);
+                    }
+                });
+            }
+            
             // Load reminders when reminders tab is opened
             if (tabName === 'tc-reminders') {
                 loadAndDisplayReminders();
@@ -3287,21 +3304,37 @@
         }
 
         function loadFieldExecMeetings() {
+            console.log('📅 loadFieldExecMeetings called');
+            console.log('   currentUser?.name:', currentUser?.name);
+            console.log('   window.fieldExecMeetings:', window.fieldExecMeetings);
+            
             const meetingsList = document.getElementById('fieldExecMeetingsList');
-            if (!meetingsList || !window.fieldExecMeetings) {
+            if (!meetingsList) {
+                console.error('❌ fieldExecMeetingsList container not found!');
+                return;
+            }
+            
+            if (!window.fieldExecMeetings) {
+                console.warn('⚠️ window.fieldExecMeetings not initialized');
                 meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">No meetings assigned yet</p>';
                 return;
             }
             
-            const myMeetings = window.fieldExecMeetings[currentUser?.name] || [];
+            const myName = currentUser?.name;
+            console.log('   Looking for meetings assigned to:', myName);
+            
+            const myMeetings = window.fieldExecMeetings[myName] || [];
+            console.log('   Found meetings:', myMeetings.length);
             
             if (myMeetings.length === 0) {
+                console.log('   No meetings found for', myName);
                 meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">✨ No meetings assigned to you yet. Check back later!</p>';
                 return;
             }
             
             let html = '';
             myMeetings.forEach((meeting, idx) => {
+                console.log('   Rendering meeting:', meeting.contactName);
                 html += `<div class="contact-item" style="background: #f0f9ff; border-left-color: #0ea5e9; margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                         <div style="flex: 1; min-width: 250px;">
