@@ -5382,6 +5382,216 @@ Orders Team,1
             setTimeout(() => initializeModules(), 500);
         });
         
-    </script>
+
+        // ============================================
+        // BUTTON FIXES - ALL 7 FUNCTIONS
+        // ============================================
+
+        function convertCardToContact(name, company, phone, email, leadType) {
+            console.log(`✅ Converting business card: ${name}`);
+            try {
+                const newContact = {
+                    id: Date.now() + Math.random(),
+                    name: name,
+                    company: company,
+                    phone: phone,
+                    email: email,
+                    address: 'Mumbai',
+                    priority: leadType === 'Hot Lead' ? 'High' : (leadType === 'Warm Lead' ? 'Medium' : 'Low'),
+                    source: 'Business Card (Field Exec)',
+                    addedBy: 'Telecaller',
+                    status: 'pending',
+                    workingOn: null,
+                    callNotes: [],
+                    reminders: [],
+                    meetings: [],
+                    createdOn: new Date().toLocaleDateString()
+                };
+                
+                importedContacts.push(newContact);
+                saveContactsToStorage();
+                console.log(`✅ Contact created: ${name}`);
+                loadAllContacts();
+                updateMetrics();
+                alert(`✅ ${name} added to Contacts!`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error adding contact.');
+                return false;
+            }
+        }
+
+        function markFollowupDone(contactName, dueDate) {
+            console.log(`✅ Mark Follow-up Done: ${contactName}`);
+            try {
+                const contact = importedContacts.find(c => c.name === contactName);
+                if (!contact) return false;
+                contact.reminders = contact.reminders.filter(r => r.date !== dueDate);
+                saveContactsToStorage();
+                loadAndDisplayFollowUps();
+                alert(`✅ Follow-up completed!`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error updating follow-up.');
+                return false;
+            }
+        }
+
+        function callContactFromFollowup(contactPhone) {
+            console.log(`📞 Calling: ${contactPhone}`);
+            try {
+                const contact = importedContacts.find(c => c.phone === contactPhone);
+                if (!contact) { alert('❌ Contact not found'); return false; }
+                
+                const duration = prompt(`Call duration (minutes):`, '15');
+                if (duration === null) return false;
+                const notes = prompt(`Call notes:`, 'Follow-up call');
+                if (notes === null) return false;
+                
+                contact.callNotes.push({
+                    notes: notes,
+                    duration: duration,
+                    savedOn: new Date().toLocaleDateString(),
+                    savedAt: new Date().toLocaleTimeString(),
+                    nextAction: 'follow_up'
+                });
+                
+                if (contact.status === 'pending') contact.status = 'called';
+                saveContactsToStorage();
+                loadAndDisplayFollowUps();
+                alert(`✅ Call logged: ${duration} min`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error logging call.');
+                return false;
+            }
+        }
+
+        function markReminderDone(contactName, reminderDate, reminderText) {
+            console.log(`✅ Mark Reminder Done: ${contactName}`);
+            try {
+                const contact = importedContacts.find(c => c.name === contactName);
+                if (!contact) return false;
+                const reminder = contact.reminders.find(r => r.date === reminderDate && r.text === reminderText);
+                if (reminder) reminder.status = 'completed';
+                saveContactsToStorage();
+                loadAndDisplayReminders();
+                alert(`✅ Reminder marked done!`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error updating reminder.');
+                return false;
+            }
+        }
+
+        function callContactFromReminder(contactPhone, contactName) {
+            console.log(`📞 Call from reminder: ${contactName}`);
+            try {
+                const contact = importedContacts.find(c => c.phone === contactPhone);
+                if (!contact) { alert('❌ Contact not found'); return false; }
+                
+                const duration = prompt(`Call duration (minutes):`, '15');
+                if (duration === null) return false;
+                const notes = prompt(`Call notes:`, 'Follow-up from reminder');
+                if (notes === null) return false;
+                
+                contact.callNotes.push({
+                    notes: notes,
+                    duration: duration,
+                    savedOn: new Date().toLocaleDateString(),
+                    savedAt: new Date().toLocaleTimeString(),
+                    nextAction: 'follow_up'
+                });
+                
+                saveContactsToStorage();
+                loadAndDisplayReminders();
+                alert(`✅ Call logged: ${duration} min`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error logging call.');
+                return false;
+            }
+        }
+
+        function addNotesToReminder(contactName, reminderDate, reminderText) {
+            console.log(`📝 Add notes to reminder: ${contactName}`);
+            try {
+                const contact = importedContacts.find(c => c.name === contactName);
+                if (!contact) { alert('❌ Contact not found'); return false; }
+                
+                const notes = prompt(`Add notes:`, '');
+                if (notes === null || notes.trim() === '') return false;
+                
+                const reminder = contact.reminders.find(r => r.date === reminderDate && r.text === reminderText);
+                if (reminder) {
+                    reminder.notes = notes;
+                    reminder.notesAddedOn = new Date().toLocaleDateString();
+                }
+                
+                saveContactsToStorage();
+                loadAndDisplayReminders();
+                alert(`✅ Notes added!`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error adding notes.');
+                return false;
+            }
+        }
+
+        function scheduleFromReminder(contactName, contactPhone, reminderDate) {
+            console.log(`📅 Schedule meeting: ${contactName}`);
+            try {
+                const contact = importedContacts.find(c => c.name === contactName);
+                if (!contact) { alert('❌ Contact not found'); return false; }
+                
+                const meetingDate = prompt(`Meeting date (YYYY-MM-DD):`, reminderDate);
+                if (meetingDate === null) return false;
+                const meetingTime = prompt(`Meeting time (HH:MM):`, '10:00');
+                if (meetingTime === null) return false;
+                const meetingType = prompt(`Meeting type:`, 'Discovery Call');
+                if (meetingType === null) return false;
+                const location = prompt(`Location:`, 'Virtual - Zoom');
+                if (location === null) return false;
+                
+                const meeting = {
+                    id: Date.now(),
+                    contactName: contactName,
+                    date: meetingDate,
+                    time: meetingTime,
+                    type: meetingType,
+                    location: location,
+                    agenda: 'Follow-up discussion',
+                    assignedTo: 'Field Executive',
+                    scheduledBy: 'Telecaller',
+                    status: 'scheduled'
+                };
+                
+                contact.meetings.push(meeting);
+                if (!window.fieldExecMeetings['Field Executive']) {
+                    window.fieldExecMeetings['Field Executive'] = [];
+                }
+                window.fieldExecMeetings['Field Executive'].push(meeting);
+                
+                saveContactsToStorage();
+                localStorage.setItem('eps_crm_fieldExecMeetings', JSON.stringify(window.fieldExecMeetings));
+                loadAndDisplayReminders();
+                
+                alert(`✅ Meeting scheduled!`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error scheduling meeting.');
+                return false;
+            }
+        }
+
+        console.log('✅ All 7 button fixes loaded');
+        </script>
 </body>
 </html>
