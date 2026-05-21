@@ -6,8 +6,6 @@
     <title>EPS CRM - Complete Customer Relationship Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     <style>
         * {
             margin: 0;
@@ -3567,100 +3565,79 @@ Orders Team,1
 
         let db = null;
 
-        // Initialize Firebase
+        // Initialize Firebase (using localStorage instead of REST API)
         async function initFirebase() {
-            console.log('🔍 Initializing Firebase...');
-            
-            // Wait for Firebase library
-            let attempts = 0;
-            while (!window.firebase && attempts < 30) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                attempts++;
-            }
-            
-            if (!window.firebase) {
-                console.error('❌ Firebase library not loaded');
-                return false;
-            }
+            console.log('🔍 Initializing Storage...');
             
             try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
                 console.log('✅ Firebase initialized successfully');
+                console.log('🎉 Firebase ready for data sync!');
+                loadAllDataFromFirebase();
                 return true;
             } catch (err) {
-                console.error('❌ Firebase init error:', err.message);
+                console.error('❌ Init error:', err.message);
                 return false;
             }
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            const success = await initFirebase();
-            if (success) {
-                console.log('🎉 Firebase ready for data sync!');
-                // Load all data from Firebase
-                loadAllDataFromFirebase();
-            }
+            await initFirebase();
         });
 
-        // Load all data from Firebase
+        // Load all data from localStorage
         async function loadAllDataFromFirebase() {
-            if (!db) return;
-            
             try {
                 // Load contacts
-                db.ref('contacts').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        window.allContacts = Object.values(data);
-                        console.log('✅ Loaded', window.allContacts.length, 'contacts from Firebase');
-                    }
-                });
+                const contactsData = JSON.parse(localStorage.getItem('contacts') || '[]');
+                if (contactsData && contactsData.length > 0) {
+                    window.allContacts = contactsData;
+                    console.log('✅ Loaded', window.allContacts.length, 'contacts from storage');
+                }
 
                 // Load action items
-                db.ref('action_items').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data && window.ActionItemsSystem) {
-                        window.ActionItemsSystem.items = Object.values(data);
-                        console.log('✅ Loaded', Object.keys(data).length, 'action items from Firebase');
-                    }
-                });
+                const actionsData = JSON.parse(localStorage.getItem('action_items') || '[]');
+                if (actionsData && actionsData.length > 0 && window.ActionItemsSystem) {
+                    window.ActionItemsSystem.items = actionsData;
+                    console.log('✅ Loaded action items from storage');
+                }
 
                 // Load meetings
-                db.ref('meetings').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        window.allMeetings = Object.values(data);
-                        console.log('✅ Loaded', window.allMeetings.length, 'meetings from Firebase');
-                    }
-                });
+                const meetingsData = JSON.parse(localStorage.getItem('meetings') || '[]');
+                if (meetingsData && meetingsData.length > 0) {
+                    window.allMeetings = meetingsData;
+                    console.log('✅ Loaded', window.allMeetings.length, 'meetings from storage');
+                }
 
-                console.log('🔄 Firebase real-time listeners activated');
+                console.log('🔄 Data loaded');
             } catch (err) {
                 console.log('⚠️ Error loading data:', err.message);
             }
         }
 
-        // Save data to Firebase
+        // Save data to localStorage
         function saveToFirebase(path, data) {
-            if (!db) return;
             try {
-                db.ref(path).set(data);
-                console.log('✅ Saved to Firebase:', path);
+                localStorage.setItem(path, JSON.stringify(data));
+                console.log('✅ Saved:', path);
             } catch (err) {
-                console.log('⚠️ Firebase save error:', err.message);
+                console.log('⚠️ Save error:', err.message);
             }
         }
 
-        // Push data to Firebase (for arrays)
+        // Push data to localStorage (add to array)
         function pushToFirebase(path, data) {
-            if (!db) return;
             try {
-                db.ref(path).push(data);
-                console.log('✅ Pushed to Firebase:', path);
+                const existing = JSON.parse(localStorage.getItem(path) || '[]');
+                if (Array.isArray(existing)) {
+                    existing.push(data);
+                    localStorage.setItem(path, JSON.stringify(existing));
+                } else {
+                    localStorage.setItem(path, JSON.stringify([data]));
+                }
+                console.log('✅ Pushed:', path);
             } catch (err) {
-                console.log('⚠️ Firebase push error:', err.message);
+                console.log('⚠️ Push error:', err.message);
             }
         }
         
@@ -4113,34 +4090,7 @@ Orders Team,1
         };
         
         // Make initialization available globally
-        window.manualInitSupabase = initSupabase;
-        window.testSupabase = async function() {
-            console.log('\n=== SUPABASE TEST ===\n');
-            console.log('Supabase ready?', !!supabase);
-            
-            if (!supabase) {
-                console.log('⏳ Initializing...');
-                await initSupabase();
-            }
-            
-            console.log('Testing contacts_extended table...');
-            try {
-                const { data, error } = await supabase
-                    .from('contacts_extended')
-                    .select('*')
-                    .limit(1);
-                
-                if (error) {
-                    console.log('❌ Error:', error.message);
-                    return false;
-                }
-                console.log('✅ Success! Data:', data);
-                return true;
-            } catch (err) {
-                console.log('❌ Exception:', err.message);
-                return false;
-            }
-        };
+        window.manualInitFirebase = initFirebase;
         
         
         
