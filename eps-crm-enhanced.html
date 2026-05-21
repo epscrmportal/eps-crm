@@ -2282,6 +2282,11 @@
     <script>
         // Imported contacts from Excel files (261 total: 76 from File 1 + 185 from File 2)
         const importedContacts = [];
+        
+        // Initialize global reminders and charts storage
+        if (!window.allReminders) window.allReminders = [];
+        if (!window.charts) window.charts = {};
+        if (!window.fieldExecMeetings) window.fieldExecMeetings = {};
         const validAccounts = {
             'admin@eps.com': { password: 'admin123', role: 'Admin', name: 'Admin User' },
             'telecaller@eps.com': { password: 'telecaller123', role: 'Telecaller', name: 'Telecaller' },
@@ -2572,6 +2577,7 @@
         
         // Save call log with reminder
         function saveCallLog(modalId, contactIndex) {
+            console.log('📞 saveCallLog called for contact index:', contactIndex);
             const notes = document.getElementById('notes_' + modalId)?.value;
             const duration = document.getElementById('dur_' + modalId)?.value;
             const reminderDate = document.getElementById('reminder_' + modalId)?.value;
@@ -2584,7 +2590,12 @@
             }
             
             const contact = importedContacts[contactIndex];
-            if (!contact) return;
+            if (!contact) {
+                console.error('❌ Contact not found at index:', contactIndex);
+                return;
+            }
+            
+            console.log('💾 Saving call log for:', contact.name);
             
             // Save call notes to contact
             if (!contact.callNotes) contact.callNotes = [];
@@ -2598,6 +2609,7 @@
             
             // Save reminder if set
             if (reminderDate && reminderText.trim()) {
+                console.log('⏰ Saving reminder for:', reminderDate);
                 if (!contact.reminders) contact.reminders = [];
                 const reminderData = {
                     date: reminderDate,
@@ -2616,6 +2628,8 @@
                     text: reminderText,
                     status: 'pending'
                 });
+                
+                console.log('✅ Total reminders now:', window.allReminders.length);
             }
             
             // Show success message
@@ -2631,6 +2645,7 @@
             loadAllContacts();
             
             setTimeout(() => {
+                console.log('📋 Calling loadAndDisplayReminders...');
                 loadAndDisplayReminders();
             }, 500);
         }
@@ -2960,8 +2975,12 @@
         
         // Load and display saved reminders
         function loadAndDisplayReminders() {
+            console.log('📋 loadAndDisplayReminders called');
             const container = document.getElementById('remindersContainer');
-            if (!container) return;
+            if (!container) {
+                console.error('❌ remindersContainer not found!');
+                return;
+            }
             
             let html = '';
             
@@ -2969,6 +2988,7 @@
             const allReminders = [];
             importedContacts.forEach(contact => {
                 if (contact.reminders && contact.reminders.length > 0) {
+                    console.log('📌 Found reminders for contact:', contact.name, contact.reminders);
                     contact.reminders.forEach(reminder => {
                         allReminders.push({
                             contactName: contact.name,
@@ -2982,11 +3002,14 @@
             
             // Also add any reminders from the global list
             if (window.allReminders && window.allReminders.length > 0) {
+                console.log('🌐 Global reminders found:', window.allReminders.length);
                 allReminders.push(...window.allReminders);
             }
             
             // Sort by date
             allReminders.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            console.log('✅ Total reminders to display:', allReminders.length);
             
             if (allReminders.length === 0) {
                 html = '<p style="color: #999; text-align: center; padding: 40px;">No reminders set yet. Create reminders using the "Note" button on contacts.</p>';
