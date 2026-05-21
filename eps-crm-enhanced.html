@@ -2471,6 +2471,26 @@
             document.getElementById('totalContactsCount').innerText = importedContacts.length;
             document.getElementById('contactsStats').innerText = `${importedContacts.length} contacts`;
             
+            // Update dashboard metrics
+            const calledContacts = importedContacts.filter(c => c.status === 'called').length;
+            const pendingFollowups = importedContacts.reduce((sum, c) => sum + (c.reminders?.length || 0), 0);
+            const scheduledMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
+            
+            // Update all metric cards that show these values
+            const metricCards = document.querySelectorAll('.metric-value');
+            metricCards.forEach(card => {
+                const label = card.previousElementSibling?.textContent || '';
+                if (label.includes('Total Contacts')) {
+                    card.textContent = importedContacts.length;
+                } else if (label.includes('Calls Connected') || label.includes('Called')) {
+                    card.textContent = calledContacts;
+                } else if (label.includes('Pending') || label.includes('Follow')) {
+                    card.textContent = pendingFollowups;
+                } else if (label.includes('Meetings')) {
+                    card.textContent = scheduledMeetings;
+                }
+            });
+            
             if (importedContacts.length === 0) {
                 contactsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No contacts yet. Create one to get started!</p>';
                 return;
@@ -2585,13 +2605,15 @@
             contact.status = 'called';
             contact.lastCalled = new Date().toLocaleDateString();
             
-            // Reload the entire contact list to reflect changes
-            loadAllContacts();
-            
-            // Show the working modal popup
-            showCallModal(contact.name || 'Contact', contact.phone || 'No phone', index);
-            
             console.log(`📞 Call completed: ${contact.name} on ${contact.lastCalled}`);
+            console.log('📋 Contact before modal:', {
+                name: contact.name,
+                callNotes: contact.callNotes?.length || 0,
+                reminders: contact.reminders?.length || 0
+            });
+            
+            // Show the working modal popup (do NOT reload before this)
+            showCallModal(contact.name || 'Contact', contact.phone || 'No phone', index);
         }
         
         // Save call log with reminder
@@ -2684,25 +2706,24 @@
             
             alert(msg);
             
-            // Close modal and reload reminders
+            // Close modal
             document.getElementById(modalId).remove();
             
             // DEBUG: Verify data was saved before refreshing UI
             console.log('🔍 VERIFICATION - Contact after save:');
             console.log('  Name:', contact.name);
-            console.log('  CallNotes:', contact.callNotes);
-            console.log('  Reminders:', contact.reminders);
-            console.log('🔍 VERIFICATION - Full importedContacts array:');
-            importedContacts.forEach((c, i) => {
-                console.log(`  [${i}] ${c.name}: callNotes=${c.callNotes?.length || 0}, reminders=${c.reminders?.length || 0}`);
-            });
+            console.log('  CallNotes:', contact.callNotes?.length || 0, 'entries');
+            console.log('  Reminders:', contact.reminders?.length || 0, 'entries');
+            console.log('🔍 Full contact object:', contact);
             
+            // Refresh UI displays to show the updated contact
+            console.log('📢 Refreshing displays...');
             loadAllContacts();
             
             setTimeout(() => {
-                console.log('📋 Calling loadAndDisplayReminders...');
+                console.log('📋 Refreshing reminders display...');
                 loadAndDisplayReminders();
-            }, 500);
+            }, 300);
         }
         
         // WORKING MODAL FUNCTION - DO NOT MODIFY
@@ -3039,7 +3060,7 @@
             
             let html = '';
             
-            // Collect all reminders from all contacts
+            // Collect all reminders from all contacts (ONLY from contact.reminders to avoid duplicates)
             const allReminders = [];
             importedContacts.forEach(contact => {
                 if (contact.reminders && contact.reminders.length > 0) {
@@ -3055,16 +3076,10 @@
                 }
             });
             
-            // Also add any reminders from the global list
-            if (window.allReminders && window.allReminders.length > 0) {
-                console.log('🌐 Global reminders found:', window.allReminders.length);
-                allReminders.push(...window.allReminders);
-            }
-            
             // Sort by date
             allReminders.sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            console.log('✅ Total reminders to display:', allReminders.length);
+            console.log('✅ Total reminders to show:', allReminders.length);
             
             if (allReminders.length === 0) {
                 html = '<p style="color: #999; text-align: center; padding: 40px;">No reminders set yet. Create reminders using the "Note" button on contacts.</p>';
@@ -3171,19 +3186,43 @@
         
         // Mark reminder as done
         function markReminderDone(index) {
-            const reminders = document.querySelectorAll('[style*="fffbeb"], [style*="fee2e2"]');
-            if (reminders[index]) {
-                reminders[index].style.background = '#d1fae5';
-                reminders[index].style.borderLeftColor = '#10b981';
-                const statusSpan = reminders[index].querySelector('span');
-                if (statusSpan) statusSpan.textContent = 'Completed';
+            console.log('✅ markReminderDone called for index:', index);
+            
+            // Get all reminders
+            const allReminders = [];
+            importedContacts.forEach(contact => {
+                if (contact.reminders && contact.reminders.length > 0) {
+                    contact.reminders.forEach(reminder => {
+                        allReminders.push({
+                            contactName: contact.name,
+                            contactPhone: contact.phone,
+                            contactId: contact.id,
+                            ...reminder
+                        });
+                    });
+                }
+            });
+            
+            if (allReminders[index]) {
+                const reminder = allReminders[index];
+                console.log('Marking done:', reminder);
+                
+                // Find and update the contact's reminder
+                const contact = importedContacts.find(c => c.id === reminder.contactId);
+                if (contact && contact.reminders) {
+                    const reminderIndex = contact.reminders.findIndex(r => r.date === reminder.date && r.text === reminder.text);
+                    if (reminderIndex !== -1) {
+                        contact.reminders[reminderIndex].status = 'Completed';
+                        console.log('✅ Reminder status updated to Completed');
+                    }
+                }
                 
                 alert('✅ Reminder marked as done!\n\nGreat follow-up!');
                 
                 // Reload to update view
                 setTimeout(() => {
                     loadAndDisplayReminders();
-                }, 1000);
+                }, 500);
             }
         }
 
