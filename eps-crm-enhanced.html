@@ -2466,13 +2466,78 @@
             loadAllContacts();
             
             // Show the working modal popup
-            showCallModal(contact.name || 'Contact', contact.phone || 'No phone');
+            showCallModal(contact.name || 'Contact', contact.phone || 'No phone', index);
             
             console.log(`📞 Call completed: ${contact.name} on ${contact.lastCalled}`);
         }
         
+        // Save call log with reminder
+        function saveCallLog(modalId, contactIndex) {
+            const notes = document.getElementById('notes_' + modalId)?.value;
+            const duration = document.getElementById('dur_' + modalId)?.value;
+            const reminderDate = document.getElementById('reminder_' + modalId)?.value;
+            const reminderText = document.getElementById('reminderText_' + modalId)?.value;
+            const action = document.getElementById('action_' + modalId)?.value;
+            
+            if (!notes || !notes.trim()) {
+                alert('❌ Please enter call notes');
+                return;
+            }
+            
+            const contact = importedContacts[contactIndex];
+            if (!contact) return;
+            
+            // Save call notes to contact
+            if (!contact.callNotes) contact.callNotes = [];
+            contact.callNotes.push({
+                notes: notes,
+                duration: duration || '0',
+                savedOn: new Date().toLocaleDateString(),
+                savedAt: new Date().toLocaleTimeString(),
+                nextAction: action
+            });
+            
+            // Save reminder if set
+            if (reminderDate && reminderText.trim()) {
+                if (!contact.reminders) contact.reminders = [];
+                const reminderData = {
+                    date: reminderDate,
+                    text: reminderText,
+                    status: 'pending',
+                    createdOn: new Date().toLocaleDateString()
+                };
+                contact.reminders.push(reminderData);
+                
+                // Store in global reminders list
+                if (!window.allReminders) window.allReminders = [];
+                window.allReminders.push({
+                    contactName: contact.name,
+                    contactPhone: contact.phone,
+                    date: reminderDate,
+                    text: reminderText,
+                    status: 'pending'
+                });
+            }
+            
+            // Show success message
+            let msg = `✅ Call logged for ${contact.name}!\n\n📝 Notes: ${notes}\n⏱️ Duration: ${duration || '0'} mins`;
+            if (reminderDate && reminderText.trim()) {
+                msg += `\n⏰ Reminder: ${reminderDate}\n📌 ${reminderText}`;
+            }
+            
+            alert(msg);
+            
+            // Close modal and reload reminders
+            document.getElementById(modalId).remove();
+            loadAllContacts();
+            
+            setTimeout(() => {
+                loadAndDisplayReminders();
+            }, 500);
+        }
+        
         // WORKING MODAL FUNCTION - DO NOT MODIFY
-        function showCallModal(contactName, contactPhone) {
+        function showCallModal(contactName, contactPhone, contactIndex) {
             const modalId = 'callModal_' + Date.now();
             const html = `
                 <div id="${modalId}" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;" onclick="if(event.target.id==='${modalId}') document.getElementById('${modalId}').remove();">
@@ -2511,7 +2576,7 @@
                         </div>
                         
                         <div style="display: flex; gap: 10px;">
-                            <button onclick="const n = document.getElementById('notes_${modalId}').value; const d = document.getElementById('dur_${modalId}').value; const r = document.getElementById('reminder_${modalId}').value; const rt = document.getElementById('reminderText_${modalId}').value; if(!n.trim()){alert('Please enter notes');return;} let msg='✅ Call logged!\\n\\n📝 Notes: '+n+'\\n⏱️ Duration: '+(d||'0')+' mins'; if(r){ msg+='\\n⏰ Reminder: '+r; if(rt.trim()) msg+='\\nText: '+rt; } alert(msg); document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">✅ Save</button>
+                            <button onclick="saveCallLog('${modalId}', ${contactIndex})" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">✅ Save</button>
                             <button onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px; background: #f0f0f0; color: #333; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Close</button>
                         </div>
                     </div>
@@ -2717,86 +2782,81 @@
                 loadAndDisplayReminders();
             }
             
+            // Load follow-ups when follow-ups tab is opened
+            if (tabName === 'tc-followups') {
+                loadAndDisplayFollowUps();
+            }
+            
             // Load meetings when Field Exec meetings tab is opened
             if (tabName === 'fe-meetings') {
                 loadFieldExecMeetings();
             }
         }
         
-        // Load and display Field Exec's assigned meetings
-        function loadFieldExecMeetings() {
-            const container = document.getElementById('fieldExecMeetingsList');
+        // Load and display follow-ups
+        function loadAndDisplayFollowUps() {
+            const container = document.querySelector('#tc-followups tbody');
             if (!container) return;
             
-            const fieldExecName = currentUser?.name;
             let html = '';
+            const followUps = [];
             
-            // Get meetings assigned to this Field Exec
-            const assignedMeetings = [];
+            // Collect all reminders that should be follow-ups
+            if (window.allReminders && window.allReminders.length > 0) {
+                window.allReminders.forEach(reminder => {
+                    if (reminder.status !== 'Completed') {
+                        followUps.push({
+                            contact: reminder.contactName,
+                            dueDate: reminder.date,
+                            status: 'Pending',
+                            note: reminder.text || 'Follow-up required',
+                            phone: reminder.contactPhone
+                        });
+                    }
+                });
+            }
+            
+            // Also check contact reminders
             importedContacts.forEach(contact => {
-                if (contact.meetings && contact.meetings.length > 0) {
-                    contact.meetings.forEach(meeting => {
-                        if (meeting.assignedTo === fieldExecName) {
-                            assignedMeetings.push({
-                                ...meeting,
-                                contactName: contact.name,
-                                contactPhone: contact.phone,
-                                contactId: contact.id
+                if (contact.reminders && contact.reminders.length > 0) {
+                    contact.reminders.forEach(reminder => {
+                        if (reminder.status !== 'Completed') {
+                            followUps.push({
+                                contact: contact.name,
+                                dueDate: reminder.date,
+                                status: 'Pending',
+                                note: reminder.text || 'Follow-up required',
+                                phone: contact.phone
                             });
                         }
                     });
                 }
             });
             
-            // Sort by date
-            assignedMeetings.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                if (dateA.getTime() === dateB.getTime()) {
-                    return a.time.localeCompare(b.time);
-                }
-                return dateA - dateB;
-            });
-            
-            if (assignedMeetings.length === 0) {
-                html = '<p style="color: #999; text-align: center; padding: 40px;">No meetings assigned yet.</p>';
+            if (followUps.length === 0) {
+                html = '<tr><td colspan="5" style="text-align: center; color: #999; padding: 40px;">No follow-ups needed right now!</td></tr>';
             } else {
-                html = assignedMeetings.map((meeting, idx) => {
-                    const today = new Date().toISOString().split('T')[0];
-                    const meetingDate = meeting.date;
-                    const isPassed = meetingDate < today;
-                    const isToday = meetingDate === today;
-                    const bgColor = isPassed ? '#f3e8e8' : (isToday ? '#dbeafe' : '#f0fdf4');
-                    const borderColor = isPassed ? '#dc2626' : (isToday ? '#3b82f6' : '#10b981');
-                    const statusLabel = isPassed ? '✅ Completed' : (isToday ? '🔴 Today' : '📅 Upcoming');
-                    
-                    return `
-                    <div class="contact-item" style="border-left-color: ${borderColor}; background: ${bgColor}; margin-bottom: 15px;">
-                        <h4>📅 ${meeting.contactName}</h4>
-                        <p><strong>Phone:</strong> ${meeting.contactPhone || 'N/A'}</p>
-                        <p><strong>Date & Time:</strong> ${meeting.date} at ${meeting.time}</p>
-                        <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
-                        <p><strong>Type:</strong> ${meeting.type || 'Meeting'}</p>
-                        <p><strong>Agenda:</strong> ${meeting.agenda || 'To be decided'}</p>
-                        <p><strong>Participant:</strong> ${meeting.participant || 'TBD'}</p>
-                        <p><strong>Scheduled by:</strong> ${meeting.scheduledBy} on ${meeting.scheduledOn}</p>
-                        <p><strong>Status:</strong> 
-                            <span style="background: ${borderColor}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold;">
-                                ${statusLabel}
-                            </span>
-                        </p>
-                        <button onclick="markMeetingDone(${idx})" style="padding: 8px 15px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px;">✅ Mark Done</button>
-                        <button onclick="callContact('${meeting.contactPhone}')" style="padding: 8px 15px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📞 Call</button>
-                    </div>
-                `}).join('');
+                html = followUps.map((followUp, idx) => `
+                    <tr>
+                        <td>${followUp.contact}</td>
+                        <td>${followUp.dueDate}</td>
+                        <td><span class="badge badge-pending">${followUp.status}</span></td>
+                        <td>${followUp.note}</td>
+                        <td>
+                            <button class="btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="markFollowUpDone(${idx})">✅ Done</button>
+                            <button class="btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="callContact('${followUp.phone}')">📞 Call</button>
+                        </td>
+                    </tr>
+                `).join('');
             }
             
             container.innerHTML = html;
         }
         
-        // Mark meeting as done
-        function markMeetingDone(index) {
-            alert('✅ Meeting marked as completed!\n\nGreat job on the meeting!');
+        // Mark follow-up as done
+        function markFollowUpDone(index) {
+            alert('✅ Follow-up marked as done!\n\nExcellent follow-up!');
+            loadAndDisplayFollowUps();
         }
         
         // Load and display saved reminders
@@ -2934,13 +2994,19 @@
         
         // Mark reminder as done
         function markReminderDone(index) {
-            const reminders = document.querySelectorAll('[style*="fffbeb"]');
+            const reminders = document.querySelectorAll('[style*="fffbeb"], [style*="fee2e2"]');
             if (reminders[index]) {
                 reminders[index].style.background = '#d1fae5';
                 reminders[index].style.borderLeftColor = '#10b981';
                 const statusSpan = reminders[index].querySelector('span');
                 if (statusSpan) statusSpan.textContent = 'Completed';
-                alert('✅ Reminder marked as done!');
+                
+                alert('✅ Reminder marked as done!\n\nGreat follow-up!');
+                
+                // Reload to update view
+                setTimeout(() => {
+                    loadAndDisplayReminders();
+                }, 1000);
             }
         }
 
@@ -2950,10 +3016,17 @@
             document.getElementById('templateBody').textContent = template.body;
         }
 
+        // Store chart instances globally
+        window.charts = {};
+        
         function createTelecallerCharts() {
             const callCtx = document.getElementById('callChart');
             if (callCtx) {
-                new Chart(callCtx, {
+                // Destroy old chart if exists
+                if (window.charts.callChart) {
+                    window.charts.callChart.destroy();
+                }
+                window.charts.callChart = new Chart(callCtx, {
                     type: 'line',
                     data: {
                         labels: [],
@@ -2968,7 +3041,11 @@
 
             const statusCtx = document.getElementById('statusChart');
             if (statusCtx) {
-                new Chart(statusCtx, {
+                // Destroy old chart if exists
+                if (window.charts.statusChart) {
+                    window.charts.statusChart.destroy();
+                }
+                window.charts.statusChart = new Chart(statusCtx, {
                     type: 'doughnut',
                     data: {
                         labels: [],
@@ -3022,7 +3099,11 @@
         function createFieldExecCharts() {
             const activityCtx = document.getElementById('activityChart');
             if (activityCtx) {
-                new Chart(activityCtx, {
+                // Destroy old chart if exists
+                if (window.charts.activityChart) {
+                    window.charts.activityChart.destroy();
+                }
+                window.charts.activityChart = new Chart(activityCtx, {
                     type: 'line',
                     data: {
                         labels: [],
@@ -3039,7 +3120,11 @@
         function createOrderCharts() {
             const serviceCtx = document.getElementById('serviceChart');
             if (serviceCtx) {
-                new Chart(serviceCtx, {
+                // Destroy old chart if exists
+                if (window.charts.serviceChart) {
+                    window.charts.serviceChart.destroy();
+                }
+                window.charts.serviceChart = new Chart(serviceCtx, {
                     type: 'doughnut',
                     data: {
                         labels: [],
@@ -3051,7 +3136,11 @@
 
             const shippingCtx = document.getElementById('shippingChart');
             if (shippingCtx) {
-                new Chart(shippingCtx, {
+                // Destroy old chart if exists
+                if (window.charts.shippingChart) {
+                    window.charts.shippingChart.destroy();
+                }
+                window.charts.shippingChart = new Chart(shippingCtx, {
                     type: 'bar',
                     data: {
                         labels: [],
@@ -4322,16 +4411,8 @@ Orders Team,1
         // This runs after user logs in as Field Exec
         function enhanceFieldExecDashboard() {
             if (currentRole !== 'fieldexec') return;
-            
-            const dashboard = document.querySelector('[id*="fe-"]');
-            if (dashboard) {
-                // Add "Add New Contact" button
-                const btn = document.createElement('button');
-                btn.onclick = openAddNewContactModal;
-                btn.style.cssText = 'padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 10px 0;';
-                btn.innerHTML = '➕ Add New Contact';
-                dashboard.parentElement.insertBefore(btn, dashboard);
-            }
+            // Field Execs cannot add contacts - only Telecallers can
+            // This function is kept for future enhancements
         }
         
         // ==================== 8️⃣ ADD ACTION ITEMS WIDGET TO TELECALLER ====================
