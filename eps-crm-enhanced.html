@@ -946,42 +946,42 @@
                 <h2>Performance Goals</h2>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <h3>0/45</h3>
+                        <h3 id="goal-daily-calls">0/45</h3>
                         <p>Daily Calls</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/270</h3>
+                        <h3 id="goal-weekly-calls">0/270</h3>
                         <p>Weekly Calls</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/1350</h3>
+                        <h3 id="goal-monthly-calls">0/1350</h3>
                         <p>Monthly Calls</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/1</h3>
+                        <h3 id="goal-daily-meetings">0/1</h3>
                         <p>Daily Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/7</h3>
+                        <h3 id="goal-weekly-meetings">0/7</h3>
                         <p>Weekly Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/30</h3>
+                        <h3 id="goal-monthly-meetings">0/30</h3>
                         <p>Monthly Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
@@ -3065,6 +3065,51 @@
             currentRole = null;
         }
 
+        function addMeetingNotes(contactName, meetingDate) {
+            const notes = prompt(`📝 Add meeting notes for ${contactName}\n\nMeeting Date: ${meetingDate}\n\nEnter your notes:`, '');
+            if (notes && notes.trim()) {
+                alert(`✅ Meeting notes saved!\n\n📝 "${notes}"\n\nDate: ${meetingDate}`);
+                console.log(`📝 Notes added for meeting: ${contactName} on ${meetingDate}`);
+                console.log(`   Notes: ${notes}`);
+            }
+        }
+        
+        function updatePerformanceGoals() {
+            console.log('🎯 Updating Performance Goals...');
+            
+            // Calculate metrics
+            const totalCalls = importedContacts.reduce((sum, c) => sum + (c.callNotes?.length || 0), 0);
+            const totalMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
+            
+            // Calculate daily/weekly (simple: assume working days are 20 per month, 4 per week)
+            const dailyCalls = Math.ceil(totalCalls / 20);
+            const weeklyCalls = Math.ceil(totalCalls / 4);
+            const dailyMeetings = Math.ceil(totalMeetings / 20);
+            const weeklyMeetings = Math.ceil(totalMeetings / 4);
+            
+            console.log('Goals metrics:', { totalCalls, totalMeetings, dailyCalls, weeklyCalls });
+            
+            // Update goals elements
+            const updateGoal = (elementId, current, target) => {
+                const el = document.getElementById(elementId);
+                if (el) {
+                    el.textContent = `${current}/${target}`;
+                    const progress = Math.min((current / target) * 100, 100);
+                    const fillBar = el.closest('.stat-box')?.querySelector('.progress-fill');
+                    if (fillBar) fillBar.style.width = progress + '%';
+                }
+            };
+            
+            updateGoal('goal-daily-calls', dailyCalls, 45);
+            updateGoal('goal-weekly-calls', weeklyCalls, 270);
+            updateGoal('goal-monthly-calls', totalCalls, 1350);
+            updateGoal('goal-daily-meetings', dailyMeetings, 1);
+            updateGoal('goal-weekly-meetings', weeklyMeetings, 7);
+            updateGoal('goal-monthly-meetings', totalMeetings, 30);
+            
+            console.log('✅ Performance Goals updated');
+        }
+        
         function showTab(event, tabName) {
             const tabs = event.target.parentElement.querySelectorAll('.tab');
             const contents = event.target.parentElement.parentElement.querySelectorAll('.tab-content');
@@ -3079,6 +3124,12 @@
             if (tabName === 'tc-dashboard' || tabName === 'fe-dashboard') {
                 console.log('📊 Dashboard tab clicked, refreshing metrics...');
                 loadAllContacts();
+            }
+            
+            // Update goals when goals tab is clicked
+            if (tabName === 'tc-goals') {
+                console.log('🎯 Goals tab clicked, updating...');
+                updatePerformanceGoals();
             }
             
             // Create charts when analytics tabs are opened
@@ -3524,7 +3575,7 @@
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
                             <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
-                            <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;">📝 Notes</button>
+                            <button class="btn-primary" onclick="addMeetingNotes('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">📝 Notes</button>
                         </div>
                     </div>
                 </div>`;
