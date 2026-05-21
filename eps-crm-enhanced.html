@@ -1291,35 +1291,35 @@
                 <h2>Performance Goals</h2>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <h3>0/2</h3>
+                        <h3 id="fe-goal-daily-meetings">0/2</h3>
                         <p>Daily Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/12</h3>
+                        <h3 id="fe-goal-weekly-meetings">0/12</h3>
                         <p>Weekly Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/48</h3>
+                        <h3 id="fe-goal-monthly-meetings">0/48</h3>
                         <p>Monthly Meetings</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/15</h3>
+                        <h3 id="fe-goal-bni-meetings">0/15</h3>
                         <p>BNI 1:1 (Monthly)</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <h3>0/20</h3>
+                        <h3 id="fe-goal-lead-gen">0/20</h3>
                         <p>Lead Gen (Monthly)</p>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%;"></div>
@@ -2357,12 +2357,14 @@
                 setTimeout(() => {
                     createTelecallerCharts();
                     loadAllContacts();
+                    updatePerformanceGoals();
                 }, 100);
             } else if (role === 'fieldexec') {
                 document.getElementById('fieldexecDash').style.display = 'block';
                 setTimeout(() => {
                     createFieldExecCharts();
                     loadFieldExecMeetings();
+                    updateFieldExecGoals();
                 }, 100);
             } else if (role === 'orders') {
                 document.getElementById('ordersDash').style.display = 'block';
@@ -3074,29 +3076,90 @@
             }
         }
         
+        function updateFieldExecGoals() {
+            console.log('🎯 Updating Field Exec Performance Goals...');
+            
+            // Get Field Exec's meetings from window.fieldExecMeetings
+            const fieldExecName = currentUser?.name || 'Field Executive';
+            const myMeetings = window.fieldExecMeetings?.[fieldExecName] || [];
+            const totalMeetings = myMeetings.length;
+            
+            console.log(`📊 Field Exec (${fieldExecName}) meetings:`, totalMeetings);
+            
+            // Calculate daily/weekly (simple: assume working days are 20 per month, 4 per week)
+            const dailyMeetings = Math.ceil(totalMeetings / 20) || 0;
+            const weeklyMeetings = Math.ceil(totalMeetings / 4) || 0;
+            
+            // Fixed targets for BNI and Lead Gen
+            const bniMeetings = 0; // Placeholder - not tracked yet
+            const leadGen = 0;     // Placeholder - not tracked yet
+            
+            console.log('🎯 Calculated FE goals:', { totalMeetings, dailyMeetings, weeklyMeetings, bniMeetings, leadGen });
+            
+            // Update goals elements
+            const updateGoal = (elementId, current, target) => {
+                const el = document.getElementById(elementId);
+                console.log(`Updating ${elementId}: current=${current}, target=${target}`);
+                if (el) {
+                    el.textContent = `${current}/${target}`;
+                    const progress = Math.min((current / target) * 100, 100);
+                    const fillBar = el.closest('.stat-box')?.querySelector('.progress-fill');
+                    if (fillBar) {
+                        fillBar.style.width = progress + '%';
+                        console.log(`✅ Progress updated: ${elementId} = ${progress}%`);
+                    }
+                } else {
+                    console.warn(`⚠️ Element not found: ${elementId}`);
+                }
+            };
+            
+            updateGoal('fe-goal-daily-meetings', dailyMeetings, 2);
+            updateGoal('fe-goal-weekly-meetings', weeklyMeetings, 12);
+            updateGoal('fe-goal-monthly-meetings', totalMeetings, 48);
+            updateGoal('fe-goal-bni-meetings', bniMeetings, 15);
+            updateGoal('fe-goal-lead-gen', leadGen, 20);
+            
+            console.log('✅ Field Exec Performance Goals updated');
+        }
+        
         function updatePerformanceGoals() {
             console.log('🎯 Updating Performance Goals...');
+            
+            // Ensure contacts are loaded from localStorage
+            if (importedContacts.length === 0) {
+                loadContactsFromStorage();
+            }
+            
+            console.log('📊 Current contacts:', importedContacts.length);
             
             // Calculate metrics
             const totalCalls = importedContacts.reduce((sum, c) => sum + (c.callNotes?.length || 0), 0);
             const totalMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
             
-            // Calculate daily/weekly (simple: assume working days are 20 per month, 4 per week)
-            const dailyCalls = Math.ceil(totalCalls / 20);
-            const weeklyCalls = Math.ceil(totalCalls / 4);
-            const dailyMeetings = Math.ceil(totalMeetings / 20);
-            const weeklyMeetings = Math.ceil(totalMeetings / 4);
+            console.log('📊 Total calls:', totalCalls, 'Total meetings:', totalMeetings);
             
-            console.log('Goals metrics:', { totalCalls, totalMeetings, dailyCalls, weeklyCalls });
+            // Calculate daily/weekly (simple: assume working days are 20 per month, 4 per week)
+            const dailyCalls = Math.ceil(totalCalls / 20) || 0;
+            const weeklyCalls = Math.ceil(totalCalls / 4) || 0;
+            const dailyMeetings = Math.ceil(totalMeetings / 20) || 0;
+            const weeklyMeetings = Math.ceil(totalMeetings / 4) || 0;
+            
+            console.log('🎯 Calculated goals:', { totalCalls, totalMeetings, dailyCalls, weeklyCalls, dailyMeetings, weeklyMeetings });
             
             // Update goals elements
             const updateGoal = (elementId, current, target) => {
                 const el = document.getElementById(elementId);
+                console.log(`Updating ${elementId}: current=${current}, target=${target}`);
                 if (el) {
                     el.textContent = `${current}/${target}`;
                     const progress = Math.min((current / target) * 100, 100);
                     const fillBar = el.closest('.stat-box')?.querySelector('.progress-fill');
-                    if (fillBar) fillBar.style.width = progress + '%';
+                    if (fillBar) {
+                        fillBar.style.width = progress + '%';
+                        console.log(`✅ Progress updated: ${elementId} = ${progress}%`);
+                    }
+                } else {
+                    console.warn(`⚠️ Element not found: ${elementId}`);
                 }
             };
             
@@ -3129,7 +3192,13 @@
             // Update goals when goals tab is clicked
             if (tabName === 'tc-goals') {
                 console.log('🎯 Goals tab clicked, updating...');
-                updatePerformanceGoals();
+                setTimeout(() => updatePerformanceGoals(), 50);
+            }
+            
+            // Update Field Exec goals when fe-goals tab is clicked
+            if (tabName === 'fe-goals') {
+                console.log('🎯 Field Exec Goals tab clicked, updating...');
+                setTimeout(() => updateFieldExecGoals(), 50);
             }
             
             // Create charts when analytics tabs are opened
