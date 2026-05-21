@@ -2340,6 +2340,105 @@
             }
         }
 
+        function showContactHistory(index) {
+            const contact = importedContacts[index];
+            if (!contact) return;
+            
+            const modalId = 'contactHistory_' + Date.now();
+            
+            // Build call history HTML
+            let callHistoryHtml = '';
+            if (contact.callNotes && contact.callNotes.length > 0) {
+                callHistoryHtml = contact.callNotes.map(call => `
+                    <div style="background: #f0f9ff; padding: 12px; border-left: 4px solid #3b82f6; margin-bottom: 10px; border-radius: 5px;">
+                        <p style="margin: 0 0 8px 0;"><strong>📝 Notes:</strong> ${call.notes}</p>
+                        <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;"><strong>Duration:</strong> ${call.duration} mins | <strong>On:</strong> ${call.savedOn} at ${call.savedAt}</p>
+                        <p style="margin: 0; font-size: 12px; color: #666;"><strong>Next Action:</strong> ${call.nextAction || 'Follow-up'}</p>
+                    </div>
+                `).join('');
+            } else {
+                callHistoryHtml = '<p style="color: #999; font-style: italic;">No call history yet.</p>';
+            }
+            
+            // Build reminders HTML
+            let remindersHtml = '';
+            if (contact.reminders && contact.reminders.length > 0) {
+                remindersHtml = contact.reminders.map(reminder => `
+                    <div style="background: #fef3c7; padding: 12px; border-left: 4px solid #f59e0b; margin-bottom: 10px; border-radius: 5px;">
+                        <p style="margin: 0 0 6px 0;"><strong>⏰ ${reminder.date}</strong></p>
+                        <p style="margin: 0; font-size: 13px;">${reminder.text}</p>
+                    </div>
+                `).join('');
+            } else {
+                remindersHtml = '<p style="color: #999; font-style: italic;">No reminders set.</p>';
+            }
+            
+            // Build meetings HTML
+            let meetingsHtml = '';
+            if (contact.meetings && contact.meetings.length > 0) {
+                meetingsHtml = contact.meetings.map(meeting => `
+                    <div style="background: #f0fdf4; padding: 12px; border-left: 4px solid #10b981; margin-bottom: 10px; border-radius: 5px;">
+                        <p style="margin: 0 0 6px 0;"><strong>📅 ${meeting.date} at ${meeting.time}</strong></p>
+                        <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
+                        <p style="margin: 0; font-size: 13px;"><strong>Agenda:</strong> ${meeting.agenda || 'To be decided'}</p>
+                    </div>
+                `).join('');
+            } else {
+                meetingsHtml = '<p style="color: #999; font-style: italic;">No meetings scheduled.</p>';
+            }
+            
+            const html = `
+                <div id="${modalId}" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target.id==='${modalId}') document.getElementById('${modalId}').remove();">
+                    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h2 style="margin: 0; color: #333;">📇 ${contact.name} - Complete History</h2>
+                            <button onclick="document.getElementById('${modalId}').remove()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #999;">×</button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #667eea;">${contact.callNotes?.length || 0}</div>
+                                <div style="font-size: 12px; color: #666;">Calls Logged</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">${contact.reminders?.length || 0}</div>
+                                <div style="font-size: 12px; color: #666;">Reminders</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #10b981;">${contact.meetings?.length || 0}</div>
+                                <div style="font-size: 12px; color: #666;">Meetings</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #dc2626;">${contact.status === 'called' ? '✅ Called' : '⏳ Pending'}</div>
+                                <div style="font-size: 12px; color: #666;">Status</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color: #333; margin-top: 0; border-bottom: 2px solid #667eea; padding-bottom: 10px;">📞 Call History</h3>
+                            ${callHistoryHtml}
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color: #333; margin-top: 0; border-bottom: 2px solid #f59e0b; padding-bottom: 10px;">⏰ Reminders & Follow-ups</h3>
+                            ${remindersHtml}
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="color: #333; margin-top: 0; border-bottom: 2px solid #10b981; padding-bottom: 10px;">📅 Scheduled Meetings</h3>
+                            ${meetingsHtml}
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <button onclick="document.getElementById('${modalId}').remove()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
         function loadAllContacts() {
             const contactsList = document.getElementById('contactsList');
             if (!contactsList) return;
@@ -2367,8 +2466,8 @@
                 
                 html += `<div class="contact-item" id="contact-${index}" style="background: ${statusColor}; border-left-color: ${borderColor}; position: relative;">
                     <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
-                        <div style="flex: 1; min-width: 250px;">
-                            <h4>${contact.name}</h4>
+                        <div style="flex: 1; min-width: 250px; cursor: pointer;" onclick="showContactHistory(${index})">
+                            <h4 style="color: #667eea; text-decoration: underline;">${contact.name}</h4>
                             <p><strong>Company:</strong> ${contact.company}</p>
                             <p><strong>Phone:</strong> ${contact.phone}${emailDisplay}</p>
                             <p><span class="badge badge-${contact.status === 'called' ? 'completed' : 'pending'}">${contact.status === 'called' ? 'Called' : 'Warm Lead'}</span></p>
@@ -3997,11 +4096,17 @@ Orders Team,1
         
         // ==================== 1️⃣ FIELD EXEC CAN ADD NEW CONTACTS ====================
         async function openAddNewContactModal() {
+            // Field Execs and Admins cannot create contacts - only Telecallers can
+            if (currentRole === 'fieldexec' || currentRole === 'admin') {
+                alert('❌ Only Telecallers can create contacts.\n\nField Executives can only schedule meetings assigned by Telecallers.');
+                return;
+            }
+            
             const html = `
                 <div id="addContactModal" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
                     <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(0,0,0,0.3);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                            <h2 style="margin: 0; color: #333;">➕ Add New Contact</h2>
+                            <h2 style="margin: 0; color: #333;">➕ Add New Contact (Telecaller Only)</h2>
                             <button onclick="document.getElementById('addContactModal').remove()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #999;">×</button>
                         </div>
                         
@@ -4070,44 +4175,42 @@ Orders Team,1
             event.preventDefault();
             
             const contactData = {
-                contact_name: document.getElementById('newContactName').value,
+                id: Date.now(),
+                name: document.getElementById('newContactName').value,
                 company: document.getElementById('newContactCompany').value,
                 phone: document.getElementById('newContactPhone').value,
-                email: document.getElementById('newContactEmail').value,
+                email: document.getElementById('newContactEmail').value || 'N/A',
                 address: document.getElementById('newContactAddress').value,
                 priority: document.getElementById('newContactPriority').value,
                 source: document.getElementById('newContactSource').value,
-                added_by: currentUser?.name || 'Field Exec',
-                is_new: true
+                addedBy: currentUser?.name || 'Telecaller',
+                status: 'pending',
+                workingOn: null,
+                callNotes: [],
+                reminders: [],
+                meetings: [],
+                createdOn: new Date().toLocaleDateString()
             };
             
-            // Show loading message
-            const modal = document.getElementById('addContactModal');
-            const origHTML = modal.innerHTML;
-            modal.innerHTML = '<div style="padding: 40px; text-align: center;"><p style="font-size: 18px;">⏳ Saving to Supabase...</p></div>';
-            
-            // Save to Firebase
             try {
+                // Add to contacts array
+                importedContacts.push(contactData);
+                
+                // Save to Firebase (offline mode - just logs)
                 pushToFirebase('contacts', contactData);
                 
                 // Show success
-                window.NotificationCenter?.add('contact', `✅ New contact added: ${contactData.name}`);
-                alert('✅ Contact saved to Firebase!');
+                alert(`✅ Contact added: ${contactData.name}\n\n📱 Phone: ${contactData.phone}\n🏢 Company: ${contactData.company}\n\nContact is now available for calling and scheduling meetings!`);
                 
                 // Refresh telecaller dashboard
-                setTimeout(() => {
-                    if (window.loadAllContacts) {
-                        loadAllContacts();
-                        console.log('✅ Dashboard refreshed with new contact');
-                    }
-                }, 500);
+                loadAllContacts();
                 
+                // Close modal
                 document.getElementById('addContactModal').remove();
                 
             } catch (err) {
                 console.error('❌ Error:', err);
                 alert('❌ Error: ' + err.message);
-                modal.innerHTML = origHTML;
             }
         }
         
