@@ -2513,27 +2513,62 @@
             document.getElementById('totalContactsCount').innerText = importedContacts.length;
             document.getElementById('contactsStats').innerText = `${importedContacts.length} contacts`;
             
-            // Update dashboard metrics
+            // Calculate all metrics
+            const totalContacts = importedContacts.length;
             const calledContacts = importedContacts.filter(c => c.status === 'called').length;
+            const totalCalls = importedContacts.reduce((sum, c) => sum + (c.callNotes?.length || 0), 0);
+            const totalMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
             const pendingFollowups = importedContacts.reduce((sum, c) => sum + (c.reminders?.length || 0), 0);
-            const scheduledMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
+            const callConversion = totalContacts > 0 ? Math.round((calledContacts / totalContacts) * 100) : 0;
             
-            // Update all metric cards that show these values
+            console.log('📊 Dashboard metrics:', { totalContacts, calledContacts, totalCalls, totalMeetings, callConversion });
+            
+            // Update metric cards
             const metricCards = document.querySelectorAll('.metric-value');
             metricCards.forEach(card => {
                 const label = card.previousElementSibling?.textContent || '';
                 if (label.includes('Total Contacts')) {
-                    card.textContent = importedContacts.length;
+                    card.textContent = totalContacts;
                 } else if (label.includes('Calls Connected') || label.includes('Called')) {
                     card.textContent = calledContacts;
                 } else if (label.includes('Pending') || label.includes('Follow')) {
                     card.textContent = pendingFollowups;
                 } else if (label.includes('Meetings')) {
-                    card.textContent = scheduledMeetings;
+                    card.textContent = totalMeetings;
                 }
             });
             
-            if (importedContacts.length === 0) {
+            // Update Monthly Targets for TELECALLER
+            document.querySelectorAll('#tc-dashboard .stat-box').forEach((box, idx) => {
+                const h3 = box.querySelector('h3');
+                const p = box.querySelector('p');
+                const fillBar = box.querySelector('.progress-fill');
+                if (!h3 || !p) return;
+                
+                if (p.textContent.includes('Monthly Calls')) {
+                    h3.textContent = `${totalCalls}/1350`;
+                    fillBar.style.width = Math.min((totalCalls / 1350) * 100, 100) + '%';
+                } else if (p.textContent.includes('Monthly Meetings')) {
+                    h3.textContent = `${totalMeetings}/30`;
+                    fillBar.style.width = Math.min((totalMeetings / 30) * 100, 100) + '%';
+                } else if (p.textContent.includes('Call Conversion')) {
+                    h3.textContent = `${callConversion}%`;
+                    fillBar.style.width = callConversion + '%';
+                }
+            });
+            
+            // Update Monthly Targets for FIELD EXEC
+            document.querySelectorAll('#fe-dashboard .stat-box').forEach((box, idx) => {
+                const h3 = box.querySelector('h3');
+                const p = box.querySelector('p');
+                if (!h3 || !p) return;
+                
+                if (p.textContent.includes('Monthly Meetings')) {
+                    h3.textContent = `${totalMeetings}/30`;
+                }
+            });
+            
+            if (totalContacts === 0) {
                 contactsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No contacts yet. Create one to get started!</p>';
                 return;
             }
@@ -2573,7 +2608,7 @@
             });
             
             contactsList.innerHTML = html;
-            console.log(`✅ Loaded ${importedContacts.length} contacts successfully!`);
+            console.log(`✅ Loaded ${totalContacts} contacts successfully!`);
         }
 
         function claimLead(index) {
