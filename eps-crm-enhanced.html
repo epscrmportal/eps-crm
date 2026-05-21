@@ -6,6 +6,8 @@
     <title>EPS CRM - Complete Customer Relationship Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     <style>
         * {
             margin: 0;
@@ -3551,10 +3553,116 @@ Orders Team,1
         console.log('✅ Smart Calendar Module Ready');
         
         
-        // ==================== SUPABASE CONFIGURATION ====================
-        // Supabase removed - all features work offline
-        let supabase = null;
-        async function initSupabase() { return true; }
+        // ==================== FIREBASE CONFIGURATION ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAahLLL0xxZCgdqR_NL3O2ATe6072QvyfY",
+            authDomain: "epscrm-f36c0.firebaseapp.com",
+            databaseURL: "https://epscrm-f36c0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "epscrm-f36c0",
+            storageBucket: "epscrm-f36c0.firebasestorage.app",
+            messagingSenderId: "846638999126",
+            appId: "1:846638999126:web:d142f99faf0422a1f4bdf7",
+            measurementId: "G-K9DQHVN52S"
+        };
+
+        let db = null;
+
+        // Initialize Firebase
+        async function initFirebase() {
+            console.log('🔍 Initializing Firebase...');
+            
+            // Wait for Firebase library
+            let attempts = 0;
+            while (!window.firebase && attempts < 30) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.firebase) {
+                console.error('❌ Firebase library not loaded');
+                return false;
+            }
+            
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                console.log('✅ Firebase initialized successfully');
+                return true;
+            } catch (err) {
+                console.error('❌ Firebase init error:', err.message);
+                return false;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const success = await initFirebase();
+            if (success) {
+                console.log('🎉 Firebase ready for data sync!');
+                // Load all data from Firebase
+                loadAllDataFromFirebase();
+            }
+        });
+
+        // Load all data from Firebase
+        async function loadAllDataFromFirebase() {
+            if (!db) return;
+            
+            try {
+                // Load contacts
+                db.ref('contacts').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        window.allContacts = Object.values(data);
+                        console.log('✅ Loaded', window.allContacts.length, 'contacts from Firebase');
+                    }
+                });
+
+                // Load action items
+                db.ref('action_items').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data && window.ActionItemsSystem) {
+                        window.ActionItemsSystem.items = Object.values(data);
+                        console.log('✅ Loaded', Object.keys(data).length, 'action items from Firebase');
+                    }
+                });
+
+                // Load meetings
+                db.ref('meetings').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        window.allMeetings = Object.values(data);
+                        console.log('✅ Loaded', window.allMeetings.length, 'meetings from Firebase');
+                    }
+                });
+
+                console.log('🔄 Firebase real-time listeners activated');
+            } catch (err) {
+                console.log('⚠️ Error loading data:', err.message);
+            }
+        }
+
+        // Save data to Firebase
+        function saveToFirebase(path, data) {
+            if (!db) return;
+            try {
+                db.ref(path).set(data);
+                console.log('✅ Saved to Firebase:', path);
+            } catch (err) {
+                console.log('⚠️ Firebase save error:', err.message);
+            }
+        }
+
+        // Push data to Firebase (for arrays)
+        function pushToFirebase(path, data) {
+            if (!db) return;
+            try {
+                db.ref(path).push(data);
+                console.log('✅ Pushed to Firebase:', path);
+            } catch (err) {
+                console.log('⚠️ Firebase push error:', err.message);
+            }
+        }
         
         // ==================== 1️⃣ FIELD EXEC CAN ADD NEW CONTACTS ====================
         async function openAddNewContactModal() {
@@ -3720,10 +3828,10 @@ Orders Team,1
                 
                 this.items.push(item);
                 
-                // Save to Supabase
-                if (supabase) {
+                // Save to Firebase
+                if (db) { // SYNC TO DB
                     try {
-                        await supabase.from('action_items').insert([item]);
+                        pushToFirebase("action_items/" + item.id, item);
                     } catch (err) {
                         console.log('⚠️ Action item saved locally only');
                     }
@@ -3750,8 +3858,8 @@ Orders Team,1
                 const item = this.items.find(i => i.id === itemId);
                 if (item) {
                     item.status = 'completed';
-                    if (supabase) {
-                        supabase.from('action_items').update({status: 'completed'}).eq('id', itemId);
+                    if (db) { // SYNC TO DB
+                        saveToFirebase("action_items/" + itemId, item);
                     }
                 }
             },
@@ -3851,15 +3959,16 @@ Orders Team,1
                 
                 this.notifications.unshift(notification);
                 
-                // Save to Supabase
-                if (supabase) {
+                // Save to Firebase
+                if (db) { // SYNC TO DB
                     try {
-                        supabase.from('notifications').insert([{
+                        pushToFirebase("notifications", {
                             user_id: currentUser?.name,
                             type: type,
                             message: message,
-                            read: false
-                        }]);
+                            read: false,
+                            created_at: new Date().toISOString()
+                        });
                     } catch (err) {
                         console.log('⚠️ Notification saved locally');
                     }
@@ -3986,11 +4095,11 @@ Orders Team,1
                 created_by: currentUser?.name
             };
             
-            // Save to Supabase
-            if (supabase) {
+            // Save to Firebase
+            if (db) { // SYNC TO DB
                 try {
-                    await supabase.from('meetings').insert([meetingData]);
-                    console.log('✅ Meeting saved to Supabase');
+                    pushToFirebase("meetings/" + Date.now(), meetingData);
+                    console.log('✅ Meeting saved to Firebase');
                 } catch (err) {
                     console.log('⚠️ Meeting saved locally only');
                 }
