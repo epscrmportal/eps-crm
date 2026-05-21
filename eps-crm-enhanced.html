@@ -5384,9 +5384,104 @@ Orders Team,1
         
 
         // ============================================
-        // ✅ WORKING BUTTON FIXES - PROPERLY BOUND
+        // ✅ COMPLETE BUTTON FIXES - AUTO-REBINDING
         // ============================================
 
+        function fixAllButtons() {
+            let fixed = 0;
+            
+            // Fix Add to Contacts buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('Add to Contacts')) {
+                    const html = btn.outerHTML;
+                    const match = html.match(/convertCardToContact\('([^']+)',\s*'([^']+)',\s*'([^']+)',\s*'([^']+)'/);
+                    if (match) {
+                        const [, name, company, phone, email] = match;
+                        const card = btn.closest('.business-card');
+                        const leadTypeText = card ? card.textContent : '';
+                        let leadType = 'Hot Lead';
+                        if (leadTypeText.includes('Warm')) leadType = 'Warm Lead';
+                        if (leadTypeText.includes('Cold')) leadType = 'Cold Lead';
+                        
+                        btn.onclick = () => convertCardToContact(name, company, phone, email, leadType);
+                        fixed++;
+                    }
+                }
+            });
+            
+            // Fix Follow-up buttons
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        const contactName = cells[0].textContent.trim();
+                        const dueDate = cells[1].textContent.trim();
+                        const contact = importedContacts.find(c => c.name === contactName);
+                        const phone = contact ? contact.phone : '';
+                        
+                        row.querySelectorAll('button').forEach(btn => {
+                            const btnText = btn.textContent.trim();
+                            if (btnText.includes('Done')) {
+                                btn.onclick = () => markFollowupDone(contactName, dueDate);
+                                fixed++;
+                            }
+                            if (btnText.includes('Call')) {
+                                btn.onclick = () => callContactFromFollowup(phone);
+                                fixed++;
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Fix Reminder buttons
+            const remindersList = document.getElementById('remindersList');
+            if (remindersList) {
+                const reminderCards = remindersList.querySelectorAll('.reminder-card');
+                reminderCards.forEach(card => {
+                    const header = card.querySelector('h4');
+                    const contactName = header ? header.textContent.trim() : '';
+                    
+                    const content = card.textContent;
+                    const dateMatch = content.match(/Date:\s*(\d{4}-\d{2}-\d{2})/);
+                    const reminderDate = dateMatch ? dateMatch[1] : '';
+                    const phoneMatch = content.match(/Phone:\s*([\d\-\s]+)/);
+                    const phone = phoneMatch ? phoneMatch[1].trim() : '';
+                    const noteMatch = content.match(/Note:\s*([^\n<]+)/);
+                    const reminderText = noteMatch ? noteMatch[1].trim() : '';
+                    
+                    if (contactName && reminderDate && phone) {
+                        card.querySelectorAll('button').forEach(btn => {
+                            const btnText = btn.textContent.trim();
+                            
+                            if (btnText.includes('Done') || btnText.includes('✅')) {
+                                btn.onclick = (e) => { e.preventDefault(); markReminderDone(contactName, reminderDate, reminderText); return false; };
+                                fixed++;
+                            }
+                            else if (btnText.includes('Call') || btnText.includes('📞')) {
+                                btn.onclick = (e) => { e.preventDefault(); callContactFromReminder(phone, contactName); return false; };
+                                fixed++;
+                            }
+                            else if (btnText.includes('Notes') || btnText.includes('📝')) {
+                                btn.onclick = (e) => { e.preventDefault(); addNotesToReminder(contactName, reminderDate, reminderText); return false; };
+                                fixed++;
+                            }
+                            else if (btnText.includes('Schedule') || btnText.includes('📅')) {
+                                btn.onclick = (e) => { e.preventDefault(); scheduleFromReminder(contactName, phone, reminderDate); return false; };
+                                fixed++;
+                            }
+                        });
+                    }
+                });
+            }
+            
+            return fixed;
+        }
+
+        // Button fix functions
         window.convertCardToContact = function(name, company, phone, email, leadType) {
             console.log(`✅ Converting: ${name}`);
             try {
@@ -5405,6 +5500,7 @@ Orders Team,1
                 importedContacts.push(newContact);
                 saveContactsToStorage();
                 loadAllContacts();
+                fixAllButtons();
                 alert(`✅ ${name} added!`);
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
@@ -5418,6 +5514,7 @@ Orders Team,1
                 contact.reminders = contact.reminders.filter(r => r.date !== dueDate);
                 saveContactsToStorage();
                 loadAndDisplayFollowUps();
+                fixAllButtons();
                 alert('✅ Follow-up completed!');
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
@@ -5436,6 +5533,7 @@ Orders Team,1
                 if(contact.status === 'pending') contact.status = 'called';
                 saveContactsToStorage();
                 loadAndDisplayFollowUps();
+                fixAllButtons();
                 alert(`✅ Call logged: ${duration} min`);
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
@@ -5450,6 +5548,7 @@ Orders Team,1
                 if(reminder) reminder.status = 'completed';
                 saveContactsToStorage();
                 loadAndDisplayReminders();
+                fixAllButtons();
                 alert('✅ Reminder done!');
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
@@ -5467,6 +5566,7 @@ Orders Team,1
                 contact.callNotes.push({ notes, duration, savedOn: new Date().toLocaleDateString(), savedAt: new Date().toLocaleTimeString(), nextAction: 'follow_up' });
                 saveContactsToStorage();
                 loadAndDisplayReminders();
+                fixAllButtons();
                 alert(`✅ Call logged: ${duration} min`);
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
@@ -5483,6 +5583,7 @@ Orders Team,1
                 if(reminder) { reminder.notes = notes; reminder.notesAddedOn = new Date().toLocaleDateString(); }
                 saveContactsToStorage();
                 loadAndDisplayReminders();
+                fixAllButtons();
                 alert('✅ Notes added!');
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
@@ -5508,19 +5609,59 @@ Orders Team,1
                 saveContactsToStorage();
                 localStorage.setItem('eps_crm_fieldExecMeetings', JSON.stringify(window.fieldExecMeetings));
                 loadAndDisplayReminders();
+                fixAllButtons();
                 alert('✅ Meeting scheduled!');
                 return true;
             } catch(e) { alert('Error: ' + e.message); return false; }
         };
 
-        // Re-render lists with working button handlers
-        setTimeout(() => {
-            console.log('✅ BUTTON FIXES LOADED - Re-rendering UI');
-            if(typeof loadAllContacts === 'function') loadAllContacts();
-            if(typeof loadAndDisplayReminders === 'function') loadAndDisplayReminders();
-            if(typeof loadAndDisplayFollowUps === 'function') loadAndDisplayFollowUps();
-            console.log('✅ All buttons ready to use!');
-        }, 1000);
+        // Initialize button fixes after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('✅ Initializing button fixes...');
+                const count = fixAllButtons();
+                console.log(`✅ Fixed ${count} buttons on load`);
+            }, 1500);
+        });
+
+        // Override showTab to refix buttons on tab change
+        const originalShowTab = window.showTab;
+        if (originalShowTab) {
+            window.showTab = function(tabName) {
+                originalShowTab.call(this, tabName);
+                setTimeout(() => fixAllButtons(), 200);
+            };
+        }
+
+        // Override loadAndDisplayReminders
+        const originalLoadReminders = window.loadAndDisplayReminders;
+        if (originalLoadReminders) {
+            window.loadAndDisplayReminders = function() {
+                originalLoadReminders.call(this);
+                setTimeout(() => fixAllButtons(), 300);
+            };
+        }
+
+        // Override loadAndDisplayFollowUps
+        const originalLoadFollowups = window.loadAndDisplayFollowUps;
+        if (originalLoadFollowups) {
+            window.loadAndDisplayFollowUps = function() {
+                originalLoadFollowups.call(this);
+                setTimeout(() => fixAllButtons(), 300);
+            };
+        }
+
+        // Override loadAllContacts
+        const originalLoadContacts = window.loadAllContacts;
+        if (originalLoadContacts) {
+            window.loadAllContacts = function() {
+                originalLoadContacts.call(this);
+                setTimeout(() => fixAllButtons(), 300);
+            };
+        }
+
+        console.log('✅ BUTTON FIXES LOADED AND READY');
+
         </script>
 </body>
 </html>
