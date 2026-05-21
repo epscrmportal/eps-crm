@@ -2346,14 +2346,28 @@
         }
 
         function showContactHistory(index) {
+            console.log('🔍 showContactHistory called with index:', index);
             const contact = importedContacts[index];
-            if (!contact) return;
+            if (!contact) {
+                console.error('❌ Contact not found at index:', index);
+                return;
+            }
+            
+            console.log('📇 Contact data:', {
+                name: contact.name,
+                callNotes: contact.callNotes?.length || 0,
+                reminders: contact.reminders?.length || 0,
+                meetings: contact.meetings?.length || 0,
+                callNotesData: contact.callNotes,
+                remindersData: contact.reminders
+            });
             
             const modalId = 'contactHistory_' + Date.now();
             
             // Build call history HTML
             let callHistoryHtml = '';
             if (contact.callNotes && contact.callNotes.length > 0) {
+                console.log('✅ Building call history with', contact.callNotes.length, 'calls');
                 callHistoryHtml = contact.callNotes.map(call => `
                     <div style="background: #f0f9ff; padding: 12px; border-left: 4px solid #3b82f6; margin-bottom: 10px; border-radius: 5px;">
                         <p style="margin: 0 0 8px 0;"><strong>📝 Notes:</strong> ${call.notes}</p>
@@ -2362,12 +2376,14 @@
                     </div>
                 `).join('');
             } else {
+                console.log('⚠️ No call history found');
                 callHistoryHtml = '<p style="color: #999; font-style: italic;">No call history yet.</p>';
             }
             
             // Build reminders HTML
             let remindersHtml = '';
             if (contact.reminders && contact.reminders.length > 0) {
+                console.log('✅ Building reminders with', contact.reminders.length, 'reminders');
                 remindersHtml = contact.reminders.map(reminder => `
                     <div style="background: #fef3c7; padding: 12px; border-left: 4px solid #f59e0b; margin-bottom: 10px; border-radius: 5px;">
                         <p style="margin: 0 0 6px 0;"><strong>⏰ ${reminder.date}</strong></p>
@@ -2375,12 +2391,14 @@
                     </div>
                 `).join('');
             } else {
+                console.log('⚠️ No reminders found');
                 remindersHtml = '<p style="color: #999; font-style: italic;">No reminders set.</p>';
             }
             
             // Build meetings HTML
             let meetingsHtml = '';
             if (contact.meetings && contact.meetings.length > 0) {
+                console.log('✅ Building meetings with', contact.meetings.length, 'meetings');
                 meetingsHtml = contact.meetings.map(meeting => `
                     <div style="background: #f0fdf4; padding: 12px; border-left: 4px solid #10b981; margin-bottom: 10px; border-radius: 5px;">
                         <p style="margin: 0 0 6px 0;"><strong>📅 ${meeting.date} at ${meeting.time}</strong></p>
@@ -2389,6 +2407,7 @@
                     </div>
                 `).join('');
             } else {
+                console.log('⚠️ No meetings found');
                 meetingsHtml = '<p style="color: #999; font-style: italic;">No meetings scheduled.</p>';
             }
             
@@ -2578,11 +2597,34 @@
         // Save call log with reminder
         function saveCallLog(modalId, contactIndex) {
             console.log('📞 saveCallLog called for contact index:', contactIndex);
-            const notes = document.getElementById('notes_' + modalId)?.value;
-            const duration = document.getElementById('dur_' + modalId)?.value;
-            const reminderDate = document.getElementById('reminder_' + modalId)?.value;
-            const reminderText = document.getElementById('reminderText_' + modalId)?.value;
-            const action = document.getElementById('action_' + modalId)?.value;
+            console.log('Modal ID:', modalId);
+            
+            const notesInput = document.getElementById('notes_' + modalId);
+            const durationInput = document.getElementById('dur_' + modalId);
+            const reminderDateInput = document.getElementById('reminder_' + modalId);
+            const reminderTextInput = document.getElementById('reminderText_' + modalId);
+            const actionInput = document.getElementById('action_' + modalId);
+            
+            console.log('Form inputs found:', {
+                notes: !!notesInput,
+                duration: !!durationInput,
+                reminderDate: !!reminderDateInput,
+                reminderText: !!reminderTextInput,
+                action: !!actionInput
+            });
+            
+            const notes = notesInput?.value || '';
+            const duration = durationInput?.value || '';
+            const reminderDate = reminderDateInput?.value || '';
+            const reminderText = reminderTextInput?.value || '';
+            const action = actionInput?.value || 'follow_up';
+            
+            console.log('Input values:', {
+                notes: notes.substring(0, 20) + '...',
+                duration,
+                reminderDate,
+                reminderText: reminderText.substring(0, 20) + '...'
+            });
             
             if (!notes || !notes.trim()) {
                 alert('❌ Please enter call notes');
@@ -2609,7 +2651,7 @@
             
             // Save reminder if set
             if (reminderDate && reminderText.trim()) {
-                console.log('⏰ Saving reminder for:', reminderDate);
+                console.log('⏰ Saving reminder for:', reminderDate, 'Text:', reminderText);
                 if (!contact.reminders) contact.reminders = [];
                 const reminderData = {
                     date: reminderDate,
@@ -2630,6 +2672,8 @@
                 });
                 
                 console.log('✅ Total reminders now:', window.allReminders.length);
+            } else {
+                console.log('⚠️ Reminder NOT saved - Date:', reminderDate, 'Text:', reminderText);
             }
             
             // Show success message
