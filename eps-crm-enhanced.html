@@ -2551,9 +2551,24 @@
                 const myMeetings = window.fieldExecMeetings?.[myName] || [];
                 feMonthlyEl.textContent = `${myMeetings.length}/48`;
                 const progress = Math.min((myMeetings.length / 48) * 100, 100);
-                feMonthlyEl.closest('.stat-box').querySelector('.progress-fill').style.width = progress + '%';
+                const feStatBox = feMonthlyEl.closest('.stat-box');
+                if (feStatBox) {
+                    const fillBar = feStatBox.querySelector('.progress-fill');
+                    if (fillBar) fillBar.style.width = progress + '%';
+                }
                 console.log('✅ Updated Field Exec Monthly Meetings:', myMeetings.length);
             }
+            
+            // Update Field Exec metric cards (dashboard overview)
+            const feMetricCards = document.querySelectorAll('#fe-dashboard .metric-value');
+            feMetricCards.forEach(card => {
+                const label = card.previousElementSibling?.textContent || '';
+                if (label.includes('1:1 Meetings') || label.includes('Meetings')) {
+                    const myName = currentUser?.name;
+                    const myMeetings = window.fieldExecMeetings?.[myName] || [];
+                    card.textContent = myMeetings.length;
+                }
+            });
             
             // Update metric cards (dashboard overview)
             const metricCards = document.querySelectorAll('.metric-value');
@@ -3524,12 +3539,16 @@
             
             // Get Field Exec's meetings
             const myName = currentUser?.name;
+            console.log('   Current user name:', myName);
+            console.log('   fieldExecMeetings:', window.fieldExecMeetings);
+            
             const myMeetings = window.fieldExecMeetings?.[myName] || [];
             const totalActivities = myMeetings.length;
             const activeProspects = totalActivities > 0 ? totalActivities : 0;
             const meetingConversion = totalActivities > 0 ? 100 : 0;
             
-            console.log('Field Exec metrics:', { totalActivities, activeProspects, meetings: myMeetings.length });
+            console.log('Field Exec metrics:', { totalActivities, activeProspects, myMeetings: myMeetings.length });
+            console.log('   My meetings:', myMeetings);
             
             // Update Activity Analytics numbers
             const activitiesEl = document.getElementById('fe-total-activities');
@@ -3537,10 +3556,19 @@
             const conversionEl = document.getElementById('fe-meeting-conversion');
             const prospectsEl = document.getElementById('fe-active-prospects');
             
-            if (activitiesEl) activitiesEl.textContent = totalActivities;
-            if (avgCardsEl) avgCardsEl.textContent = totalActivities > 0 ? Math.ceil(totalActivities / 5) : 0;
-            if (conversionEl) conversionEl.textContent = meetingConversion + '%';
-            if (prospectsEl) prospectsEl.textContent = activeProspects;
+            if (activitiesEl) {
+                activitiesEl.textContent = totalActivities;
+                console.log('   ✅ Updated total activities:', totalActivities);
+            }
+            if (avgCardsEl) {
+                avgCardsEl.textContent = totalActivities > 0 ? Math.ceil(totalActivities / 5) : 0;
+            }
+            if (conversionEl) {
+                conversionEl.textContent = meetingConversion + '%';
+            }
+            if (prospectsEl) {
+                prospectsEl.textContent = activeProspects;
+            }
             
             // Create Activity Trend chart (Line - Activities vs Cards)
             const activityCtx = document.getElementById('activityChart');
