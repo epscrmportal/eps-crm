@@ -2217,10 +2217,7 @@
                     <label>Assign To Field Executive</label>
                     <select id="assignedFieldExec">
                         <option value="">Select a Field Executive</option>
-                        <option value="Anjali Patel">🚀 Anjali Patel</option>
-                        <option value="Deepak Sharma">🚀 Deepak Sharma</option>
-                        <option value="Priya Singh">🚀 Priya Singh</option>
-                        <option value="Vikram Singh">🚀 Vikram Singh</option>
+                        <option value="Field Executive">🚀 Field Executive</option>
                     </select>
                 </div>
 
@@ -3017,6 +3014,9 @@
             
             closeScheduleMeetingModal();
             
+            // Save to localStorage
+            saveContactsToStorage();
+            
             // Show appropriate success message
             let message = '';
             if (callNotes.trim()) {
@@ -3030,7 +3030,15 @@
             }
             
             if (message) alert(message);
-            console.log('💾 Data saved:', {callNotes, reminderData: reminderDate, meetingData});
+            console.log('✅ Meeting scheduled successfully!');
+            console.log('   Contact:', contact.name);
+            console.log('   Assigned to:', assignedFieldExec);
+            console.log('   Date:', meetingData.date);
+            console.log('   Time:', meetingData.time);
+            console.log('   Field Exec meetings:', window.fieldExecMeetings);
+            
+            // Refresh displays
+            loadAllContacts();
         }
 
         function backToRoles() {
