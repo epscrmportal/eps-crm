@@ -1049,32 +1049,32 @@
                     <div class="metric-card">
                         <div class="metric-icon">🎯</div>
                         <div class="metric-label">Total Activities</div>
-                        <div class="metric-value">0</div>
+                        <div class="metric-value" id="fe-total-activities-metric">0</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-icon">🤝</div>
                         <div class="metric-label">Business Cards</div>
-                        <div class="metric-value">0</div>
+                        <div class="metric-value" id="fe-business-cards-metric">0</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-icon">👥</div>
                         <div class="metric-label">Connections Made</div>
-                        <div class="metric-value">0</div>
+                        <div class="metric-value" id="fe-connections-metric">0</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-icon">📅</div>
                         <div class="metric-label">Events Attended</div>
-                        <div class="metric-value">0</div>
+                        <div class="metric-value" id="fe-events-metric">0</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-icon">💼</div>
                         <div class="metric-label">BNI Meetings</div>
-                        <div class="metric-value">0</div>
+                        <div class="metric-value" id="fe-bni-meetings-metric">0</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-icon">👨‍💼</div>
                         <div class="metric-label">1:1 Meetings</div>
-                        <div class="metric-value">0</div>
+                        <div class="metric-value" id="fe-one-on-one-meetings-metric">0</div>
                     </div>
                 </div>
 
@@ -2559,6 +2559,18 @@
                     if (fillBar) fillBar.style.width = progress + '%';
                 }
                 console.log('✅ Updated Field Exec Monthly Meetings:', myMeetings.length);
+                
+                // Update Field Exec dashboard metrics with IDs
+                const updateFEMetric = (elementId, value) => {
+                    const el = document.getElementById(elementId);
+                    if (el) {
+                        el.textContent = value;
+                    }
+                };
+                
+                updateFEMetric('fe-total-activities-metric', myMeetings.length);
+                updateFEMetric('fe-bni-meetings-metric', myMeetings.length);
+                updateFEMetric('fe-one-on-one-meetings-metric', myMeetings.length);
             }
             
             // Update Field Exec metric cards (dashboard overview)
@@ -3086,15 +3098,35 @@
             
             console.log(`📊 Field Exec (${fieldExecName}) meetings:`, totalMeetings);
             
+            // For Field Exec, all meetings = BNI 1:1 meetings
+            const bniMeetings = totalMeetings;
+            
             // Calculate daily/weekly (simple: assume working days are 20 per month, 4 per week)
             const dailyMeetings = Math.ceil(totalMeetings / 20) || 0;
             const weeklyMeetings = Math.ceil(totalMeetings / 4) || 0;
             
-            // Fixed targets for BNI and Lead Gen
-            const bniMeetings = 0; // Placeholder - not tracked yet
-            const leadGen = 0;     // Placeholder - not tracked yet
+            // Other metrics (placeholders for now)
+            const leadGen = 0;
             
-            console.log('🎯 Calculated FE goals:', { totalMeetings, dailyMeetings, weeklyMeetings, bniMeetings, leadGen });
+            console.log('🎯 Calculated FE goals:', { totalMeetings, bniMeetings, dailyMeetings, weeklyMeetings });
+            
+            // Update dashboard metrics
+            const updateMetric = (elementId, value) => {
+                const el = document.getElementById(elementId);
+                if (el) {
+                    el.textContent = value;
+                    console.log(`✅ Updated ${elementId}: ${value}`);
+                } else {
+                    console.warn(`⚠️ Element not found: ${elementId}`);
+                }
+            };
+            
+            updateMetric('fe-total-activities-metric', totalMeetings);
+            updateMetric('fe-business-cards-metric', 0);
+            updateMetric('fe-connections-metric', 0);
+            updateMetric('fe-events-metric', 0);
+            updateMetric('fe-bni-meetings-metric', bniMeetings);
+            updateMetric('fe-one-on-one-meetings-metric', totalMeetings);
             
             // Update goals elements
             const updateGoal = (elementId, current, target) => {
