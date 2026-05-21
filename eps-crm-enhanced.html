@@ -3085,6 +3085,11 @@
                 html = '<p style="color: #999; text-align: center; padding: 40px;">No reminders set yet. Create reminders using the "Note" button on contacts.</p>';
             } else {
                 html = allReminders.map((reminder, idx) => {
+                    // Skip completed reminders
+                    if (reminder.status === 'Completed') {
+                        return '';
+                    }
+                    
                     const today = new Date().toISOString().split('T')[0];
                     const reminderDate = reminder.date;
                     const isDue = reminderDate <= today;
@@ -3107,7 +3112,7 @@
                         <button onclick="markReminderDone(${idx})" style="padding: 8px 15px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px;">✅ Done</button>
                         <button onclick="callContact('${reminder.contactPhone}')" style="padding: 8px 15px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📞 Call</button>
                     </div>
-                `}).join('');
+                `}).filter(item => item !== '').join('');
             }
             
             container.innerHTML = html;
@@ -3214,15 +3219,16 @@
                     if (reminderIndex !== -1) {
                         contact.reminders[reminderIndex].status = 'Completed';
                         console.log('✅ Reminder status updated to Completed');
+                        
+                        // Show success message
+                        alert('✅ Reminder marked as done!\n\n🎉 Great follow-up!');
+                        
+                        // Reload to remove from view
+                        setTimeout(() => {
+                            loadAndDisplayReminders();
+                        }, 300);
                     }
                 }
-                
-                alert('✅ Reminder marked as done!\n\nGreat follow-up!');
-                
-                // Reload to update view
-                setTimeout(() => {
-                    loadAndDisplayReminders();
-                }, 500);
             }
         }
 
