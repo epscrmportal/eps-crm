@@ -1113,8 +1113,60 @@
 
             <!-- FE Scheduled Meetings Tab -->
             <div id="fe-meetings" class="tab-content">
-                <h2>My Assigned Meetings</h2>
-                <p style="color: #666; margin-bottom: 15px;">📅 Meetings assigned to you by Telecallers</p>
+                <h2>Meetings</h2>
+                
+                <!-- Schedule Own Meeting Form -->
+                <div style="background: #f0f4ff; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #667eea;">
+                    <h3>📅 Schedule Your Own Meeting</h3>
+                    <form onsubmit="scheduleOwnMeeting(event)" style="margin-top: 15px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Contact Name *</label>
+                                <input type="text" required placeholder="John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone *</label>
+                                <input type="tel" required placeholder="9876543210">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Meeting Date *</label>
+                                <input type="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Meeting Time *</label>
+                                <input type="time" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Meeting Type *</label>
+                                <select required>
+                                    <option>BNI 1:1 Meeting</option>
+                                    <option>Client Meeting</option>
+                                    <option>Follow-up Meeting</option>
+                                    <option>Discovery Call</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Location *</label>
+                                <input type="text" required placeholder="e.g., Coffee Shop, Virtual, Office">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Meeting Agenda</label>
+                            <textarea placeholder="Details about the meeting..." style="min-height: 80px;"></textarea>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn-primary">📅 Schedule Meeting</button>
+                            <button type="reset" class="btn-secondary">🔄 Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <h3 style="margin-top: 20px; margin-bottom: 15px;">📋 Assigned Meetings</h3>
+                <p style="color: #666; margin-bottom: 15px;">Meetings assigned to you by Telecallers</p>
                 <div id="fieldExecMeetingsList"></div>
             </div>
 
@@ -2319,6 +2371,8 @@
         // Load on startup
         window.addEventListener('load', () => {
             loadContactsFromStorage();
+            loadBusinessCardsFromStorage();
+            loadOwnMeetingsFromStorage();
             console.log('📱 Total contacts after load:', importedContacts.length);
         });
         
@@ -2599,47 +2653,82 @@
                 }
             });
             
-            if (totalContacts === 0) {
+            if (totalContacts === 0 && (!window.businessCards || Object.keys(window.businessCards).length === 0)) {
                 contactsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No contacts yet. Create one to get started!</p>';
                 return;
             }
             
             let html = '';
-            importedContacts.forEach((contact, index) => {
-                const emailDisplay = contact.email && contact.email !== 'N/A' ? ` | <strong>Email:</strong> ${contact.email}` : '';
-                const bgColor = contact.status === 'called' ? '#f0fdf4' : 'white';
-                const borderColor = contact.status === 'called' ? '#10b981' : '#667eea';
+            
+            // Display Business Cards collected by Field Execs
+            if (window.businessCards && Object.keys(window.businessCards).length > 0) {
+                html += '<h3 style="margin-bottom: 15px; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px;">📇 Business Cards from Field Executives</h3>';
                 
-                // Check who is working on this lead
-                const workingOn = contact.workingOn || null;
-                const workingStatus = workingOn ? `🔒 Working: <strong>${workingOn}</strong>` : '🟢 Available';
-                const isLockedByMe = workingOn === currentUser?.name;
-                const statusColor = workingOn ? '#fef3c7' : '#f0fdf4';
+                for (const [fieldExecName, cards] of Object.entries(window.businessCards)) {
+                    if (cards && cards.length > 0) {
+                        cards.forEach((card, idx) => {
+                            html += `<div class="contact-item" style="background: #fef3c7; border-left-color: #f59e0b; opacity: 0.95;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
+                                    <div style="flex: 1; min-width: 250px;">
+                                        <h4 style="color: #f59e0b;">📇 ${card.name}</h4>
+                                        <p><strong>Company:</strong> ${card.company}</p>
+                                        <p><strong>Designation:</strong> ${card.designation || 'N/A'}</p>
+                                        <p><strong>Phone:</strong> ${card.phone}${card.email ? ` | <strong>Email:</strong> ${card.email}` : ''}</p>
+                                        <p><span class="badge" style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 11px;">🎯 ${card.leadType}</span></p>
+                                        <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                                            <strong>Collected by:</strong> ${fieldExecName} on ${card.collectedOn}
+                                        </p>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                                        <button type="button" class="btn-primary" onclick="convertCardToContact('${card.name}', '${card.company}', '${card.phone}', '${card.email}')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">➕ Add to Contacts</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                        });
+                    }
+                }
+            }
+            
+            // Display regular contacts
+            if (totalContacts > 0) {
+                html += '<h3 style="margin-top: 25px; margin-bottom: 15px; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px;">👥 Contacts Created by Telecallers</h3>';
                 
-                html += `<div class="contact-item" id="contact-${index}" style="background: ${statusColor}; border-left-color: ${borderColor}; position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
-                        <div style="flex: 1; min-width: 250px; cursor: pointer;" onclick="showContactHistory(${index})">
-                            <h4 style="color: #667eea; text-decoration: underline;">${contact.name}</h4>
-                            <p><strong>Company:</strong> ${contact.company}</p>
-                            <p><strong>Phone:</strong> ${contact.phone}${emailDisplay}</p>
-                            <p><span class="badge badge-${contact.status === 'called' ? 'completed' : 'pending'}">${contact.status === 'called' ? 'Called' : 'Warm Lead'}</span></p>
-                            <p style="margin-top: 8px; font-size: 13px; color: ${workingOn ? '#d97706' : '#10b981'}; font-weight: bold;">
-                                ${workingStatus}
-                            </p>
+                importedContacts.forEach((contact, index) => {
+                    const emailDisplay = contact.email && contact.email !== 'N/A' ? ` | <strong>Email:</strong> ${contact.email}` : '';
+                    const bgColor = contact.status === 'called' ? '#f0fdf4' : 'white';
+                    const borderColor = contact.status === 'called' ? '#10b981' : '#667eea';
+                    
+                    // Check who is working on this lead
+                    const workingOn = contact.workingOn || null;
+                    const workingStatus = workingOn ? `🔒 Working: <strong>${workingOn}</strong>` : '🟢 Available';
+                    const isLockedByMe = workingOn === currentUser?.name;
+                    const statusColor = workingOn ? '#fef3c7' : '#f0fdf4';
+                    
+                    html += `<div class="contact-item" id="contact-${index}" style="background: ${statusColor}; border-left-color: ${borderColor}; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1; min-width: 250px; cursor: pointer;" onclick="showContactHistory(${index})">
+                                <h4 style="color: #667eea; text-decoration: underline;">${contact.name}</h4>
+                                <p><strong>Company:</strong> ${contact.company}</p>
+                                <p><strong>Phone:</strong> ${contact.phone}${emailDisplay}</p>
+                                <p><span class="badge badge-${contact.status === 'called' ? 'completed' : 'pending'}">${contact.status === 'called' ? 'Called' : 'Warm Lead'}</span></p>
+                                <p style="margin-top: 8px; font-size: 13px; color: ${workingOn ? '#d97706' : '#10b981'}; font-weight: bold;">
+                                    ${workingStatus}
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                                <button type="button" class="btn-primary" onclick="claimLead(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap; ${workingOn && !isLockedByMe ? 'opacity: 0.6; cursor: not-allowed;' : ''}" ${workingOn && !isLockedByMe ? 'disabled' : ''}>
+                                    ${isLockedByMe ? '✅ Release Lead' : (workingOn ? '🔒 Locked' : '🟢 Claim Lead')}
+                                </button>
+                                <button type="button" class="btn-success" onclick="markCallDone(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">☎️ Call Done</button>
+                                <button type="button" class="btn-warning" onclick="openScheduleMeetingModal(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">📝 Note</button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                            <button type="button" class="btn-primary" onclick="claimLead(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap; ${workingOn && !isLockedByMe ? 'opacity: 0.6; cursor: not-allowed;' : ''}" ${workingOn && !isLockedByMe ? 'disabled' : ''}>
-                                ${isLockedByMe ? '✅ Release Lead' : (workingOn ? '🔒 Locked' : '🟢 Claim Lead')}
-                            </button>
-                            <button type="button" class="btn-success" onclick="markCallDone(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">☎️ Call Done</button>
-                            <button type="button" class="btn-warning" onclick="openScheduleMeetingModal(${index})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">📝 Note</button>
-                        </div>
-                    </div>
-                </div>`;
-            });
+                    </div>`;
+                });
+            }
             
             contactsList.innerHTML = html;
-            console.log(`✅ Loaded ${totalContacts} contacts successfully!`);
+            console.log(`✅ Loaded ${totalContacts} contacts + ${Object.keys(window.businessCards || {}).length} Business Card sources!`);
         }
 
         function claimLead(index) {
@@ -3633,7 +3722,6 @@
         function loadFieldExecMeetings() {
             console.log('📅 loadFieldExecMeetings called');
             console.log('   currentUser?.name:', currentUser?.name);
-            console.log('   window.fieldExecMeetings:', window.fieldExecMeetings);
             
             const meetingsList = document.getElementById('fieldExecMeetingsList');
             if (!meetingsList) {
@@ -3641,49 +3729,75 @@
                 return;
             }
             
-            if (!window.fieldExecMeetings) {
-                console.warn('⚠️ window.fieldExecMeetings not initialized');
-                meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">No meetings assigned yet</p>';
-                return;
-            }
-            
             const myName = currentUser?.name;
-            console.log('   Looking for meetings assigned to:', myName);
             
-            const myMeetings = window.fieldExecMeetings[myName] || [];
-            console.log('   Found meetings:', myMeetings.length);
+            // Get assigned meetings
+            const assignedMeetings = window.fieldExecMeetings?.[myName] || [];
             
-            if (myMeetings.length === 0) {
-                console.log('   No meetings found for', myName);
-                meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">✨ No meetings assigned to you yet. Check back later!</p>';
+            // Get own scheduled meetings
+            const ownMeetings = window.fieldExecOwnMeetings?.[myName] || [];
+            
+            console.log(`   Assigned meetings: ${assignedMeetings.length}, Own meetings: ${ownMeetings.length}`);
+            
+            if (assignedMeetings.length === 0 && ownMeetings.length === 0) {
+                meetingsList.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">✨ No meetings assigned yet. You can schedule your own above!</p>';
                 return;
             }
             
             let html = '';
-            myMeetings.forEach((meeting, idx) => {
-                console.log('   Rendering meeting:', meeting.contactName);
-                html += `<div class="contact-item" style="background: #f0f9ff; border-left-color: #0ea5e9; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                        <div style="flex: 1; min-width: 250px;">
-                            <h4>📅 ${meeting.contactName}</h4>
-                            <p><strong>Date:</strong> ${meeting.date} at ${meeting.time}</p>
-                            <p><strong>Type:</strong> ${meeting.type}</p>
-                            <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
-                            <p><strong>Agenda:</strong> ${meeting.agenda}</p>
-                            <p style="margin-top: 8px; font-size: 12px; color: #666;">
-                                <strong>Scheduled by:</strong> ${meeting.scheduledBy}
-                            </p>
+            
+            // Show Own Meetings first
+            if (ownMeetings.length > 0) {
+                html += '<h4 style="margin-top: 20px; margin-bottom: 15px; color: #667eea;">🗓️ Your Scheduled Meetings</h4>';
+                ownMeetings.forEach((meeting) => {
+                    html += `<div class="contact-item" style="background: #f0fdf4; border-left-color: #22c55e; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <h4>📅 ${meeting.contactName}</h4>
+                                <p><strong>Date:</strong> ${meeting.date} at ${meeting.time}</p>
+                                <p><strong>Type:</strong> ${meeting.type}</p>
+                                <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
+                                <p><strong>Agenda:</strong> ${meeting.agenda || 'No details'}</p>
+                                <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                                    <strong>Status:</strong> You scheduled this
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
+                                <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
+                                <button class="btn-primary" onclick="addMeetingNotes('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">📝 Notes</button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
-                            <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
-                            <button class="btn-primary" onclick="addMeetingNotes('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">📝 Notes</button>
+                    </div>`;
+                });
+            }
+            
+            // Show Assigned Meetings
+            if (assignedMeetings.length > 0) {
+                html += '<h4 style="margin-top: 20px; margin-bottom: 15px; color: #0ea5e9;">📋 Meetings Assigned by Telecallers</h4>';
+                assignedMeetings.forEach((meeting) => {
+                    html += `<div class="contact-item" style="background: #f0f9ff; border-left-color: #0ea5e9; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <h4>📅 ${meeting.contactName}</h4>
+                                <p><strong>Date:</strong> ${meeting.date} at ${meeting.time}</p>
+                                <p><strong>Type:</strong> ${meeting.type}</p>
+                                <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
+                                <p><strong>Agenda:</strong> ${meeting.agenda}</p>
+                                <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                                    <strong>Scheduled by:</strong> ${meeting.scheduledBy}
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
+                                <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
+                                <button class="btn-primary" onclick="addMeetingNotes('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">📝 Notes</button>
+                            </div>
                         </div>
-                    </div>
-                </div>`;
-            });
+                    </div>`;
+                });
+            }
             
             meetingsList.innerHTML = html;
-            console.log(`✅ Loaded ${myMeetings.length} assigned meetings`);
+            console.log(`✅ Loaded ${ownMeetings.length} own + ${assignedMeetings.length} assigned meetings`);
         }
 
         function createFieldExecCharts() {
@@ -3927,10 +4041,157 @@
             event.target.reset();
         }
 
+        // Initialize business cards storage
+        if (!window.businessCards) window.businessCards = {};
+        
+        function convertCardToContact(name, company, phone, email) {
+            const newContact = {
+                id: Date.now(),
+                name,
+                company,
+                phone,
+                email: email || 'N/A',
+                address: 'TBD',
+                priority: 'High',
+                source: 'Business Card (Field Exec)',
+                addedBy: 'Telecaller (from Business Card)',
+                status: 'pending',
+                workingOn: null,
+                callNotes: [],
+                reminders: [],
+                meetings: [],
+                createdOn: new Date().toLocaleDateString()
+            };
+            
+            importedContacts.push(newContact);
+            saveContactsToStorage();
+            
+            console.log('✅ Business card converted to contact:', newContact);
+            alert(`✅ Contact Added!\n\n👤 ${name}\n🏢 ${company}\n📱 ${phone}\n\nNow you can work on this lead!`);
+            
+            loadAllContacts();
+        }
+        
+        function scheduleOwnMeeting(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const name = form.querySelector('input[placeholder="John Doe"]').value.trim();
+            const phone = form.querySelector('input[placeholder="9876543210"]').value.trim();
+            const date = form.querySelectorAll('input[type="date"]')[0].value;
+            const time = form.querySelector('input[type="time"]').value;
+            const type = form.querySelector('select').value;
+            const location = form.querySelector('input[placeholder*="Coffee Shop"]').value.trim();
+            const agenda = form.querySelector('textarea').value.trim();
+            
+            if (!name || !phone || !date || !time || !location) {
+                alert('❌ Please fill all required fields');
+                return;
+            }
+            
+            const fieldExecName = currentUser?.name || 'Field Executive';
+            
+            // Create meeting object
+            const meeting = {
+                id: Date.now(),
+                contactName: name,
+                contactPhone: phone,
+                date,
+                time,
+                type,
+                location,
+                agenda,
+                scheduledBy: fieldExecName,
+                scheduledOn: new Date().toLocaleDateString(),
+                status: 'scheduled'
+            };
+            
+            // Add to Field Exec's own meetings
+            if (!window.fieldExecOwnMeetings) {
+                window.fieldExecOwnMeetings = {};
+            }
+            if (!window.fieldExecOwnMeetings[fieldExecName]) {
+                window.fieldExecOwnMeetings[fieldExecName] = [];
+            }
+            window.fieldExecOwnMeetings[fieldExecName].push(meeting);
+            
+            // Also save to localStorage
+            localStorage.setItem('eps_crm_fieldExecOwnMeetings', JSON.stringify(window.fieldExecOwnMeetings));
+            
+            console.log(`✅ Own meeting scheduled by ${fieldExecName}:`, meeting);
+            alert(`✅ Meeting Scheduled!\n\n👤 ${name}\n📱 ${phone}\n📅 ${date} at ${time}\n📍 ${location}\n🎯 Type: ${type}`);
+            event.target.reset();
+            
+            // Reload meetings list
+            loadFieldExecMeetings();
+        }
+        
+        function loadOwnMeetingsFromStorage() {
+            const saved = localStorage.getItem('eps_crm_fieldExecOwnMeetings');
+            if (saved) {
+                window.fieldExecOwnMeetings = JSON.parse(saved);
+                console.log('📅 Field Exec own meetings loaded from storage:', window.fieldExecOwnMeetings);
+            }
+        }
+        
         function saveCard(event) {
             event.preventDefault();
-            alert('✅ Business card saved successfully!');
+            
+            const form = event.target;
+            const name = form.querySelector('input[placeholder="John Doe"]').value.trim();
+            const designation = form.querySelector('input[placeholder="Manager"]').value.trim();
+            const company = form.querySelector('input[placeholder="ABC Corp"]').value.trim();
+            const phone = form.querySelector('input[placeholder="9876543210"]').value.trim();
+            const email = form.querySelector('input[type="email"]').value.trim();
+            const leadType = form.querySelector('select').value;
+            
+            if (!name || !company || !phone) {
+                alert('❌ Please fill all required fields (Name, Company, Phone)');
+                return;
+            }
+            
+            const fieldExecName = currentUser?.name || 'Field Executive';
+            
+            // Create business card object
+            const card = {
+                id: Date.now(),
+                name,
+                designation,
+                company,
+                phone,
+                email,
+                leadType,
+                collectedBy: fieldExecName,
+                collectedOn: new Date().toLocaleDateString(),
+                isVisible: true
+            };
+            
+            // Store in window.businessCards
+            if (!window.businessCards[fieldExecName]) {
+                window.businessCards[fieldExecName] = [];
+            }
+            window.businessCards[fieldExecName].push(card);
+            
+            // Also save to localStorage
+            localStorage.setItem('eps_crm_businessCards', JSON.stringify(window.businessCards));
+            
+            console.log(`✅ Business card saved for ${fieldExecName}:`, card);
+            alert(`✅ Business card saved!\n\n👤 ${name}\n🏢 ${company}\n📱 ${phone}\n🎯 Lead Type: ${leadType}`);
             event.target.reset();
+            
+            // Update metric
+            const metric = document.getElementById('fe-business-cards-metric');
+            if (metric) {
+                metric.textContent = window.businessCards[fieldExecName].length;
+            }
+        }
+        
+        function loadBusinessCardsFromStorage() {
+            const saved = localStorage.getItem('eps_crm_businessCards');
+            if (saved) {
+                window.businessCards = JSON.parse(saved);
+                console.log('📇 Business cards loaded from storage:', window.businessCards);
+            }
         }
 
         function saveEvent(event) {
