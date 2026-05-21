@@ -2686,6 +2686,17 @@
             
             // Close modal and reload reminders
             document.getElementById(modalId).remove();
+            
+            // DEBUG: Verify data was saved before refreshing UI
+            console.log('🔍 VERIFICATION - Contact after save:');
+            console.log('  Name:', contact.name);
+            console.log('  CallNotes:', contact.callNotes);
+            console.log('  Reminders:', contact.reminders);
+            console.log('🔍 VERIFICATION - Full importedContacts array:');
+            importedContacts.forEach((c, i) => {
+                console.log(`  [${i}] ${c.name}: callNotes=${c.callNotes?.length || 0}, reminders=${c.reminders?.length || 0}`);
+            });
+            
             loadAllContacts();
             
             setTimeout(() => {
