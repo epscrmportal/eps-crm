@@ -5388,8 +5388,6 @@ Orders Team,1
         // ============================================
 
         window.convertCardToContact = function(name, company, phone, email, leadType) {
-            console.log(`✅ Converting: ${name}, leadType: ${leadType}`);
-            
             if (!leadType) {
                 const card = document.querySelector(`button[onclick*="${name}"]`)?.closest('.contact-item');
                 const cardText = card?.textContent || '';
@@ -5413,18 +5411,13 @@ Orders Team,1
                 createdOn: new Date().toLocaleDateString()
             };
             
-            console.log('📝 New contact object:', newContact);
             importedContacts.push(newContact);
-            console.log('✅ Pushed to importedContacts, total now:', importedContacts.length);
             
-            // REMOVE the card from business cards
-            console.log('🗑️ Removing business card from collection...');
             if(window.businessCards) {
                 for(const [fieldExecName, cards] of Object.entries(window.businessCards)) {
                     const cardIndex = cards.findIndex(c => c.name === name && c.company === company);
                     if(cardIndex > -1) {
                         cards.splice(cardIndex, 1);
-                        console.log(`✅ Removed ${name} from ${fieldExecName}'s business cards`);
                         break;
                     }
                 }
@@ -5432,22 +5425,16 @@ Orders Team,1
             }
             
             saveContactsToStorage();
-            console.log('💾 Saved to localStorage');
-            
-            setTimeout(() => {
-                loadAllContacts();
-                console.log('✅ loadAllContacts() called');
-            }, 100);
-            
+            setTimeout(() => loadAllContacts(), 100);
             alert(`✅ ${name} added to Contacts!`);
         };
 
         // ============================================
-        // FOLLOW-UPS DISPLAY - WITH ALL 4 FEATURES
+        // FOLLOW-UPS DISPLAY - SORTED BY DATE
         // ============================================
 
         function loadAndDisplayFollowUps() {
-            console.log('📋 Loading follow-ups...');
+            console.log('📋 Loading follow-ups with sorting...');
             const container = document.querySelector('#tc-followups tbody');
             if (!container) {
                 console.log('⚠️ #tc-followups tbody not found');
@@ -5457,6 +5444,7 @@ Orders Team,1
             let html = '';
             const followUps = [];
             
+            // Collect all reminders from contacts
             importedContacts.forEach(contact => {
                 if (contact.reminders && contact.reminders.length > 0) {
                     contact.reminders.forEach(reminder => {
@@ -5471,27 +5459,53 @@ Orders Team,1
                 }
             });
             
+            // SORT BY DATE (earliest/upcoming first)
+            followUps.sort((a, b) => {
+                const dateA = new Date(a.dueDate);
+                const dateB = new Date(b.dueDate);
+                return dateA - dateB;
+            });
+            
+            console.log(`✅ Sorted ${followUps.length} follow-ups by date`);
+            
             if (followUps.length === 0) {
                 html = '<tr><td colspan="5" style="text-align: center; color: #999; padding: 40px;">No follow-ups needed right now!</td></tr>';
             } else {
-                html = followUps.map((followUp) => `
-                    <tr>
-                        <td>${followUp.contact}</td>
-                        <td>${followUp.dueDate}</td>
-                        <td><span class="badge badge-pending">${followUp.status}</span></td>
-                        <td>${followUp.note}</td>
-                        <td style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn-success" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="markFollowupDoneFixed('${followUp.contact}', '${followUp.dueDate}')">✅ Done</button>
-                            <button class="btn-primary" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="callFromFollowupFixed('${followUp.phone}', '${followUp.contact}')">📞 Call</button>
-                            <button class="btn-warning" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="openFollowupNotesModal('${followUp.contact}', '${followUp.dueDate}')">📝 Notes</button>
-                            <button class="btn-info" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="openRescheduleModal('${followUp.contact}', '${followUp.dueDate}')">📅 Reschedule</button>
-                        </td>
-                    </tr>
-                `).join('');
+                html = followUps.map((followUp) => {
+                    // Color code based on urgency
+                    const dueDate = new Date(followUp.dueDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    dueDate.setHours(0, 0, 0, 0);
+                    
+                    let bgColor = '#ffffff';
+                    if (dueDate < today) {
+                        bgColor = '#fee2e2';  // 🔴 Red - overdue
+                    } else if (dueDate.getTime() === today.getTime()) {
+                        bgColor = '#fef3c7';  // 🟡 Yellow - today
+                    } else if ((dueDate - today) / (1000 * 60 * 60 * 24) <= 3) {
+                        bgColor = '#fef08a';  // 🟡 Light yellow - within 3 days
+                    }
+                    
+                    return `
+                        <tr style="background: ${bgColor};">
+                            <td>${followUp.contact}</td>
+                            <td><strong>${followUp.dueDate}</strong></td>
+                            <td><span class="badge badge-pending">${followUp.status}</span></td>
+                            <td>${followUp.note}</td>
+                            <td style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                <button class="btn-success" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="markFollowupDoneFixed('${followUp.contact}', '${followUp.dueDate}')">✅ Done</button>
+                                <button class="btn-primary" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="callFromFollowupFixed('${followUp.phone}', '${followUp.contact}')">📞 Call</button>
+                                <button class="btn-warning" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="openFollowupNotesModal('${followUp.contact}', '${followUp.dueDate}')">📝 Notes</button>
+                                <button class="btn-info" style="padding: 5px 10px; font-size: 12px; margin: 2px;" onclick="openRescheduleModal('${followUp.contact}', '${followUp.dueDate}')">📅 Reschedule</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
             
             container.innerHTML = html;
-            console.log(`✅ Loaded ${followUps.length} follow-ups`);
+            console.log(`✅ Displayed ${followUps.length} follow-ups sorted by date`);
         }
 
         // ============================================
@@ -5556,6 +5570,7 @@ Orders Team,1
 
             saveContactsToStorage();
             closeSetReminderModal();
+            loadAndDisplayFollowUps();
             loadAndDisplayReminders();
             alert(`✅ Reminder set for ${contactName}!`);
         };
@@ -5569,7 +5584,6 @@ Orders Team,1
         // ============================================
 
         window.markFollowupDoneFixed = function(contactName, dueDate) {
-            console.log(`✅ Marking done: ${contactName}, ${dueDate}`);
             const contact = importedContacts.find(c => c.name === contactName);
             if(!contact) {
                 alert('❌ Contact not found');
@@ -5589,7 +5603,6 @@ Orders Team,1
         // ============================================
 
         window.callFromFollowupFixed = function(contactPhone, contactName) {
-            console.log(`📞 Call: ${contactName}`);
             const contact = importedContacts.find(c => c.phone === contactPhone);
             if(!contact) {
                 alert('❌ Contact not found');
@@ -5678,7 +5691,7 @@ Orders Team,1
         };
 
         // ============================================
-        // FEATURE 5: RESCHEDULE
+        // FEATURE 5: RESCHEDULE (with sorting)
         // ============================================
 
         window.openRescheduleModal = function(contactName, oldDate) {
@@ -5722,7 +5735,7 @@ Orders Team,1
             reminder.date = newDate;
             saveContactsToStorage();
             closeRescheduleModal();
-            loadAndDisplayFollowUps();
+            loadAndDisplayFollowUps();  // This will re-sort automatically
             alert(`✅ Rescheduled to ${newDate}!`);
         };
 
@@ -5745,7 +5758,7 @@ Orders Team,1
             });
         });
 
-        console.log('✅ ALL FEATURES LOADED: Add to Contacts (with card removal), Set Reminder, Done, Call, Notes, Reschedule');
+        console.log('✅ ALL FEATURES: Add to Contacts, Set Reminder, Done, Call, Notes, Reschedule (SORTED BY DATE)');
 
         </script>
 </body>
