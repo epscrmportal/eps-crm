@@ -3162,46 +3162,66 @@
         }
 
         function completeMeeting(contactName, meetingDate) {
-            const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact) return;
+            console.log(`🏁 Completing meeting: ${contactName} on ${meetingDate}`);
             
-            if(!contact.completedMeetings) contact.completedMeetings = [];
-            
-            // Find the meeting in fieldExecOwnMeetings or fieldExecMeetings
             const myName = currentUser?.name;
             let meeting = null;
+            let foundIn = null;
             
+            console.log(`   Current user: ${myName}`);
+            
+            // Find the meeting in fieldExecOwnMeetings
+            console.log(`   Searching in fieldExecOwnMeetings[${myName}]...`);
             if(window.fieldExecOwnMeetings && window.fieldExecOwnMeetings[myName]) {
                 const idx = window.fieldExecOwnMeetings[myName].findIndex(m => m.contactName === contactName && m.date === meetingDate);
                 if(idx >= 0) {
                     meeting = window.fieldExecOwnMeetings[myName][idx];
+                    foundIn = 'ownMeetings';
+                    console.log(`   ✅ Found in ownMeetings at index ${idx}`);
                     window.fieldExecOwnMeetings[myName].splice(idx, 1);
                 }
             }
             
-            if(!meeting && window.fieldExecMeetings && window.fieldExecMeetings[myName]) {
-                const idx = window.fieldExecMeetings[myName].findIndex(m => m.contactName === contactName && m.date === meetingDate);
-                if(idx >= 0) {
-                    meeting = window.fieldExecMeetings[myName][idx];
-                    window.fieldExecMeetings[myName].splice(idx, 1);
+            // If not found, search in fieldExecMeetings
+            if(!meeting) {
+                console.log(`   Searching in fieldExecMeetings[${myName}]...`);
+                if(window.fieldExecMeetings && window.fieldExecMeetings[myName]) {
+                    const idx = window.fieldExecMeetings[myName].findIndex(m => m.contactName === contactName && m.date === meetingDate);
+                    if(idx >= 0) {
+                        meeting = window.fieldExecMeetings[myName][idx];
+                        foundIn = 'assignedMeetings';
+                        console.log(`   ✅ Found in assignedMeetings at index ${idx}`);
+                        window.fieldExecMeetings[myName].splice(idx, 1);
+                    }
                 }
             }
             
             if(meeting) {
-                // Get notes for this meeting
-                const meetingNotes = contact.meetingNotes?.filter(n => n.date === meetingDate) || [];
+                console.log(`   ✅ Meeting found in ${foundIn}:`, meeting);
                 
-                // Add to completed meetings with notes
-                contact.completedMeetings.push({
+                // Create or get completedMeetings array at user level
+                if(!window.completedFieldExecMeetings) {
+                    window.completedFieldExecMeetings = {};
+                }
+                if(!window.completedFieldExecMeetings[myName]) {
+                    window.completedFieldExecMeetings[myName] = [];
+                }
+                
+                // Add to completed meetings with timestamp
+                window.completedFieldExecMeetings[myName].push({
                     ...meeting,
                     completedOn: new Date().toLocaleDateString(),
-                    completedAt: new Date().toLocaleTimeString(),
-                    notes: meetingNotes
+                    completedAt: new Date().toLocaleTimeString()
                 });
                 
-                saveContactsToStorage();
+                console.log(`   ✅ Added to completedFieldExecMeetings`);
+                console.log(`   Completed meetings:`, window.completedFieldExecMeetings[myName]);
+                
                 loadFieldExecMeetings();
                 alert(`✅ Meeting marked as completed!`);
+            } else {
+                console.log(`❌ Meeting not found for ${contactName} on ${meetingDate}`);
+                alert(`❌ Could not find meeting to complete`);
             }
         }
 
@@ -3752,16 +3772,9 @@
             
             // Show Completed Meetings History
             const completedMeetings = [];
-            importedContacts.forEach(contact => {
-                if(contact.completedMeetings && contact.completedMeetings.length > 0) {
-                    contact.completedMeetings.forEach(meeting => {
-                        completedMeetings.push({
-                            ...meeting,
-                            contactObj: contact
-                        });
-                    });
-                }
-            });
+            if(window.completedFieldExecMeetings && window.completedFieldExecMeetings[myName]) {
+                completedMeetings.push(...window.completedFieldExecMeetings[myName]);
+            }
             
             if(completedMeetings.length > 0) {
                 html += '<h4 style="margin-top: 30px; margin-bottom: 15px; color: #10b981; border-top: 2px solid #e5e7eb; padding-top: 20px;">✅ Completed Meetings History</h4>';
@@ -3774,18 +3787,6 @@
                                 <p><strong>Type:</strong> ${meeting.type}</p>
                                 <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
                                 <p><strong>Completed:</strong> ${meeting.completedOn} at ${meeting.completedAt}</p>
-                                ${meeting.notes && meeting.notes.length > 0 ? `
-                                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #10b981;">
-                                        <strong style="color: #10b981;">📝 Meeting Notes:</strong>
-                                        ${meeting.notes.map(note => `
-                                            <div style="margin-top: 8px; font-size: 13px;">
-                                                <p style="margin: 4px 0;"><strong>Duration:</strong> ${note.duration} mins</p>
-                                                <p style="margin: 4px 0; white-space: pre-wrap;">${note.notes}</p>
-                                                <p style="font-size: 11px; color: #999; margin: 4px 0;">${note.savedOn} at ${note.savedAt}</p>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : '<p style="color: #999; font-size: 12px; margin-top: 10px;">No notes added</p>'}
                             </div>
                         </div>
                     </div>`;
@@ -3793,7 +3794,7 @@
             }
             
             meetingsList.innerHTML = html;
-            console.log(`✅ Loaded ${ownMeetings.length} own + ${assignedMeetings.length} assigned meetings + ${completedMeetings.length} completed`);
+            console.log(`✅ Loaded ${ownMeetings.length} own + ${assignedMeetings.length} assigned + ${completedMeetings.length} completed meetings`);
         }
 
         function createFieldExecCharts() {
