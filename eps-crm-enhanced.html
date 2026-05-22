@@ -1279,12 +1279,42 @@
                 </form>
 
                 <h3>Collected Cards</h3>
-                <div class="contact-item highlighted">
-                    <h4>John Doe</h4>
-                    <p><strong>Designation:</strong> Sales Manager | <strong>Company:</strong> ABC Corp</p>
-                    <p><strong>Phone:</strong> 9876543210 | <strong>Email:</strong> john@abc.com</p>
-                    <p><span class="badge badge-hot">Hot Lead</span></p>
-                </div>
+                <div id="collectedCardsList" style="display:flex; flex-direction: column; gap: 15px;"></div>
+                <script>
+                    function loadCollectedCards() {
+                        const cardsList = document.getElementById('collectedCardsList');
+                        if(!cardsList) return;
+                        
+                        let html = '';
+                        
+                        // Get current user
+                        const currentUserName = currentUser?.name || 'Field Executive';
+                        
+                        // Get business cards for this user
+                        const userCards = window.businessCards?.[currentUserName] || [];
+                        
+                        if(userCards.length === 0) {
+                            html = '<p style="color: #999; font-style: italic;">No business cards collected yet</p>';
+                        } else {
+                            userCards.forEach(card => {
+                                html += `<div class="contact-item highlighted" style="background: #fffbf0; border-left-color: #f59e0b;">
+                                    <h4>${card.name}</h4>
+                                    <p><strong>Designation:</strong> ${card.designation} | <strong>Company:</strong> ${card.company}</p>
+                                    <p><strong>Phone:</strong> ${card.phone} | <strong>Email:</strong> ${card.email || 'N/A'}</p>
+                                    ${card.notes ? `<p><strong>Notes:</strong> ${card.notes}</p>` : ''}
+                                    <p><span class="badge badge-hot">${card.category || 'Contact'}</span></p>
+                                </div>`;
+                            });
+                        }
+                        
+                        cardsList.innerHTML = html;
+                    }
+                    
+                    // Load on page load
+                    setTimeout(() => {
+                        loadCollectedCards();
+                    }, 500);
+                </script>
             </div>
 
             <!-- FE Events Tab -->
@@ -4199,6 +4229,11 @@
             console.log(`✅ Business card saved for ${fieldExecName}:`, card);
             alert(`✅ Business card saved!\n\n👤 ${name}\n🏢 ${company}\n📱 ${phone}\n🎯 Lead Type: ${leadType}`);
             event.target.reset();
+            
+            // Reload collected cards display
+            if(window.loadCollectedCards) {
+                window.loadCollectedCards();
+            }
             
             // Update metric
             const metric = document.getElementById('fe-business-cards-metric');
