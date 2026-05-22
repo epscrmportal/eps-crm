@@ -5384,7 +5384,7 @@ Orders Team,1
         
 
         // ============================================
-        // FIXED BUTTON FUNCTIONS
+        // FIXED BUTTON FUNCTIONS - WITH CARD REMOVAL
         // ============================================
 
         window.convertCardToContact = function(name, company, phone, email, leadType) {
@@ -5418,6 +5418,20 @@ Orders Team,1
             importedContacts.push(newContact);
             console.log('✅ Pushed to importedContacts, total now:', importedContacts.length);
             
+            // REMOVE the card from business cards
+            console.log('🗑️ Removing business card from collection...');
+            if(window.businessCards) {
+                for(const [fieldExecName, cards] of Object.entries(window.businessCards)) {
+                    const cardIndex = cards.findIndex(c => c.name === name && c.company === company);
+                    if(cardIndex > -1) {
+                        cards.splice(cardIndex, 1);
+                        console.log(`✅ Removed ${name} from ${fieldExecName}'s business cards`);
+                        break;
+                    }
+                }
+                localStorage.setItem('eps_crm_businessCards', JSON.stringify(window.businessCards));
+            }
+            
             saveContactsToStorage();
             console.log('💾 Saved to localStorage');
             
@@ -5427,7 +5441,7 @@ Orders Team,1
                 console.log('✅ loadAllContacts() called');
             }, 100);
             
-            alert(`✅ ${name} added to Contacts!`);
+            alert(`✅ ${name} added to Contacts and removed from Business Cards!`);
         };
 
         window.markFollowupDone = function(contactName, dueDate) {
