@@ -5384,7 +5384,7 @@ Orders Team,1
         
 
         // ============================================
-        // FEATURE 1: SET REMINDER - CREATE NEW REMINDERS
+        // FEATURE 1: SET REMINDER
         // ============================================
 
         window.openSetReminderModal = function() {
@@ -5454,60 +5454,42 @@ Orders Team,1
         };
 
         // ============================================
-        // FEATURE 2: FIX FOLLOW-UP BUTTONS - DONE & CALL
+        // FEATURE 2: FOLLOW-UP FUNCTIONS
         // ============================================
 
         window.markFollowupDoneFixed = function(contactName, dueDate) {
-            console.log(`✅ Marking follow-up done: ${contactName}, ${dueDate}`);
+            console.log(`✅ Marking done: ${contactName}, ${dueDate}`);
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact) {
-                alert('❌ Contact not found');
-                return;
-            }
+            if(!contact) { alert('Contact not found'); return; }
 
-            // Find and remove the follow-up
-            const reminderIndex = contact.reminders.findIndex(r => r.date === dueDate);
-            if(reminderIndex > -1) {
-                const removed = contact.reminders.splice(reminderIndex, 1)[0];
-                console.log(`✅ Removed follow-up: ${removed.text}`);
-            }
+            const idx = contact.reminders.findIndex(r => r.date === dueDate);
+            if(idx > -1) contact.reminders.splice(idx, 1);
 
             saveContactsToStorage();
             loadAndDisplayFollowUps();
-            alert(`✅ Follow-up completed for ${contactName}!`);
+            alert(`✅ Follow-up done!`);
         };
 
         window.callFromFollowupFixed = function(contactPhone, contactName) {
-            console.log(`📞 Calling from follow-up: ${contactName}`);
+            console.log(`📞 Call: ${contactName}`);
             const contact = importedContacts.find(c => c.phone === contactPhone);
-            if(!contact) {
-                alert('❌ Contact not found');
-                return;
-            }
+            if(!contact) { alert('Contact not found'); return; }
 
-            const duration = prompt('Call duration (minutes):', '15');
+            const duration = prompt('Duration (min):', '15');
             if(duration === null) return;
-
-            const notes = prompt('Call notes / What customer said:', 'Follow-up call');
+            const notes = prompt('Notes:', '');
             if(notes === null) return;
 
-            contact.callNotes.push({
-                notes: notes,
-                duration: duration,
-                savedOn: new Date().toLocaleDateString(),
-                savedAt: new Date().toLocaleTimeString(),
-                nextAction: 'follow_up'
-            });
-
+            contact.callNotes.push({notes, duration, savedOn: new Date().toLocaleDateString(), savedAt: new Date().toLocaleTimeString()});
             if(contact.status === 'pending') contact.status = 'called';
 
             saveContactsToStorage();
             loadAndDisplayFollowUps();
-            alert(`✅ Call logged: ${duration} minutes with ${contactName}`);
+            alert(`✅ Call logged!`);
         };
 
         // ============================================
-        // FEATURE 3: ADD NOTES TO FOLLOW-UPS
+        // FEATURE 3: FOLLOW-UP NOTES
         // ============================================
 
         window.openFollowupNotesModal = function(contactName, dueDate) {
@@ -5516,33 +5498,24 @@ Orders Team,1
 
             let html = `
                 <div class="modal-content">
-                    <h3>📝 Add Notes to Follow-up</h3>
+                    <h3>📝 Add Notes</h3>
                     <p><strong>Contact:</strong> ${contactName}</p>
-                    <p><strong>Due Date:</strong> ${dueDate}</p>
+                    <p><strong>Date:</strong> ${dueDate}</p>
                     <div style="margin-top: 20px;">
                         <div class="form-group">
-                            <label>Call Duration (minutes):</label>
-                            <input type="number" id="followupDuration" value="${reminder?.notes?.callDuration || 15}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" />
+                            <label>Duration (min):</label>
+                            <input type="number" id="dur" value="${reminder?.notes?.callDuration || 15}" style="width: 100%; padding: 8px;" />
                         </div>
                         <div class="form-group">
-                            <label>What did the customer say?</label>
-                            <textarea id="followupResponse" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;" placeholder="e.g., Interested, waiting for budget approval...">${reminder?.notes?.customerResponse || ''}</textarea>
+                            <label>Customer Response:</label>
+                            <textarea id="resp" style="width: 100%; padding: 8px; min-height: 60px;">${reminder?.notes?.customerResponse || ''}</textarea>
                         </div>
                         <div class="form-group">
                             <label>Next Steps:</label>
-                            <textarea id="followupNextSteps" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;" placeholder="e.g., Send quote by Friday, Schedule demo, etc">${reminder?.notes?.nextSteps || ''}</textarea>
+                            <textarea id="next" style="width: 100%; padding: 8px; min-height: 60px;">${reminder?.notes?.nextSteps || ''}</textarea>
                         </div>
-                        <div class="form-group">
-                            <label>Outcome:</label>
-                            <select id="followupOutcome" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="interested" ${reminder?.notes?.outcome === 'interested' ? 'selected' : ''}>🟢 Interested</option>
-                                <option value="not_interested" ${reminder?.notes?.outcome === 'not_interested' ? 'selected' : ''}>🔴 Not Interested</option>
-                                <option value="pending" ${reminder?.notes?.outcome === 'pending' ? 'selected' : ''}>🟡 Pending</option>
-                                <option value="scheduled" ${reminder?.notes?.outcome === 'scheduled' ? 'selected' : ''}>📅 Meeting Scheduled</option>
-                            </select>
-                        </div>
-                        <div style="margin-top: 20px; display: flex; gap: 10px;">
-                            <button class="btn btn-success" onclick="saveFollowupNotes('${contactName}', '${dueDate}')">✅ Save Notes</button>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="saveFollowupNotes('${contactName}', '${dueDate}')">✅ Save</button>
                             <button class="btn btn-danger" onclick="closeFollowupNotesModal()">❌ Cancel</button>
                         </div>
                     </div>
@@ -5554,34 +5527,21 @@ Orders Team,1
 
         window.saveFollowupNotes = function(contactName, dueDate) {
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact) {
-                alert('❌ Contact not found');
-                return;
-            }
-
+            if(!contact) return;
             const reminder = contact.reminders.find(r => r.date === dueDate);
-            if(!reminder) {
-                alert('❌ Follow-up not found');
-                return;
-            }
-
-            const duration = document.getElementById('followupDuration').value;
-            const response = document.getElementById('followupResponse').value;
-            const nextSteps = document.getElementById('followupNextSteps').value;
-            const outcome = document.getElementById('followupOutcome').value;
+            if(!reminder) return;
 
             reminder.notes = {
-                callDuration: duration,
-                customerResponse: response,
-                nextSteps: nextSteps,
-                outcome: outcome,
+                callDuration: document.getElementById('dur').value,
+                customerResponse: document.getElementById('resp').value,
+                nextSteps: document.getElementById('next').value,
                 addedOn: new Date().toLocaleDateString()
             };
 
             saveContactsToStorage();
             closeFollowupNotesModal();
             loadAndDisplayFollowUps();
-            alert(`✅ Notes saved for ${contactName}!`);
+            alert(`✅ Notes saved!`);
         };
 
         window.closeFollowupNotesModal = function() {
@@ -5589,25 +5549,25 @@ Orders Team,1
         };
 
         // ============================================
-        // FEATURE 4: RESCHEDULE FOLLOW-UP
+        // FEATURE 4: RESCHEDULE
         // ============================================
 
         window.openRescheduleModal = function(contactName, oldDate) {
             let html = `
                 <div class="modal-content">
-                    <h3>📅 Reschedule Follow-up</h3>
+                    <h3>📅 Reschedule</h3>
                     <p><strong>Contact:</strong> ${contactName}</p>
-                    <p><strong>Current Date:</strong> ${oldDate}</p>
+                    <p><strong>Current:</strong> ${oldDate}</p>
                     <div style="margin-top: 20px;">
                         <div class="form-group">
                             <label>New Date:</label>
-                            <input type="date" id="rescheduleDate" value="${oldDate}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" />
+                            <input type="date" id="newDate" value="${oldDate}" style="width: 100%; padding: 8px;" />
                         </div>
                         <div class="form-group">
-                            <label>Why reschedule?</label>
-                            <textarea id="rescheduleReason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;" placeholder="e.g., Customer asked to call next week, etc"></textarea>
+                            <label>Reason:</label>
+                            <textarea id="reason" style="width: 100%; padding: 8px; min-height: 60px;"></textarea>
                         </div>
-                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
                             <button class="btn btn-success" onclick="saveReschedule('${contactName}', '${oldDate}')">✅ Reschedule</button>
                             <button class="btn btn-danger" onclick="closeRescheduleModal()">❌ Cancel</button>
                         </div>
@@ -5620,41 +5580,18 @@ Orders Team,1
 
         window.saveReschedule = function(contactName, oldDate) {
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact) {
-                alert('❌ Contact not found');
-                return;
-            }
-
+            if(!contact) return;
             const reminder = contact.reminders.find(r => r.date === oldDate);
-            if(!reminder) {
-                alert('❌ Follow-up not found');
-                return;
-            }
+            if(!reminder) return;
 
-            const newDate = document.getElementById('rescheduleDate').value;
-            const reason = document.getElementById('rescheduleReason').value;
+            const newDate = document.getElementById('newDate').value;
+            if(!newDate) { alert('Pick a date'); return; }
 
-            if(!newDate) {
-                alert('❌ Please select a new date');
-                return;
-            }
-
-            // Track reschedule history
-            if(!reminder.rescheduleHistory) reminder.rescheduleHistory = [];
-            reminder.rescheduleHistory.push({
-                oldDate: oldDate,
-                newDate: newDate,
-                reason: reason,
-                changedOn: new Date().toLocaleDateString()
-            });
-
-            // Update the date
             reminder.date = newDate;
-
             saveContactsToStorage();
             closeRescheduleModal();
             loadAndDisplayFollowUps();
-            alert(`✅ Follow-up rescheduled to ${newDate}!`);
+            alert(`✅ Rescheduled!`);
         };
 
         window.closeRescheduleModal = function() {
@@ -5662,161 +5599,93 @@ Orders Team,1
         };
 
         // ============================================
-        // UPDATE FOLLOW-UPS DISPLAY WITH NEW BUTTONS
+        // AUTO-BIND BUTTONS AFTER RENDER
         // ============================================
 
-        const originalLoadFollowUps = window.loadAndDisplayFollowUps;
-        window.loadAndDisplayFollowUps = function() {
-            const followupsList = document.getElementById('tc-followups-list') || document.getElementById('followupsList');
-            if (!followupsList) return;
-
-            const followups = [];
-            importedContacts.forEach(contact => {
-                if (contact.reminders && contact.reminders.length > 0) {
-                    contact.reminders.forEach(reminder => {
-                        followups.push({
-                            ...reminder,
-                            contactName: contact.name,
-                            contactPhone: contact.phone,
-                            contactId: contact.id
-                        });
-                    });
+        function bindFollowupButtons() {
+            let count = 0;
+            const buttons = document.querySelectorAll('button');
+            
+            buttons.forEach(btn => {
+                if(!btn.getAttribute('data-bound')) {
+                    const text = btn.textContent.trim();
+                    const row = btn.closest('tr');
+                    
+                    if(!row) return;
+                    
+                    const cells = row.querySelectorAll('td');
+                    if(cells.length < 2) return;
+                    
+                    const contactName = cells[0].textContent.trim();
+                    const dueDate = cells[1].textContent.trim();
+                    
+                    if(text.includes('Done') && text.includes('✅')) {
+                        btn.onclick = () => markFollowupDoneFixed(contactName, dueDate);
+                        btn.setAttribute('data-bound', 'true');
+                        count++;
+                    }
+                    else if(text.includes('Call') && text.includes('📞')) {
+                        const contact = importedContacts.find(c => c.name === contactName);
+                        if(contact) {
+                            btn.onclick = () => callFromFollowupFixed(contact.phone, contactName);
+                            btn.setAttribute('data-bound', 'true');
+                            count++;
+                        }
+                    }
+                    else if(text.includes('Notes') && text.includes('📝')) {
+                        btn.onclick = () => openFollowupNotesModal(contactName, dueDate);
+                        btn.setAttribute('data-bound', 'true');
+                        count++;
+                    }
+                    else if(text.includes('Reschedule') && text.includes('📅')) {
+                        btn.onclick = () => openRescheduleModal(contactName, dueDate);
+                        btn.setAttribute('data-bound', 'true');
+                        count++;
+                    }
                 }
             });
+            
+            if(count > 0) console.log(`✅ Bound ${count} buttons`);
+        }
 
-            if (followups.length === 0) {
-                followupsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No follow-ups</p>';
-                return;
-            }
+        // Bind on initial load
+        setTimeout(() => bindFollowupButtons(), 1000);
 
-            let html = `
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #f0f0f0;">
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Contact</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Due Date</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Status</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Note</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            followups.forEach((followup) => {
-                const outcomeColor = followup.notes?.outcome === 'interested' ? '#10b981' : 
-                                    followup.notes?.outcome === 'not_interested' ? '#ef4444' :
-                                    followup.notes?.outcome === 'scheduled' ? '#3b82f6' : '#f59e0b';
-                
-                html += `
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px;">${followup.contactName}</td>
-                        <td style="padding: 10px;">${followup.date}</td>
-                        <td style="padding: 10px;"><span style="background: #fbbf24; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Pending</span></td>
-                        <td style="padding: 10px;">${followup.text}</td>
-                        <td style="padding: 10px;">
-                            <button class="btn btn-success" onclick="markFollowupDoneFixed('${followup.contactName}', '${followup.date}')" style="padding: 6px 12px; font-size: 12px; margin-right: 5px;">✅ Done</button>
-                            <button class="btn btn-primary" onclick="callFromFollowupFixed('${followup.contactPhone}', '${followup.contactName}')" style="padding: 6px 12px; font-size: 12px; margin-right: 5px;">📞 Call</button>
-                            <button class="btn btn-warning" onclick="openFollowupNotesModal('${followup.contactName}', '${followup.date}')" style="padding: 6px 12px; font-size: 12px; margin-right: 5px;">📝 Notes</button>
-                            <button class="btn btn-info" onclick="openRescheduleModal('${followup.contactName}', '${followup.date}')" style="padding: 6px 12px; font-size: 12px;">📅 Reschedule</button>
-                        </td>
-                    </tr>
-                    ${followup.notes ? `
-                    <tr style="background: #f9fafb; border-bottom: 1px solid #eee;">
-                        <td colspan="5" style="padding: 15px;">
-                            <strong>📝 Notes:</strong><br>
-                            <strong>Duration:</strong> ${followup.notes.callDuration} min | 
-                            <strong>Outcome:</strong> <span style="color: ${outcomeColor}; font-weight: bold;">${followup.notes.outcome}</span><br>
-                            <strong>Customer Response:</strong> ${followup.notes.customerResponse}<br>
-                            <strong>Next Steps:</strong> ${followup.notes.nextSteps}
-                        </td>
-                    </tr>
-                    ` : ''}
-                `;
-            });
-
-            html += '</tbody></table>';
-            followupsList.innerHTML = html;
+        // Override load function to rebind
+        const origLoad = window.loadAndDisplayFollowUps;
+        window.loadAndDisplayFollowUps = function() {
+            origLoad.call(this);
+            setTimeout(() => bindFollowupButtons(), 200);
         };
 
-        // ============================================
-        // UPDATE REMINDERS DISPLAY WITH SET REMINDER BUTTON
-        // ============================================
-
-        const originalLoadReminders = window.loadAndDisplayReminders;
+        // Add Set Reminder button to reminders tab
+        const origReminders = window.loadAndDisplayReminders;
         window.loadAndDisplayReminders = function() {
+            origReminders.call(this);
             const remindersList = document.getElementById('tc-reminders-list') || document.getElementById('remindersList');
-            if (!remindersList) return;
-
-            // Add Set Reminder button if not exists
-            const container = remindersList.parentElement;
-            let setReminderBtn = container.querySelector('.set-reminder-btn');
-            if(!setReminderBtn) {
+            if(remindersList && !remindersList.parentElement.querySelector('.set-reminder-btn')) {
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-primary set-reminder-btn';
                 btn.innerHTML = '➕ Set Reminder';
                 btn.style.marginBottom = '20px';
                 btn.onclick = openSetReminderModal;
-                container.insertBefore(btn, remindersList);
+                remindersList.parentElement.insertBefore(btn, remindersList);
             }
-
-            // Call original function to display reminders
-            originalLoadReminders.call(this);
         };
 
-        console.log('✅ ALL 4 FEATURES LOADED:');
-        console.log('   1. Set Reminder - Create new reminders manually');
-        console.log('   2. Fixed Follow-up Buttons - Done & Call now work');
-        console.log('   3. Follow-up Notes - Document outcomes & next steps');
-        console.log('   4. Reschedule Follow-up - Change dates as needed');
+        // Create modals
+        document.addEventListener('DOMContentLoaded', function() {
+            ['setReminderModal', 'followupNotesModal', 'rescheduleModal'].forEach(id => {
+                if(!document.getElementById(id)) {
+                    const modal = document.createElement('div');
+                    modal.id = id;
+                    modal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;';
+                    document.body.appendChild(modal);
+                }
+            });
+        });
 
-
-        // Create modal containers
-        if(!document.getElementById('setReminderModal')) {
-            const setReminderModal = document.createElement('div');
-            setReminderModal.id = 'setReminderModal';
-            setReminderModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;';
-            document.body.appendChild(setReminderModal);
-        }
-
-        if(!document.getElementById('followupNotesModal')) {
-            const followupNotesModal = document.createElement('div');
-            followupNotesModal.id = 'followupNotesModal';
-            followupNotesModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;';
-            document.body.appendChild(followupNotesModal);
-        }
-
-        if(!document.getElementById('rescheduleModal')) {
-            const rescheduleModal = document.createElement('div');
-            rescheduleModal.id = 'rescheduleModal';
-            rescheduleModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;';
-            document.body.appendChild(rescheduleModal);
-        }
-
-        // Style for modal content
-        const style = document.createElement('style');
-        style.textContent = `
-            .modal-content {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                max-width: 500px;
-                width: 90%;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-            .form-group {
-                margin-bottom: 15px;
-            }
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: 600;
-                color: #333;
-            }
-        `;
-        document.head.appendChild(style);
+        console.log('✅ ALL 4 FEATURES WITH AUTO-BINDING LOADED');
 
         </script>
 </body>
