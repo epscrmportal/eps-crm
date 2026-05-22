@@ -3161,6 +3161,50 @@
             currentRole = null;
         }
 
+        function completeMeeting(contactName, meetingDate) {
+            const contact = importedContacts.find(c => c.name === contactName);
+            if(!contact) return;
+            
+            if(!contact.completedMeetings) contact.completedMeetings = [];
+            
+            // Find the meeting in fieldExecOwnMeetings or fieldExecMeetings
+            const myName = currentUser?.name;
+            let meeting = null;
+            
+            if(window.fieldExecOwnMeetings && window.fieldExecOwnMeetings[myName]) {
+                const idx = window.fieldExecOwnMeetings[myName].findIndex(m => m.contactName === contactName && m.date === meetingDate);
+                if(idx >= 0) {
+                    meeting = window.fieldExecOwnMeetings[myName][idx];
+                    window.fieldExecOwnMeetings[myName].splice(idx, 1);
+                }
+            }
+            
+            if(!meeting && window.fieldExecMeetings && window.fieldExecMeetings[myName]) {
+                const idx = window.fieldExecMeetings[myName].findIndex(m => m.contactName === contactName && m.date === meetingDate);
+                if(idx >= 0) {
+                    meeting = window.fieldExecMeetings[myName][idx];
+                    window.fieldExecMeetings[myName].splice(idx, 1);
+                }
+            }
+            
+            if(meeting) {
+                // Get notes for this meeting
+                const meetingNotes = contact.meetingNotes?.filter(n => n.date === meetingDate) || [];
+                
+                // Add to completed meetings with notes
+                contact.completedMeetings.push({
+                    ...meeting,
+                    completedOn: new Date().toLocaleDateString(),
+                    completedAt: new Date().toLocaleTimeString(),
+                    notes: meetingNotes
+                });
+                
+                saveContactsToStorage();
+                loadFieldExecMeetings();
+                alert(`✅ Meeting marked as completed!`);
+            }
+        }
+
         function addMeetingNotes(contactName, meetingDate) {
             const modal = document.getElementById('meetingNotesModal');
             if(!modal) {
@@ -3658,7 +3702,7 @@
                                 </p>
                             </div>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
-                                <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
+                                <button class="btn-success" onclick="completeMeeting('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">✅ Completed</button>
                                 <button class="btn-primary" onclick="addMeetingNotes('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">📝 Notes</button>
                             </div>
                         </div>
@@ -3698,7 +3742,7 @@
                                 </p>
                             </div>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start;">
-                                <button class="btn-success" style="padding: 6px 12px; font-size: 12px;">✅ Completed</button>
+                                <button class="btn-success" onclick="completeMeeting('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">✅ Completed</button>
                                 <button class="btn-primary" onclick="addMeetingNotes('${meeting.contactName}', '${meeting.date}')" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">📝 Notes</button>
                             </div>
                         </div>
@@ -3706,8 +3750,50 @@
                 });
             }
             
+            // Show Completed Meetings History
+            const completedMeetings = [];
+            importedContacts.forEach(contact => {
+                if(contact.completedMeetings && contact.completedMeetings.length > 0) {
+                    contact.completedMeetings.forEach(meeting => {
+                        completedMeetings.push({
+                            ...meeting,
+                            contactObj: contact
+                        });
+                    });
+                }
+            });
+            
+            if(completedMeetings.length > 0) {
+                html += '<h4 style="margin-top: 30px; margin-bottom: 15px; color: #10b981; border-top: 2px solid #e5e7eb; padding-top: 20px;">✅ Completed Meetings History</h4>';
+                completedMeetings.forEach((meeting) => {
+                    html += `<div class="contact-item" style="background: #f0fdf4; border-left-color: #10b981; margin-bottom: 15px; opacity: 0.9;">
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <h4>📅 ${meeting.contactName}</h4>
+                                <p><strong>Meeting Date:</strong> ${meeting.date} at ${meeting.time}</p>
+                                <p><strong>Type:</strong> ${meeting.type}</p>
+                                <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
+                                <p><strong>Completed:</strong> ${meeting.completedOn} at ${meeting.completedAt}</p>
+                                ${meeting.notes && meeting.notes.length > 0 ? `
+                                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #10b981;">
+                                        <strong style="color: #10b981;">📝 Meeting Notes:</strong>
+                                        ${meeting.notes.map(note => `
+                                            <div style="margin-top: 8px; font-size: 13px;">
+                                                <p style="margin: 4px 0;"><strong>Duration:</strong> ${note.duration} mins</p>
+                                                <p style="margin: 4px 0; white-space: pre-wrap;">${note.notes}</p>
+                                                <p style="font-size: 11px; color: #999; margin: 4px 0;">${note.savedOn} at ${note.savedAt}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p style="color: #999; font-size: 12px; margin-top: 10px;">No notes added</p>'}
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+            
             meetingsList.innerHTML = html;
-            console.log(`✅ Loaded ${ownMeetings.length} own + ${assignedMeetings.length} assigned meetings`);
+            console.log(`✅ Loaded ${ownMeetings.length} own + ${assignedMeetings.length} assigned meetings + ${completedMeetings.length} completed`);
         }
 
         function createFieldExecCharts() {
