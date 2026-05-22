@@ -4117,11 +4117,34 @@
             importedContacts.push(newContact);
             saveContactsToStorage();
             
+            // Remove the card from business cards
+            const fieldExecName = currentUser?.name || 'Field Executive';
+            if(window.businessCards && window.businessCards[fieldExecName]) {
+                const cardIndex = window.businessCards[fieldExecName].findIndex(c => c.name === name && c.phone === phone);
+                if(cardIndex >= 0) {
+                    window.businessCards[fieldExecName].splice(cardIndex, 1);
+                    localStorage.setItem('eps_crm_businessCards', JSON.stringify(window.businessCards));
+                    console.log(`✅ Business card removed for ${fieldExecName}: ${name}`);
+                }
+            }
+            
             console.log('✅ Business card converted to contact:', newContact);
             alert(`✅ Contact Added!\n\n👤 ${name}\n🏢 ${company}\n📱 ${phone}\n\nNow you can work on this lead!`);
             
             loadAllContacts();
+            
+            // Reload business cards display if function exists
+            if(window.loadBusinessCardsFromFieldExecs) {
+                window.loadBusinessCardsFromFieldExecs();
+            }
         }
+        
+        window.loadBusinessCardsFromFieldExecs = function() {
+            // This function reloads the contacts view to update business cards
+            if(window.loadAllContacts) {
+                window.loadAllContacts();
+            }
+        };
         
         function scheduleOwnMeeting(event) {
             event.preventDefault();
