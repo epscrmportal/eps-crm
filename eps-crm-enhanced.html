@@ -3192,12 +3192,27 @@
                 return;
             }
             
+            // Find contact and save notes
+            const contact = importedContacts.find(c => c.name === contactName);
+            if(contact) {
+                if(!contact.meetingNotes) contact.meetingNotes = [];
+                contact.meetingNotes.push({
+                    date: meetingDate,
+                    duration: duration,
+                    notes: notes,
+                    savedOn: new Date().toLocaleDateString(),
+                    savedAt: new Date().toLocaleTimeString()
+                });
+                saveContactsToStorage();
+            }
+            
             console.log(`✅ Meeting notes saved for ${contactName}`);
             console.log(`   Date: ${meetingDate}`);
             console.log(`   Duration: ${duration} minutes`);
             console.log(`   Notes: ${notes}`);
             
             document.getElementById('meetingNotesModal').style.display = 'none';
+            loadFieldExecMeetings();
             alert('✅ Meeting notes saved!');
         }
         
@@ -3615,6 +3630,9 @@
             if (ownMeetings.length > 0) {
                 html += '<h4 style="margin-top: 20px; margin-bottom: 15px; color: #667eea;">🗓️ Your Scheduled Meetings</h4>';
                 ownMeetings.forEach((meeting) => {
+                    const contact = importedContacts.find(c => c.name === meeting.contactName);
+                    const meetingNotes = contact?.meetingNotes?.filter(n => n.date === meeting.date) || [];
+                    
                     html += `<div class="contact-item" style="background: #f0fdf4; border-left-color: #22c55e; margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                             <div style="flex: 1; min-width: 250px;">
@@ -3623,6 +3641,18 @@
                                 <p><strong>Type:</strong> ${meeting.type}</p>
                                 <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
                                 <p><strong>Agenda:</strong> ${meeting.agenda || 'No details'}</p>
+                                ${meetingNotes.length > 0 ? `
+                                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #22c55e;">
+                                        <strong style="color: #22c55e;">📝 Meeting Notes:</strong>
+                                        ${meetingNotes.map(note => `
+                                            <div style="margin-top: 8px; font-size: 13px;">
+                                                <p style="margin: 4px 0;"><strong>Duration:</strong> ${note.duration} mins</p>
+                                                <p style="margin: 4px 0; white-space: pre-wrap;">${note.notes}</p>
+                                                <p style="font-size: 11px; color: #999; margin: 4px 0;">${note.savedOn} at ${note.savedAt}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
                                 <p style="margin-top: 8px; font-size: 12px; color: #666;">
                                     <strong>Status:</strong> You scheduled this
                                 </p>
@@ -3640,6 +3670,9 @@
             if (assignedMeetings.length > 0) {
                 html += '<h4 style="margin-top: 20px; margin-bottom: 15px; color: #0ea5e9;">📋 Meetings Assigned by Telecallers</h4>';
                 assignedMeetings.forEach((meeting) => {
+                    const contact = importedContacts.find(c => c.name === meeting.contactName);
+                    const meetingNotes = contact?.meetingNotes?.filter(n => n.date === meeting.date) || [];
+                    
                     html += `<div class="contact-item" style="background: #f0f9ff; border-left-color: #0ea5e9; margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                             <div style="flex: 1; min-width: 250px;">
@@ -3648,6 +3681,18 @@
                                 <p><strong>Type:</strong> ${meeting.type}</p>
                                 <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
                                 <p><strong>Agenda:</strong> ${meeting.agenda}</p>
+                                ${meetingNotes.length > 0 ? `
+                                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #0ea5e9;">
+                                        <strong style="color: #0ea5e9;">📝 Meeting Notes:</strong>
+                                        ${meetingNotes.map(note => `
+                                            <div style="margin-top: 8px; font-size: 13px;">
+                                                <p style="margin: 4px 0;"><strong>Duration:</strong> ${note.duration} mins</p>
+                                                <p style="margin: 4px 0; white-space: pre-wrap;">${note.notes}</p>
+                                                <p style="font-size: 11px; color: #999; margin: 4px 0;">${note.savedOn} at ${note.savedAt}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
                                 <p style="margin-top: 8px; font-size: 12px; color: #666;">
                                     <strong>Scheduled by:</strong> ${meeting.scheduledBy}
                                 </p>
