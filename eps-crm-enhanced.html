@@ -3388,8 +3388,8 @@
                         <td style="display:flex; gap:5px; flex-wrap:wrap;">
                             <button onclick="window.markFollowupDoneFixed('${f.contact}', '${f.dueDate}')" style="padding:5px 10px; font-size:12px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer;">✅ Done</button>
                             <button onclick="window.openFollowupCallModal('${f.contact}', '${f.phone}')" style="padding:5px 10px; font-size:12px; background:#3b82f6; color:white; border:none; border-radius:4px; cursor:pointer;">📞 Call</button>
-                            <button onclick="window.openFollowupNotesModal('${f.contact}', ${f.reminderIndex})" style="padding:5px 10px; font-size:12px; background:#f59e0b; color:white; border:none; border-radius:4px; cursor:pointer;">📝 Notes</button>
-                            <button onclick="window.openRescheduleModal('${f.contact}', ${f.reminderIndex})" style="padding:5px 10px; font-size:12px; background:#8b5cf6; color:white; border:none; border-radius:4px; cursor:pointer;">📅 Reschedule</button>
+                            <button onclick="window.openFollowupNotesModal('${f.contact}')" style="padding:5px 10px; font-size:12px; background:#f59e0b; color:white; border:none; border-radius:4px; cursor:pointer;">📝 Notes</button>
+                            <button onclick="window.openRescheduleModal('${f.contact}')" style="padding:5px 10px; font-size:12px; background:#8b5cf6; color:white; border:none; border-radius:4px; cursor:pointer;">📅 Reschedule</button>
                         </td>
                     </tr>`;
                 }).join('');
@@ -5225,7 +5225,12 @@ Orders Team,1
         window.markFollowupDoneFixed = function(contactName, dueDate) {
             const contact = importedContacts.find(c => c.name === contactName);
             if(!contact) return;
-            contact.reminders = contact.reminders.filter(r => r.date !== dueDate);
+            
+            // Remove the first reminder (simple approach)
+            if(contact.reminders && contact.reminders.length > 0) {
+                contact.reminders.shift();
+            }
+            
             saveContactsToStorage();
             loadAndDisplayFollowUps();
             alert('✅ Done!');
@@ -5263,79 +5268,81 @@ Orders Team,1
             alert('✅ Call logged!');
         };
 
-        window.openFollowupNotesModal = function(contactName, reminderIndex) {
-            const idx = parseInt(reminderIndex);
+        window.openFollowupNotesModal = function(contactName) {
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact || !contact.reminders[idx]) { alert('Not found'); return; }
+            if(!contact) { alert('Contact not found'); return; }
             
-            const r = contact.reminders[idx];
             const modal = document.getElementById('followupNotesModal');
             modal.innerHTML = `
                 <div style="background:white; padding:30px; border-radius:10px; max-width:500px; width:90%;">
-                    <h3>📝 Notes</h3>
-                    <p>${contactName} | ${r.text}</p>
-                    <input type="number" id="dur" value="${r?.notes?.callDuration || 15}" placeholder="Duration" style="width:100%; padding:8px; margin:10px 0;" />
-                    <textarea id="resp" placeholder="Response" style="width:100%; padding:8px; min-height:60px; margin:10px 0;">${r?.notes?.customerResponse || ''}</textarea>
-                    <textarea id="next" placeholder="Next steps" style="width:100%; padding:8px; min-height:60px; margin:10px 0;">${r?.notes?.nextSteps || ''}</textarea>
-                    <button onclick="window.saveFollowupNotes('${contactName}', ${idx})" style="padding:8px 15px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:5px;">✅ Save</button>
-                    <button onclick="document.getElementById('followupNotesModal').style.display='none'" style="padding:8px 15px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer;">❌ Cancel</button>
+                    <h3>📝 Add Notes</h3>
+                    <p><strong>${contactName}</strong></p>
+                    <textarea id="callNotesField" placeholder="What did you discuss with the customer?" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; min-height:100px;"></textarea>
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button onclick="window.saveFollowupNotes('${contactName}')" style="padding:10px 15px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">✅ Save</button>
+                        <button onclick="document.getElementById('followupNotesModal').style.display='none'" style="padding:10px 15px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">❌ Cancel</button>
+                    </div>
                 </div>
             `;
             modal.style.display = 'flex';
         };
 
-        window.saveFollowupNotes = function(contactName, reminderIndex) {
-            const idx = parseInt(reminderIndex);
+        window.saveFollowupNotes = function(contactName) {
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact || !contact.reminders[idx]) return;
+            if(!contact) return;
             
-            contact.reminders[idx].notes = {
-                callDuration: document.getElementById('dur').value,
-                customerResponse: document.getElementById('resp').value,
-                nextSteps: document.getElementById('next').value,
-                addedOn: new Date().toLocaleDateString()
-            };
+            const notes = document.getElementById('callNotesField').value.trim();
+            if(!notes) { alert('Add some notes'); return; }
+            
+            if(!contact.callNotes) contact.callNotes = [];
+            contact.callNotes.push({
+                notes: notes,
+                duration: 0,
+                savedOn: new Date().toLocaleDateString(),
+                savedAt: new Date().toLocaleTimeString()
+            });
             
             saveContactsToStorage();
             document.getElementById('followupNotesModal').style.display = 'none';
             loadAndDisplayFollowUps();
-            alert('✅ Saved!');
+            alert('✅ Notes saved!');
         };
 
-        window.openRescheduleModal = function(contactName, reminderIndex) {
-            const idx = parseInt(reminderIndex);
+        window.openRescheduleModal = function(contactName) {
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact || !contact.reminders[idx]) { alert('Not found'); return; }
+            if(!contact) { alert('Contact not found'); return; }
             
-            const r = contact.reminders[idx];
             const modal = document.getElementById('rescheduleModal');
             modal.innerHTML = `
                 <div style="background:white; padding:30px; border-radius:10px; max-width:500px; width:90%;">
-                    <h3>📅 Reschedule</h3>
-                    <p>${contactName}</p>
-                    <p>Current: <strong>${r.date}</strong></p>
-                    <input type="date" id="newDate" value="${r.date}" style="width:100%; padding:8px; margin:10px 0;" />
-                    <textarea id="reason" placeholder="Why?" style="width:100%; padding:8px; min-height:60px; margin:10px 0;"></textarea>
-                    <button onclick="window.saveReschedule('${contactName}', ${idx})" style="padding:8px 15px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:5px;">✅ Reschedule</button>
-                    <button onclick="document.getElementById('rescheduleModal').style.display='none'" style="padding:8px 15px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer;">❌ Cancel</button>
+                    <h3>📅 Reschedule Follow-up</h3>
+                    <p><strong>${contactName}</strong></p>
+                    <p style="margin:20px 0;">Pick new date:</p>
+                    <input type="date" id="newDateField" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin:10px 0;" />
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button onclick="window.saveReschedule('${contactName}')" style="padding:10px 15px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">✅ Reschedule</button>
+                        <button onclick="document.getElementById('rescheduleModal').style.display='none'" style="padding:10px 15px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">❌ Cancel</button>
+                    </div>
                 </div>
             `;
             modal.style.display = 'flex';
         };
 
-        window.saveReschedule = function(contactName, reminderIndex) {
-            const idx = parseInt(reminderIndex);
+        window.saveReschedule = function(contactName) {
             const contact = importedContacts.find(c => c.name === contactName);
-            if(!contact || !contact.reminders[idx]) return;
+            if(!contact) return;
             
-            const newDate = document.getElementById('newDate').value;
-            if(!newDate) { alert('Pick date'); return; }
+            const newDate = document.getElementById('newDateField').value;
+            if(!newDate) { alert('Pick a date'); return; }
             
-            contact.reminders[idx].date = newDate;
-            saveContactsToStorage();
-            document.getElementById('rescheduleModal').style.display = 'none';
-            loadAndDisplayFollowUps();
-            alert('✅ Rescheduled!');
+            // Find first reminder and update its date
+            if(contact.reminders && contact.reminders.length > 0) {
+                contact.reminders[0].date = newDate;
+                saveContactsToStorage();
+                document.getElementById('rescheduleModal').style.display = 'none';
+                loadAndDisplayFollowUps();
+                alert('✅ Rescheduled!');
+            }
         };
 
         // Ensure modals exist
