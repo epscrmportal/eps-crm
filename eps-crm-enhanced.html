@@ -3199,6 +3199,14 @@
             if(meeting) {
                 console.log(`   ✅ Meeting found in ${foundIn}:`, meeting);
                 
+                // Find notes for this meeting from importedContacts
+                let meetingNotes = [];
+                const contact = importedContacts.find(c => c.name === contactName);
+                if(contact && contact.meetingNotes) {
+                    meetingNotes = contact.meetingNotes.filter(n => n.date === meetingDate);
+                    console.log(`   ✅ Found ${meetingNotes.length} notes for this meeting`);
+                }
+                
                 // Create or get completedMeetings array at user level
                 if(!window.completedFieldExecMeetings) {
                     window.completedFieldExecMeetings = {};
@@ -3207,9 +3215,10 @@
                     window.completedFieldExecMeetings[myName] = [];
                 }
                 
-                // Add to completed meetings with timestamp
+                // Add to completed meetings with timestamp and notes
                 window.completedFieldExecMeetings[myName].push({
                     ...meeting,
+                    notes: meetingNotes,
                     completedOn: new Date().toLocaleDateString(),
                     completedAt: new Date().toLocaleTimeString()
                 });
@@ -3787,6 +3796,19 @@
                                 <p><strong>Type:</strong> ${meeting.type}</p>
                                 <p><strong>Location:</strong> ${meeting.location || 'TBD'}</p>
                                 <p><strong>Completed:</strong> ${meeting.completedOn} at ${meeting.completedAt}</p>
+                                
+                                ${meeting.notes && meeting.notes.length > 0 ? `
+                                    <div style="margin-top: 15px; padding: 12px; background: white; border-radius: 4px; border-left: 3px solid #10b981;">
+                                        <strong style="color: #10b981; display:block; margin-bottom:8px;">📝 Meeting Notes:</strong>
+                                        ${meeting.notes.map(note => `
+                                            <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
+                                                <p style="margin: 4px 0;"><strong>Duration:</strong> ${note.duration} mins</p>
+                                                <p style="margin: 4px 0; white-space: pre-wrap; color: #333;">${note.notes}</p>
+                                                <p style="font-size: 11px; color: #999; margin: 4px 0;">${note.savedOn} at ${note.savedAt}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p style="color: #999; font-size: 12px; margin-top: 10px; font-style: italic;">No notes added</p>'}
                             </div>
                         </div>
                     </div>`;
