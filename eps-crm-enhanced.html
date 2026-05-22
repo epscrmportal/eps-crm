@@ -690,7 +690,7 @@
                 <button class="tab" onclick="showTab(event, 'tc-calls')">☎️ Log Calls</button>
                 <button class="tab" onclick="showTab(event, 'tc-contacts')">📇 Contacts</button>
                 <button class="tab" onclick="showTab(event, 'tc-followups')">⏰ Follow-ups</button>
-                <button class="tab" onclick="showTab(event, 'tc-reminders')">🔔 Reminders</button>
+
                 <button class="tab" onclick="showTab(event, 'tc-emails')">📧 Email Templates</button>
                 <button class="tab" onclick="showTab(event, 'tc-goals')">🎯 Goals</button>
                 <button class="tab" onclick="showTab(event, 'tc-analytics')">📈 Analytics</button>
@@ -910,13 +910,6 @@
             </div>
 
             <!-- TC Reminders Tab -->
-            <div id="tc-reminders" class="tab-content">
-                <h2>Upcoming Reminders</h2>
-                <div id="remindersContainer" style="margin-top: 20px;">
-                    <!-- Reminders will be loaded here -->
-                </div>
-            </div>
-
             <!-- TC Email Templates Tab -->
             <div id="tc-emails" class="tab-content">
                 <h2>Email Templates</h2>
@@ -3404,170 +3397,6 @@
             
             container.innerHTML = html;
         }
-
-        
-        // Load and display saved reminders
-        function loadAndDisplayReminders() {
-            console.log('📋 loadAndDisplayReminders called');
-            const container = document.getElementById('remindersContainer');
-            if (!container) {
-                console.error('❌ remindersContainer not found!');
-                return;
-            }
-            
-            let html = '';
-            
-            // Collect all reminders from all contacts (ONLY from contact.reminders to avoid duplicates)
-            const allReminders = [];
-            importedContacts.forEach(contact => {
-                if (contact.reminders && contact.reminders.length > 0) {
-                    console.log('📌 Found reminders for contact:', contact.name, contact.reminders);
-                    contact.reminders.forEach(reminder => {
-                        allReminders.push({
-                            contactName: contact.name,
-                            contactPhone: contact.phone,
-                            contactId: contact.id,
-                            ...reminder
-                        });
-                    });
-                }
-            });
-            
-            // Sort by date
-            allReminders.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            console.log('✅ Total reminders to show:', allReminders.length);
-            
-            if (allReminders.length === 0) {
-                html = '<p style="color: #999; text-align: center; padding: 40px;">No reminders set yet. Create reminders using the "Note" button on contacts.</p>';
-            } else {
-                html = allReminders.map((reminder, idx) => {
-                    // Skip completed reminders
-                    if (reminder.status === 'Completed') {
-                        return '';
-                    }
-                    
-                    const today = new Date().toISOString().split('T')[0];
-                    const reminderDate = reminder.date;
-                    const isDue = reminderDate <= today;
-                    const bgColor = isDue ? '#fee2e2' : '#fffbeb';
-                    const borderColor = isDue ? '#ef4444' : '#f59e0b';
-                    const dueLabel = isDue ? '🔴 DUE TODAY' : '⏰ Upcoming';
-                    
-                    return `
-                    <div class="contact-item" style="border-left-color: ${borderColor}; background: ${bgColor}; margin-bottom: 15px;">
-                        <h4>🔔 ${reminder.contactName}</h4>
-                        <p><strong>Phone:</strong> ${reminder.contactPhone || 'N/A'}</p>
-                        <p><strong>Due Date:</strong> ${reminder.date}</p>
-                        <p><strong>Note:</strong> ${reminder.text || reminder.reminderText || 'Follow-up reminder'}</p>
-                        <p><strong>Status:</strong> 
-                            <span style="background: ${isDue ? '#fca5a5' : '#fbbf24'}; color: ${isDue ? '#7f1d1d' : '#78350f'}; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold;">
-                                ${reminder.status || (isDue ? 'OVERDUE' : 'Pending')}
-                            </span>
-                            <span style="margin-left: 10px; font-weight: bold; color: ${isDue ? '#dc2626' : '#d97706'};">${dueLabel}</span>
-                        </p>
-                        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button onclick="markReminderDone(${idx})" style="padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">✅ Done</button>
-                            <button onclick="callContact('${reminder.contactPhone}')" style="padding: 8px 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">📞 Call</button>
-                            <button onclick="addReminderNotes('${reminder.contactName}', '${reminder.contactPhone}')" style="padding: 8px 12px; background: #8b5cf6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">📝 Notes</button>
-                            <button onclick="scheduleRemiderMeeting('${reminder.contactName}', '${reminder.contactPhone}')" style="padding: 8px 12px; background: #ec4899; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">📅 Schedule</button>
-                        </div>
-                    </div>
-                `}).filter(item => item !== '').join('');
-            }
-            
-            container.innerHTML = html;
-            
-            // Check for due reminders and show notifications
-            checkAndNotifyReminders(allReminders);
-        }
-        
-        // Check for reminders due today and notify
-        function checkAndNotifyReminders(reminders) {
-            const today = new Date().toISOString().split('T')[0];
-            const dueReminders = reminders.filter(r => r.date === today && r.status !== 'Completed');
-            
-            if (dueReminders.length > 0) {
-                dueReminders.forEach(reminder => {
-                    // Create notification
-                    const notification = {
-                        id: Date.now() + Math.random(),
-                        type: 'reminder',
-                        message: `🔔 Reminder: ${reminder.contactName} - ${reminder.text || 'Follow-up reminder'}`,
-                        read: false,
-                        created_at: new Date(),
-                        data: {
-                            contactName: reminder.contactName,
-                            contactPhone: reminder.contactPhone,
-                            reminderText: reminder.text
-                        }
-                    };
-                    
-                    // Add to notification center
-                    if (window.NotificationCenter) {
-                        window.NotificationCenter.notifications.unshift(notification);
-                    }
-                    
-                    // Show browser notification
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        new Notification('EPS CRM Reminder', {
-                            body: `${reminder.contactName}: ${reminder.text || 'Follow-up needed'}`,
-                            icon: '🔔'
-                        });
-                    }
-                    
-                    // Show toast alert
-                    showToastNotification(`🔔 Action Required: ${reminder.contactName}`, 'reminder');
-                });
-            }
-        }
-        
-        // Helper function to call contact
-        function callContact(phone) {
-            if (!phone || phone === 'N/A') {
-                alert('❌ No phone number available');
-                return;
-            }
-            alert(`📞 Ready to call: ${phone}\n\nMake the call and mark reminder as done!`);
-        }
-        
-        // Add notes to reminder
-        function addReminderNotes(contactName, phone) {
-            const notes = prompt(`📝 Add notes for ${contactName}:\n\n(Current reminder will be updated)`);
-            if (notes && notes.trim()) {
-                alert(`✅ Notes added for ${contactName}:\n\n"${notes}"\n\nMake sure to call and follow up!`);
-            }
-        }
-        
-        // Schedule meeting from reminder
-        function scheduleRemiderMeeting(contactName, phone) {
-            const date = prompt(`📅 Schedule meeting for ${contactName}\n\nEnter date (YYYY-MM-DD):`);
-            if (date) {
-                const time = prompt(`Enter time (HH:MM):`);
-                if (time) {
-                    alert(`✅ Meeting scheduled!\n\n📅 ${contactName}\n🕐 ${date} at ${time}\n📱 ${phone}\n\nAssign to Field Executive to complete!`);
-                }
-            }
-        }
-        
-        // Request notification permission on page load
-        window.addEventListener('load', () => {
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-        });
-        
-        // Check reminders every hour
-        setInterval(() => {
-            loadAndDisplayReminders();
-        }, 60 * 60 * 1000);
-        
-        // Also check when page becomes visible
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                loadAndDisplayReminders();
-            }
-        });
         
         // Mark reminder as done
         function markReminderDone(index) {
