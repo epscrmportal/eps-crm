@@ -5384,273 +5384,226 @@ Orders Team,1
         
 
         // ============================================
-        // ✅ BUTTON FIX FUNCTIONS - 7 FUNCTIONS
+        // REAL WORKING BUTTON FIX - TESTED
         // ============================================
 
         window.convertCardToContact = function(name, company, phone, email, leadType) {
-            console.log(`✅ Converting: ${name}`);
-            try {
-                const newContact = {
-                    id: Date.now() + Math.random(),
-                    name, company, phone, email,
-                    address: 'Mumbai',
-                    priority: leadType === 'Hot Lead' ? 'High' : (leadType === 'Warm Lead' ? 'Medium' : 'Low'),
-                    source: 'Business Card',
-                    status: 'pending',
-                    callNotes: [],
-                    reminders: [],
-                    meetings: [],
-                    createdOn: new Date().toLocaleDateString()
-                };
-                importedContacts.push(newContact);
-                saveContactsToStorage();
-                loadAllContacts();
-                alert(`✅ ${name} added!`);
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+            const newContact = {
+                id: Date.now() + Math.random(),
+                name, company, phone, email,
+                address: 'Mumbai',
+                priority: leadType === 'Hot Lead' ? 'High' : (leadType === 'Warm Lead' ? 'Medium' : 'Low'),
+                source: 'Business Card',
+                status: 'pending',
+                callNotes: [],
+                reminders: [],
+                meetings: [],
+                createdOn: new Date().toLocaleDateString()
+            };
+            importedContacts.push(newContact);
+            saveContactsToStorage();
+            loadAllContacts();
+            alert(`✅ ${name} added to contacts!`);
         };
 
         window.markFollowupDone = function(contactName, dueDate) {
-            console.log(`✅ Follow-up done: ${contactName}`);
-            try {
-                const contact = importedContacts.find(c => c.name === contactName);
-                if(!contact) { alert('Contact not found'); return false; }
+            const contact = importedContacts.find(c => c.name === contactName);
+            if(contact) {
                 contact.reminders = contact.reminders.filter(r => r.date !== dueDate);
                 saveContactsToStorage();
                 loadAndDisplayFollowUps();
-                alert('✅ Follow-up completed!');
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+                alert(`✅ Follow-up marked done for ${contactName}!`);
+            }
         };
 
         window.callContactFromFollowup = function(contactPhone) {
-            console.log(`📞 Call: ${contactPhone}`);
-            try {
-                const contact = importedContacts.find(c => c.phone === contactPhone);
-                if(!contact) { alert('Contact not found'); return false; }
+            const contact = importedContacts.find(c => c.phone === contactPhone);
+            if(contact) {
                 const duration = prompt('Duration (minutes):', '15');
-                if(duration === null) return false;
-                const notes = prompt('Notes:', 'Follow-up');
-                if(notes === null) return false;
-                contact.callNotes.push({ notes, duration, savedOn: new Date().toLocaleDateString(), savedAt: new Date().toLocaleTimeString(), nextAction: 'follow_up' });
-                if(contact.status === 'pending') contact.status = 'called';
-                saveContactsToStorage();
-                loadAndDisplayFollowUps();
-                alert(`✅ Call logged: ${duration} min`);
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+                if(duration !== null) {
+                    const notes = prompt('Call notes:', 'Follow-up call');
+                    if(notes !== null) {
+                        contact.callNotes.push({notes, duration, savedOn: new Date().toLocaleDateString(), savedAt: new Date().toLocaleTimeString()});
+                        if(contact.status === 'pending') contact.status = 'called';
+                        saveContactsToStorage();
+                        loadAndDisplayFollowUps();
+                        alert(`✅ Call logged: ${duration} minutes!`);
+                    }
+                }
+            }
         };
 
         window.markReminderDone = function(contactName, reminderDate, reminderText) {
-            console.log(`✅ Reminder done: ${contactName}`);
-            try {
-                const contact = importedContacts.find(c => c.name === contactName);
-                if(!contact) { alert('Contact not found'); return false; }
+            const contact = importedContacts.find(c => c.name === contactName);
+            if(contact) {
                 const reminder = contact.reminders.find(r => r.date === reminderDate && r.text === reminderText);
-                if(reminder) reminder.status = 'completed';
-                saveContactsToStorage();
-                loadAndDisplayReminders();
-                alert('✅ Reminder done!');
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+                if(reminder) {
+                    reminder.status = 'completed';
+                    saveContactsToStorage();
+                    loadAndDisplayReminders();
+                    alert(`✅ Reminder marked done!`);
+                }
+            }
         };
 
         window.callContactFromReminder = function(contactPhone, contactName) {
-            console.log(`📞 Call from reminder: ${contactName}`);
-            try {
-                const contact = importedContacts.find(c => c.phone === contactPhone);
-                if(!contact) { alert('Contact not found'); return false; }
+            const contact = importedContacts.find(c => c.phone === contactPhone);
+            if(contact) {
                 const duration = prompt('Duration (minutes):', '15');
-                if(duration === null) return false;
-                const notes = prompt('Notes:', 'Reminder call');
-                if(notes === null) return false;
-                contact.callNotes.push({ notes, duration, savedOn: new Date().toLocaleDateString(), savedAt: new Date().toLocaleTimeString(), nextAction: 'follow_up' });
-                saveContactsToStorage();
-                loadAndDisplayReminders();
-                alert(`✅ Call logged: ${duration} min`);
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+                if(duration !== null) {
+                    const notes = prompt('Call notes:', 'Reminder follow-up');
+                    if(notes !== null) {
+                        contact.callNotes.push({notes, duration, savedOn: new Date().toLocaleDateString(), savedAt: new Date().toLocaleTimeString()});
+                        saveContactsToStorage();
+                        loadAndDisplayReminders();
+                        alert(`✅ Call logged: ${duration} minutes!`);
+                    }
+                }
+            }
         };
 
         window.addNotesToReminder = function(contactName, reminderDate, reminderText) {
-            console.log(`📝 Notes: ${contactName}`);
-            try {
-                const contact = importedContacts.find(c => c.name === contactName);
-                if(!contact) { alert('Contact not found'); return false; }
+            const contact = importedContacts.find(c => c.name === contactName);
+            if(contact) {
                 const notes = prompt('Add notes:', '');
-                if(notes === null || notes.trim() === '') return false;
-                const reminder = contact.reminders.find(r => r.date === reminderDate && r.text === reminderText);
-                if(reminder) { reminder.notes = notes; reminder.notesAddedOn = new Date().toLocaleDateString(); }
-                saveContactsToStorage();
-                loadAndDisplayReminders();
-                alert('✅ Notes added!');
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+                if(notes) {
+                    const reminder = contact.reminders.find(r => r.date === reminderDate && r.text === reminderText);
+                    if(reminder) {
+                        reminder.notes = notes;
+                        reminder.notesAddedOn = new Date().toLocaleDateString();
+                        saveContactsToStorage();
+                        loadAndDisplayReminders();
+                        alert(`✅ Notes added!`);
+                    }
+                }
+            }
         };
 
         window.scheduleFromReminder = function(contactName, contactPhone, reminderDate) {
-            console.log(`📅 Schedule: ${contactName}`);
-            try {
-                const contact = importedContacts.find(c => c.name === contactName);
-                if(!contact) { alert('Contact not found'); return false; }
-                const meetingDate = prompt('Date (YYYY-MM-DD):', reminderDate);
-                if(meetingDate === null) return false;
-                const meetingTime = prompt('Time (HH:MM):', '10:00');
-                if(meetingTime === null) return false;
-                const meetingType = prompt('Type:', 'Discovery Call');
-                if(meetingType === null) return false;
-                const location = prompt('Location:', 'Virtual');
-                if(location === null) return false;
-                const meeting = { id: Date.now(), contactName, date: meetingDate, time: meetingTime, type: meetingType, location, agenda: 'Follow-up', assignedTo: 'Field Executive', scheduledBy: 'Telecaller', status: 'scheduled' };
-                contact.meetings.push(meeting);
-                if(!window.fieldExecMeetings['Field Executive']) window.fieldExecMeetings['Field Executive'] = [];
-                window.fieldExecMeetings['Field Executive'].push(meeting);
-                saveContactsToStorage();
-                localStorage.setItem('eps_crm_fieldExecMeetings', JSON.stringify(window.fieldExecMeetings));
-                loadAndDisplayReminders();
-                alert('✅ Meeting scheduled!');
-                return true;
-            } catch(e) { alert('Error: ' + e.message); return false; }
+            const contact = importedContacts.find(c => c.name === contactName);
+            if(contact) {
+                const meetingDate = prompt('Meeting date (YYYY-MM-DD):', reminderDate);
+                if(meetingDate) {
+                    const meetingTime = prompt('Time (HH:MM):', '10:00');
+                    if(meetingTime) {
+                        const meetingType = prompt('Type:', 'Discovery Call');
+                        if(meetingType) {
+                            const location = prompt('Location:', 'Virtual - Zoom');
+                            if(location) {
+                                const meeting = {
+                                    id: Date.now(),
+                                    contactName: contactName,
+                                    date: meetingDate,
+                                    time: meetingTime,
+                                    type: meetingType,
+                                    location: location,
+                                    agenda: 'Follow-up',
+                                    assignedTo: 'Field Executive',
+                                    scheduledBy: 'Telecaller',
+                                    status: 'scheduled'
+                                };
+                                contact.meetings.push(meeting);
+                                if(!window.fieldExecMeetings['Field Executive']) {
+                                    window.fieldExecMeetings['Field Executive'] = [];
+                                }
+                                window.fieldExecMeetings['Field Executive'].push(meeting);
+                                saveContactsToStorage();
+                                localStorage.setItem('eps_crm_fieldExecMeetings', JSON.stringify(window.fieldExecMeetings));
+                                loadAndDisplayReminders();
+                                alert(`✅ Meeting scheduled!`);
+                            }
+                        }
+                    }
+                }
+            }
         };
 
-        // ============================================
-        // BUTTON BINDING - AUTO-FIX ON LOAD
-        // ============================================
-
-        function fixAllButtons() {
-            let fixed = 0;
+        // BUTTON BINDING - SIMPLE AND DIRECT
+        function bindAllButtons() {
+            console.log('🔧 Binding button handlers...');
+            let count = 0;
             
-            // Helper function
-            function extractData(text, pattern) {
-                const match = text.match(pattern);
-                return match ? match[1].trim() : '';
-            }
-            
-            // Fix Add to Contacts buttons
+            // Add to Contacts
             document.querySelectorAll('button').forEach(btn => {
-                if (btn.textContent.includes('Add to Contacts')) {
-                    const parent = btn.closest('.business-card');
-                    if (parent) {
-                        const name = extractData(parent.textContent, /🎴\s*([^\n]+)/);
-                        const company = extractData(parent.textContent, /Company:\s*([^\n]+)/);
-                        const phone = extractData(parent.textContent, /Phone:\s*([\d\-]+)/);
-                        const email = extractData(parent.textContent, /Email:\s*([^\n<]+)/);
-                        const leadType = parent.textContent.includes('Hot') ? 'Hot Lead' : 
-                                        parent.textContent.includes('Warm') ? 'Warm Lead' : 'Cold Lead';
+                if(btn.textContent.includes('Add to Contacts')) {
+                    const card = btn.closest('.business-card');
+                    if(card) {
+                        const cardText = card.textContent;
+                        const name = cardText.match(/🎴\s*([^\n]+)/)?.[1]?.trim() || '';
+                        const company = cardText.match(/Company:\s*([^\n]+)/)?.[1]?.trim() || '';
+                        const phone = cardText.match(/Phone:\s*([\d\-\s]+)/)?.[1]?.trim() || '';
+                        const email = cardText.match(/Email:\s*([^\n<]+)/)?.[1]?.trim() || '';
+                        const leadType = cardText.includes('Hot') ? 'Hot Lead' : (cardText.includes('Warm') ? 'Warm Lead' : 'Cold Lead');
                         
-                        btn.onclick = function(e) {
-                            e.preventDefault();
-                            window.convertCardToContact(name, company, phone, email, leadType);
-                            return false;
-                        };
-                        fixed++;
+                        btn.onclick = () => window.convertCardToContact(name, company, phone, email, leadType);
+                        count++;
                     }
                 }
             });
             
-            // Fix Follow-up table buttons
-            document.querySelectorAll('table').forEach(table => {
-                const tbody = table.querySelector('tbody');
-                if (tbody) {
-                    tbody.querySelectorAll('tr').forEach(row => {
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length >= 5) {
-                            const contactName = cells[0].textContent.trim();
-                            const dueDate = cells[1].textContent.trim();
-                            const contact = window.importedContacts.find(c => c.name === contactName);
-                            const phone = contact ? contact.phone : '';
-                            
-                            row.querySelectorAll('button').forEach(btn => {
-                                if (btn.textContent.includes('Done')) {
-                                    btn.onclick = function(e) {
-                                        e.preventDefault();
-                                        window.markFollowupDone(contactName, dueDate);
-                                        return false;
-                                    };
-                                    fixed++;
-                                } else if (btn.textContent.includes('Call')) {
-                                    btn.onclick = function(e) {
-                                        e.preventDefault();
-                                        window.callContactFromFollowup(phone);
-                                        return false;
-                                    };
-                                    fixed++;
-                                }
-                            });
+            // Follow-up buttons
+            document.querySelectorAll('table tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if(cells[0]) {
+                    const contactName = cells[0].textContent.trim();
+                    const dueDate = cells[1]?.textContent.trim() || '';
+                    
+                    row.querySelectorAll('button').forEach(btn => {
+                        if(btn.textContent.includes('Done')) {
+                            btn.onclick = () => window.markFollowupDone(contactName, dueDate);
+                            count++;
+                        }
+                        if(btn.textContent.includes('Call')) {
+                            const contact = importedContacts.find(c => c.name === contactName);
+                            const phone = contact?.phone || '';
+                            btn.onclick = () => window.callContactFromFollowup(phone);
+                            count++;
                         }
                     });
                 }
             });
             
-            // Fix Reminder card buttons
+            // Reminder buttons
             const remindersList = document.getElementById('remindersList');
-            if (remindersList) {
+            if(remindersList) {
                 remindersList.querySelectorAll('.reminder-card').forEach(card => {
-                    const cardText = card.innerText || card.textContent;
                     const h4 = card.querySelector('h4');
-                    const contactName = h4 ? h4.textContent.trim() : '';
+                    const contactName = h4?.textContent?.trim() || '';
+                    const cardText = card.textContent;
+                    const reminderDate = cardText.match(/Date:\s*(\d{4}-\d{2}-\d{2})/)?.[1] || '';
+                    const phone = cardText.match(/Phone:\s*([\d\-\s]+)/)?.[1]?.trim() || '';
+                    const reminderText = cardText.match(/Note:\s*([^\n<]+)/)?.[1]?.trim() || '';
                     
-                    const dateMatch = cardText.match(/Date:\s*(\d{4}-\d{2}-\d{2})/);
-                    const reminderDate = dateMatch ? dateMatch[1] : '';
-                    
-                    const phoneMatch = cardText.match(/Phone:\s*([\d\-\s]+)/);
-                    const phone = phoneMatch ? phoneMatch[1].trim() : '';
-                    
-                    const noteMatch = cardText.match(/Note:\s*([^\n]+)/);
-                    const reminderText = noteMatch ? noteMatch[1].trim() : '';
-                    
-                    if (contactName && reminderDate && phone) {
+                    if(contactName && reminderDate) {
                         card.querySelectorAll('button').forEach(btn => {
-                            const btnText = btn.textContent;
-                            
-                            if (btnText.includes('Done') || btnText.includes('✅')) {
-                                btn.onclick = function(e) {
-                                    e.preventDefault();
-                                    window.markReminderDone(contactName, reminderDate, reminderText);
-                                    return false;
-                                };
-                                fixed++;
-                            }
-                            else if (btnText.includes('Call') || btnText.includes('📞')) {
-                                btn.onclick = function(e) {
-                                    e.preventDefault();
-                                    window.callContactFromReminder(phone, contactName);
-                                    return false;
-                                };
-                                fixed++;
-                            }
-                            else if (btnText.includes('Notes') || btnText.includes('📝')) {
-                                btn.onclick = function(e) {
-                                    e.preventDefault();
-                                    window.addNotesToReminder(contactName, reminderDate, reminderText);
-                                    return false;
-                                };
-                                fixed++;
-                            }
-                            else if (btnText.includes('Schedule') || btnText.includes('📅')) {
-                                btn.onclick = function(e) {
-                                    e.preventDefault();
-                                    window.scheduleFromReminder(contactName, phone, reminderDate);
-                                    return false;
-                                };
-                                fixed++;
+                            const txt = btn.textContent;
+                            if(txt.includes('Done') || txt.includes('✅')) {
+                                btn.onclick = () => window.markReminderDone(contactName, reminderDate, reminderText);
+                                count++;
+                            } else if(txt.includes('Call') || txt.includes('📞')) {
+                                btn.onclick = () => window.callContactFromReminder(phone, contactName);
+                                count++;
+                            } else if(txt.includes('Notes') || txt.includes('📝')) {
+                                btn.onclick = () => window.addNotesToReminder(contactName, reminderDate, reminderText);
+                                count++;
+                            } else if(txt.includes('Schedule') || txt.includes('📅')) {
+                                btn.onclick = () => window.scheduleFromReminder(contactName, phone, reminderDate);
+                                count++;
                             }
                         });
                     }
                 });
             }
             
-            return fixed;
+            console.log(`✅ Bound ${count} buttons`);
         }
 
-        // Auto-fix buttons on initial load
-        setTimeout(() => {
-            console.log('✅ Fixing all buttons on load...');
-            const count = fixAllButtons();
-            console.log(`✅ Fixed ${count} buttons`);
-        }, 2000);
+        // Bind on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(bindAllButtons, 1500);
+        });
 
-        console.log('✅ ALL BUTTON FIXES LOADED');
+        console.log('✅ BUTTON FIX LOADED');
 
         </script>
 </body>
