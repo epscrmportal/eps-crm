@@ -5291,8 +5291,13 @@ Orders Team,1
             const contact = importedContacts.find(c => c.name === contactName);
             if(!contact) return;
             
-            const notes = document.getElementById('callNotesField').value.trim();
-            if(!notes) { alert('Add some notes'); return; }
+            const notesField = document.getElementById('callNotesField');
+            const notes = notesField ? notesField.value : '';
+            
+            if(!notes || notes.length === 0) { 
+                alert('Add some notes'); 
+                return; 
+            }
             
             if(!contact.callNotes) contact.callNotes = [];
             contact.callNotes.push({
@@ -5312,13 +5317,16 @@ Orders Team,1
             const contact = importedContacts.find(c => c.name === contactName);
             if(!contact) { alert('Contact not found'); return; }
             
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];
+            
             const modal = document.getElementById('rescheduleModal');
             modal.innerHTML = `
                 <div style="background:white; padding:30px; border-radius:10px; max-width:500px; width:90%;">
                     <h3>📅 Reschedule Follow-up</h3>
                     <p><strong>${contactName}</strong></p>
                     <p style="margin:20px 0;">Pick new date:</p>
-                    <input type="date" id="newDateField" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin:10px 0;" />
+                    <input type="date" id="newDateField" value="${today}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin:10px 0;" />
                     <div style="margin-top:15px; display:flex; gap:10px;">
                         <button onclick="window.saveReschedule('${contactName}')" style="padding:10px 15px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">✅ Reschedule</button>
                         <button onclick="document.getElementById('rescheduleModal').style.display='none'" style="padding:10px 15px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">❌ Cancel</button>
