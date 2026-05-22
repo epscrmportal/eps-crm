@@ -5384,7 +5384,7 @@ Orders Team,1
         
 
         // ============================================
-        // ✅ BUTTON FIX FUNCTIONS - SIMPLE VERSION
+        // ✅ BUTTON FIX FUNCTIONS - 7 FUNCTIONS
         // ============================================
 
         window.convertCardToContact = function(name, company, phone, email, leadType) {
@@ -5513,7 +5513,145 @@ Orders Team,1
             } catch(e) { alert('Error: ' + e.message); return false; }
         };
 
-        console.log('✅ ALL 7 BUTTON FIX FUNCTIONS LOADED');
+        // ============================================
+        // BUTTON BINDING - AUTO-FIX ON LOAD
+        // ============================================
+
+        function fixAllButtons() {
+            let fixed = 0;
+            
+            // Helper function
+            function extractData(text, pattern) {
+                const match = text.match(pattern);
+                return match ? match[1].trim() : '';
+            }
+            
+            // Fix Add to Contacts buttons
+            document.querySelectorAll('button').forEach(btn => {
+                if (btn.textContent.includes('Add to Contacts')) {
+                    const parent = btn.closest('.business-card');
+                    if (parent) {
+                        const name = extractData(parent.textContent, /🎴\s*([^\n]+)/);
+                        const company = extractData(parent.textContent, /Company:\s*([^\n]+)/);
+                        const phone = extractData(parent.textContent, /Phone:\s*([\d\-]+)/);
+                        const email = extractData(parent.textContent, /Email:\s*([^\n<]+)/);
+                        const leadType = parent.textContent.includes('Hot') ? 'Hot Lead' : 
+                                        parent.textContent.includes('Warm') ? 'Warm Lead' : 'Cold Lead';
+                        
+                        btn.onclick = function(e) {
+                            e.preventDefault();
+                            window.convertCardToContact(name, company, phone, email, leadType);
+                            return false;
+                        };
+                        fixed++;
+                    }
+                }
+            });
+            
+            // Fix Follow-up table buttons
+            document.querySelectorAll('table').forEach(table => {
+                const tbody = table.querySelector('tbody');
+                if (tbody) {
+                    tbody.querySelectorAll('tr').forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length >= 5) {
+                            const contactName = cells[0].textContent.trim();
+                            const dueDate = cells[1].textContent.trim();
+                            const contact = window.importedContacts.find(c => c.name === contactName);
+                            const phone = contact ? contact.phone : '';
+                            
+                            row.querySelectorAll('button').forEach(btn => {
+                                if (btn.textContent.includes('Done')) {
+                                    btn.onclick = function(e) {
+                                        e.preventDefault();
+                                        window.markFollowupDone(contactName, dueDate);
+                                        return false;
+                                    };
+                                    fixed++;
+                                } else if (btn.textContent.includes('Call')) {
+                                    btn.onclick = function(e) {
+                                        e.preventDefault();
+                                        window.callContactFromFollowup(phone);
+                                        return false;
+                                    };
+                                    fixed++;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // Fix Reminder card buttons
+            const remindersList = document.getElementById('remindersList');
+            if (remindersList) {
+                remindersList.querySelectorAll('.reminder-card').forEach(card => {
+                    const cardText = card.innerText || card.textContent;
+                    const h4 = card.querySelector('h4');
+                    const contactName = h4 ? h4.textContent.trim() : '';
+                    
+                    const dateMatch = cardText.match(/Date:\s*(\d{4}-\d{2}-\d{2})/);
+                    const reminderDate = dateMatch ? dateMatch[1] : '';
+                    
+                    const phoneMatch = cardText.match(/Phone:\s*([\d\-\s]+)/);
+                    const phone = phoneMatch ? phoneMatch[1].trim() : '';
+                    
+                    const noteMatch = cardText.match(/Note:\s*([^\n]+)/);
+                    const reminderText = noteMatch ? noteMatch[1].trim() : '';
+                    
+                    if (contactName && reminderDate && phone) {
+                        card.querySelectorAll('button').forEach(btn => {
+                            const btnText = btn.textContent;
+                            
+                            if (btnText.includes('Done') || btnText.includes('✅')) {
+                                btn.onclick = function(e) {
+                                    e.preventDefault();
+                                    window.markReminderDone(contactName, reminderDate, reminderText);
+                                    return false;
+                                };
+                                fixed++;
+                            }
+                            else if (btnText.includes('Call') || btnText.includes('📞')) {
+                                btn.onclick = function(e) {
+                                    e.preventDefault();
+                                    window.callContactFromReminder(phone, contactName);
+                                    return false;
+                                };
+                                fixed++;
+                            }
+                            else if (btnText.includes('Notes') || btnText.includes('📝')) {
+                                btn.onclick = function(e) {
+                                    e.preventDefault();
+                                    window.addNotesToReminder(contactName, reminderDate, reminderText);
+                                    return false;
+                                };
+                                fixed++;
+                            }
+                            else if (btnText.includes('Schedule') || btnText.includes('📅')) {
+                                btn.onclick = function(e) {
+                                    e.preventDefault();
+                                    window.scheduleFromReminder(contactName, phone, reminderDate);
+                                    return false;
+                                };
+                                fixed++;
+                            }
+                        });
+                    }
+                });
+            }
+            
+            return fixed;
+        }
+
+        // Auto-fix buttons on initial load
+        setTimeout(() => {
+            console.log('✅ Fixing all buttons on load...');
+            const count = fixAllButtons();
+            console.log(`✅ Fixed ${count} buttons`);
+        }, 2000);
+
+        console.log('✅ ALL BUTTON FIXES LOADED');
+
         </script>
 </body>
 </html>
