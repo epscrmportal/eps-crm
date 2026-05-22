@@ -3199,12 +3199,12 @@
             if(meeting) {
                 console.log(`   ✅ Meeting found in ${foundIn}:`, meeting);
                 
-                // Find notes for this meeting from importedContacts
+                // Find notes for this meeting from meetingNotesStore
                 let meetingNotes = [];
-                const contact = importedContacts.find(c => c.name === contactName);
-                if(contact && contact.meetingNotes) {
-                    meetingNotes = contact.meetingNotes.filter(n => n.date === meetingDate);
-                    console.log(`   ✅ Found ${meetingNotes.length} notes for this meeting`);
+                const noteKey = `${contactName}_${meetingDate}`;
+                if(window.meetingNotesStore && window.meetingNotesStore[noteKey]) {
+                    meetingNotes = [window.meetingNotesStore[noteKey]];
+                    console.log(`   ✅ Found note in store:`, meetingNotes);
                 }
                 
                 // Create or get completedMeetings array at user level
@@ -3265,24 +3265,26 @@
                 return;
             }
             
-            // Find contact and save notes
-            const contact = importedContacts.find(c => c.name === contactName);
-            if(contact) {
-                if(!contact.meetingNotes) contact.meetingNotes = [];
-                contact.meetingNotes.push({
-                    date: meetingDate,
-                    duration: duration,
-                    notes: notes,
-                    savedOn: new Date().toLocaleDateString(),
-                    savedAt: new Date().toLocaleTimeString()
-                });
-                saveContactsToStorage();
+            // Store notes globally by meeting date
+            if(!window.meetingNotesStore) {
+                window.meetingNotesStore = {};
             }
+            
+            const noteKey = `${contactName}_${meetingDate}`;
+            window.meetingNotesStore[noteKey] = {
+                contactName: contactName,
+                date: meetingDate,
+                duration: duration,
+                notes: notes,
+                savedOn: new Date().toLocaleDateString(),
+                savedAt: new Date().toLocaleTimeString()
+            };
             
             console.log(`✅ Meeting notes saved for ${contactName}`);
             console.log(`   Date: ${meetingDate}`);
             console.log(`   Duration: ${duration} minutes`);
             console.log(`   Notes: ${notes}`);
+            console.log(`   Store:`, window.meetingNotesStore);
             
             document.getElementById('meetingNotesModal').style.display = 'none';
             loadFieldExecMeetings();
