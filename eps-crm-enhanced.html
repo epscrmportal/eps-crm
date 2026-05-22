@@ -2365,6 +2365,7 @@
             try {
                 localStorage.setItem('eps_crm_contacts', JSON.stringify(importedContacts));
                 localStorage.setItem('eps_crm_fieldExecMeetings', JSON.stringify(window.fieldExecMeetings));
+                localStorage.setItem('eps_crm_goalTracking', JSON.stringify(window.goalTracking));
                 console.log('💾 Data saved to localStorage');
             } catch (e) {
                 console.error('❌ Storage error:', e);
@@ -2375,6 +2376,7 @@
             try {
                 const saved = localStorage.getItem('eps_crm_contacts');
                 const savedMeetings = localStorage.getItem('eps_crm_fieldExecMeetings');
+                const savedGoalTracking = localStorage.getItem('eps_crm_goalTracking');
                 
                 if (saved) {
                     const data = JSON.parse(saved);
@@ -2385,6 +2387,18 @@
                 if (savedMeetings) {
                     window.fieldExecMeetings = JSON.parse(savedMeetings);
                     console.log('✅ Loaded meetings from localStorage');
+                }
+                
+                if (savedGoalTracking) {
+                    window.goalTracking = JSON.parse(savedGoalTracking);
+                    console.log('✅ Loaded goal tracking from localStorage');
+                } else {
+                    // Initialize if not in storage
+                    window.goalTracking = {
+                        currentMonth: new Date().toISOString().slice(0, 7),
+                        monthlyCallsThisMonth: 0,
+                        monthlyMeetingsThisMonth: 0
+                    };
                 }
             } catch (e) {
                 console.error('❌ Load error:', e);
@@ -2891,6 +2905,17 @@
                 nextAction: action
             });
             
+            // Increment monthly goal counter
+            if (!window.goalTracking) {
+                window.goalTracking = {
+                    currentMonth: new Date().toISOString().slice(0, 7),
+                    monthlyCallsThisMonth: 0,
+                    monthlyMeetingsThisMonth: 0
+                };
+            }
+            window.goalTracking.monthlyCallsThisMonth++;
+            console.log(`📊 Monthly calls this month: ${window.goalTracking.monthlyCallsThisMonth}`);
+            
             // Save reminder if set
             if (reminderDate && reminderText.trim()) {
                 console.log('⏰ Saving reminder for:', reminderDate, 'Text:', reminderText);
@@ -3103,6 +3128,17 @@
             if (meetingData.date && meetingData.time) {
                 if (!contact.meetings) contact.meetings = [];
                 contact.meetings.push(meetingData);
+                
+                // Increment monthly meeting counter
+                if (!window.goalTracking) {
+                    window.goalTracking = {
+                        currentMonth: new Date().toISOString().slice(0, 7),
+                        monthlyCallsThisMonth: 0,
+                        monthlyMeetingsThisMonth: 0
+                    };
+                }
+                window.goalTracking.monthlyMeetingsThisMonth++;
+                console.log(`📊 Monthly meetings this month: ${window.goalTracking.monthlyMeetingsThisMonth}`);
                 
                 // Create automatic 1-day before meeting reminder
                 const meetingDate = new Date(meetingData.date);
@@ -3390,6 +3426,25 @@
         function updatePerformanceGoals() {
             console.log('🎯 Updating Performance Goals...');
             
+            // Initialize goal tracking if not exists
+            if (!window.goalTracking) {
+                const currentMonth = new Date().toISOString().slice(0, 7);
+                window.goalTracking = {
+                    currentMonth: currentMonth,
+                    monthlyCallsThisMonth: 0,
+                    monthlyMeetingsThisMonth: 0
+                };
+            }
+            
+            // Check if month has changed - if so, reset counters
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            if (window.goalTracking.currentMonth !== currentMonth) {
+                console.log(`🔄 Month changed from ${window.goalTracking.currentMonth} to ${currentMonth} - Resetting monthly goals!`);
+                window.goalTracking.currentMonth = currentMonth;
+                window.goalTracking.monthlyCallsThisMonth = 0;
+                window.goalTracking.monthlyMeetingsThisMonth = 0;
+            }
+            
             // Ensure contacts are loaded from localStorage
             if (importedContacts.length === 0) {
                 loadContactsFromStorage();
@@ -3397,11 +3452,17 @@
             
             console.log('📊 Current contacts:', importedContacts.length);
             
-            // Calculate metrics
+            // Calculate metrics (daily/weekly = current total / 20 or 4)
             const totalCalls = importedContacts.reduce((sum, c) => sum + (c.callNotes?.length || 0), 0);
             const totalMeetings = importedContacts.reduce((sum, c) => sum + (c.meetings?.length || 0), 0);
             
-            console.log('📊 Total calls:', totalCalls, 'Total meetings:', totalMeetings);
+            // Monthly = THIS MONTH only (tracks what's in goalTracking)
+            // Default to current month totals if not yet calculated
+            let monthlyCallsThisMonth = window.goalTracking.monthlyCallsThisMonth || totalCalls;
+            let monthlyMeetingsThisMonth = window.goalTracking.monthlyMeetingsThisMonth || totalMeetings;
+            
+            console.log('📊 Total calls (all-time):', totalCalls, 'This month:', monthlyCallsThisMonth);
+            console.log('📊 Total meetings (all-time):', totalMeetings, 'This month:', monthlyMeetingsThisMonth);
             
             // Calculate daily/weekly (simple: assume working days are 20 per month, 4 per week)
             const dailyCalls = Math.ceil(totalCalls / 20) || 0;
@@ -3409,7 +3470,7 @@
             const dailyMeetings = Math.ceil(totalMeetings / 20) || 0;
             const weeklyMeetings = Math.ceil(totalMeetings / 4) || 0;
             
-            console.log('🎯 Calculated goals:', { totalCalls, totalMeetings, dailyCalls, weeklyCalls, dailyMeetings, weeklyMeetings });
+            console.log('🎯 Calculated goals:', { totalCalls, totalMeetings, dailyCalls, weeklyCalls, dailyMeetings, weeklyMeetings, monthlyCallsThisMonth, monthlyMeetingsThisMonth });
             
             // Update goals elements
             const updateGoal = (elementId, current, target) => {
@@ -3430,12 +3491,156 @@
             
             updateGoal('goal-daily-calls', dailyCalls, 45);
             updateGoal('goal-weekly-calls', weeklyCalls, 270);
-            updateGoal('goal-monthly-calls', totalCalls, 1350);
+            updateGoal('goal-monthly-calls', monthlyCallsThisMonth, 1350);
             updateGoal('goal-daily-meetings', dailyMeetings, 1);
             updateGoal('goal-weekly-meetings', weeklyMeetings, 7);
-            updateGoal('goal-monthly-meetings', totalMeetings, 30);
+            updateGoal('goal-monthly-meetings', monthlyMeetingsThisMonth, 30);
             
             console.log('✅ Performance Goals updated');
+        }
+        
+        // ============ ADMIN TEAM REPORTS ============
+        function updateTeamReports() {
+            console.log('📊 Updating Team Reports for Admin Dashboard...');
+            
+            // Get today's date
+            const today = new Date().toLocaleDateString();
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            
+            // Calculate TODAY's metrics
+            let todaysCalls = 0;
+            let todaysContacts = 0;
+            let todaysMeetings = 0;
+            let todaysActivities = 0;
+            
+            importedContacts.forEach(contact => {
+                // Count calls from today
+                if (contact.callNotes) {
+                    contact.callNotes.forEach(call => {
+                        if (call.savedOn === today) {
+                            todaysCalls++;
+                            todaysActivities++;
+                        }
+                    });
+                }
+                
+                // Count contacts created today
+                if (contact.createdOn === today) {
+                    todaysContacts++;
+                }
+                
+                // Count meetings scheduled today
+                if (contact.meetings) {
+                    contact.meetings.forEach(meeting => {
+                        if (meeting.scheduledOn === today) {
+                            todaysMeetings++;
+                            todaysActivities++;
+                        }
+                    });
+                }
+            });
+            
+            // Calculate MONTHLY metrics (current month only)
+            let monthsCalls = window.goalTracking?.monthlyCallsThisMonth || 0;
+            let monthsContacts = 0;
+            let monthsMeetings = window.goalTracking?.monthlyMeetingsThisMonth || 0;
+            let monthsActivities = monthsCalls + monthsMeetings;
+            
+            // Count contacts from current month
+            importedContacts.forEach(contact => {
+                if (contact.createdOn && contact.createdOn.includes(currentMonth.replace('-', '-'))) {
+                    monthsContacts++;
+                }
+            });
+            
+            console.log('📊 Today\'s Metrics:', { todaysCalls, todaysContacts, todaysMeetings, todaysActivities });
+            console.log('📊 Month\'s Metrics:', { monthsCalls, monthsContacts, monthsMeetings, monthsActivities });
+            
+            // Update TODAY's display
+            const todayElements = {
+                'todayCallsCount': todaysCalls,
+                'todayContactsCount': todaysContacts,
+                'todayMeetingsCount': todaysMeetings,
+                'todayActivitiesCount': todaysActivities
+            };
+            
+            Object.entries(todayElements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                    console.log(`✅ Updated ${id}: ${value}`);
+                }
+            });
+            
+            // Update MONTHLY display
+            const monthElements = {
+                'monthCallsCount': monthsCalls,
+                'monthContactsCount': monthsContacts,
+                'monthMeetingsCount': monthsMeetings,
+                'monthActivitiesCount': monthsActivities
+            };
+            
+            Object.entries(monthElements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                    console.log(`✅ Updated ${id}: ${value}`);
+                }
+            });
+            
+            // Update Team Tables
+            updateTeamTable();
+            
+            console.log('✅ Team Reports updated');
+        }
+        
+        function updateTeamTable() {
+            // Calculate totals for each team
+            let tcCalls = 0, tcContacts = 0, tcMeetings = 0;
+            let feCards = 0, feMeetings = 0;
+            
+            // Telecaller metrics from importedContacts
+            importedContacts.forEach(contact => {
+                if (contact.callNotes) tcCalls += contact.callNotes.length;
+                if (contact.meetings) tcMeetings += contact.meetings.length;
+            });
+            tcContacts = importedContacts.length;
+            
+            // Field Exec metrics from business cards
+            if (window.businessCards) {
+                Object.values(window.businessCards).forEach(cardArray => {
+                    feCards += cardArray.length;
+                });
+            }
+            
+            // Field Exec meetings
+            if (window.fieldExecMeetings) {
+                Object.values(window.fieldExecMeetings).forEach(meetingArray => {
+                    feMeetings += meetingArray.length;
+                });
+            }
+            
+            // Update table rows (if they exist)
+            const rows = document.querySelectorAll('table tbody tr');
+            if (rows.length >= 2) {
+                // Telecaller row
+                const tcRow = rows[0];
+                if (tcRow) {
+                    tcRow.querySelectorAll('td')[2].textContent = tcCalls;
+                    tcRow.querySelectorAll('td')[3].textContent = tcContacts;
+                    tcRow.querySelectorAll('td')[4].textContent = tcMeetings;
+                }
+                
+                // Field Executive row
+                const feRow = rows[1];
+                if (feRow) {
+                    feRow.querySelectorAll('td')[2].textContent = '0'; // FE calls
+                    feRow.querySelectorAll('td')[3].textContent = feCards;
+                    feRow.querySelectorAll('td')[4].textContent = feMeetings;
+                }
+            }
+            
+            console.log('✅ Team table updated:', { tcCalls, tcContacts, tcMeetings, feCards, feMeetings });
         }
         
         function showTab(event, tabName) {
@@ -3464,6 +3669,12 @@
             if (tabName === 'fe-goals') {
                 console.log('🎯 Field Exec Goals tab clicked, updating...');
                 setTimeout(() => updateFieldExecGoals(), 50);
+            }
+            
+            // Update Team Reports when clicked
+            if (tabName === 'ac-reports') {
+                console.log('📊 Team Reports clicked, updating...');
+                setTimeout(() => updateTeamReports(), 50);
             }
             
             // Create charts when analytics tabs are opened
