@@ -3735,6 +3735,18 @@
             if (tabName === 'fe-meetings') {
                 loadFieldExecMeetings();
             }
+            
+            // Display orders when My Orders tab is opened
+            if (tabName === 'ord-myorders') {
+                console.log('📦 My Orders tab clicked, displaying orders...');
+                setTimeout(() => displayOrders(), 50);
+            }
+            
+            // Update orders dashboard when clicked
+            if (tabName === 'ord-dashboard') {
+                console.log('📦 Orders dashboard clicked, updating metrics...');
+                setTimeout(() => updateOrdersDashboard(), 50);
+            }
         }
         
         // Load and display follow-ups
