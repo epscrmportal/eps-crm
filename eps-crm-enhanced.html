@@ -3746,8 +3746,11 @@
             
             // Update orders dashboard when clicked
             if (tabName === 'ord-dashboard') {
-                console.log('📦 Orders dashboard clicked, updating metrics...');
-                setTimeout(() => updateOrdersDashboard(), 50);
+                console.log('📦 Orders dashboard clicked, updating metrics and charts...');
+                setTimeout(() => {
+                    updateOrdersDashboard();
+                    createOrderCharts();
+                }, 50);
             }
         }
         
@@ -4200,36 +4203,87 @@
         }
 
         function createOrderCharts() {
+            console.log('📊 Creating orders charts with real data...');
+            
+            // Count orders by shipping method
+            const shippingCounts = {};
+            const statusCounts = { pending: 0, completed: 0 };
+            
+            window.orders.forEach(order => {
+                // Count by shipping method
+                const method = order.shippingMethod || 'Other';
+                shippingCounts[method] = (shippingCounts[method] || 0) + 1;
+                
+                // Count by status
+                if (order.status === 'completed') {
+                    statusCounts.completed++;
+                } else {
+                    statusCounts.pending++;
+                }
+            });
+            
+            console.log('Shipping methods:', shippingCounts);
+            console.log('Status counts:', statusCounts);
+            
+            // Service/Shipping Chart
             const serviceCtx = document.getElementById('serviceChart');
             if (serviceCtx) {
-                // Destroy old chart if exists
                 if (window.charts.serviceChart) {
                     window.charts.serviceChart.destroy();
                 }
+                
+                const serviceLabels = Object.keys(shippingCounts);
+                const serviceData = Object.values(shippingCounts);
+                
                 window.charts.serviceChart = new Chart(serviceCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: [],
-                        datasets: [{ data: [], backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981'] }]
+                        labels: serviceLabels.length > 0 ? serviceLabels : ['No Data'],
+                        datasets: [{
+                            data: serviceData.length > 0 ? serviceData : [0],
+                            backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#06b6d4']
+                        }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
                 });
+                console.log('✅ Service chart created with data');
             }
 
+            // Status/Orders Chart
             const shippingCtx = document.getElementById('shippingChart');
             if (shippingCtx) {
-                // Destroy old chart if exists
                 if (window.charts.shippingChart) {
                     window.charts.shippingChart.destroy();
                 }
+                
                 window.charts.shippingChart = new Chart(shippingCtx, {
                     type: 'bar',
                     data: {
-                        labels: [],
-                        datasets: [{ label: 'Orders', data: [], backgroundColor: '#667eea' }]
+                        labels: ['Pending', 'Completed'],
+                        datasets: [{
+                            label: 'Orders by Status',
+                            data: [statusCounts.pending, statusCounts.completed],
+                            backgroundColor: ['#f59e0b', '#10b981']
+                        }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: Math.max(statusCounts.pending, statusCounts.completed) + 2 }
+                        },
+                        plugins: {
+                            legend: { display: true }
+                        }
+                    }
                 });
+                console.log('✅ Status chart created with data');
             }
         }
 
@@ -4315,8 +4369,9 @@
             // Add to table
             addOrderToTable(order);
             
-            // Update dashboard metrics
+            // Update dashboard metrics and charts
             updateOrdersDashboard();
+            createOrderCharts();
             
             // Reset form
             form.reset();
@@ -4345,6 +4400,7 @@
                 saveOrdersToStorage();
                 displayOrders();
                 updateOrdersDashboard();
+                createOrderCharts();
                 alert(`✅ Order updated!\n\nNew Amount: ₹${order.amount}`);
             }
         }
@@ -4360,6 +4416,7 @@
                 saveOrdersToStorage();
                 displayOrders();
                 updateOrdersDashboard();
+                createOrderCharts();
                 alert('✅ Order deleted permanently!');
             }
         }
