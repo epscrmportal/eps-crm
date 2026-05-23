@@ -4610,6 +4610,116 @@
             if (modal) modal.remove();
         }
 
+        function printInvoice(orderId) {
+            const order = window.orders.find(o => o.id === orderId);
+            if (!order) {
+                alert('❌ Order not found');
+                return;
+            }
+
+            // Calculate tax (18% IGST)
+            const taxRate = 18;
+            const subtotal = order.amount;
+            const taxAmount = (subtotal * taxRate) / 100;
+            const total = subtotal + taxAmount;
+
+            // Company details
+            const companyName = 'EPS EXPRESS PRIVATE LIMITED';
+            const companyAddress = '123 Business Park, Mumbai, Maharashtra 400001, India';
+            const companyPhone = '+91-22-1234-5678';
+            const companyEmail = 'info@epsexpress.com';
+            const gstin = '27AABCT1234H1Z0';
+
+            // Create invoice HTML
+            let printContent = '<html><head><title>Invoice ' + orderId + '</title>';
+            printContent += '<style>';
+            printContent += 'body { font-family: Arial, sans-serif; margin: 20px; }';
+            printContent += '.invoice { max-width: 900px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; }';
+            printContent += '.header { border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 20px; }';
+            printContent += 'h1 { color: #667eea; margin: 0; }';
+            printContent += 'h2 { color: #667eea; margin: 10px 0; }';
+            printContent += 'p { margin: 5px 0; font-size: 13px; }';
+            printContent += '.details { display: flex; gap: 40px; margin: 20px 0; }';
+            printContent += '.detail-box { flex: 1; }';
+            printContent += '.detail-box h3 { color: #667eea; font-size: 14px; border-bottom: 2px solid #667eea; padding-bottom: 5px; margin-bottom: 10px; }';
+            printContent += 'table { width: 100%; border-collapse: collapse; margin: 20px 0; }';
+            printContent += 'th { background: #667eea; color: white; padding: 10px; text-align: left; }';
+            printContent += 'td { padding: 10px; border-bottom: 1px solid #ddd; }';
+            printContent += '.summary { text-align: right; margin: 20px 0; }';
+            printContent += '.total-row { font-weight: bold; font-size: 16px; color: #667eea; }';
+            printContent += '@media print { body { margin: 0; } }';
+            printContent += '</style>';
+            printContent += '</head><body>';
+
+            printContent += '<div class="invoice">';
+            printContent += '<div class="header">';
+            printContent += '<h1>' + companyName + '</h1>';
+            printContent += '<h2>TAX INVOICE</h2>';
+            printContent += '<p><strong>Invoice No:</strong> ' + orderId + '</p>';
+            printContent += '<p><strong>Date:</strong> ' + order.createdOn + '</p>';
+            printContent += '<p><strong>Address:</strong> ' + companyAddress + '</p>';
+            printContent += '<p><strong>Phone:</strong> ' + companyPhone + '</p>';
+            printContent += '<p><strong>Email:</strong> ' + companyEmail + '</p>';
+            printContent += '<p><strong>GSTIN:</strong> ' + gstin + '</p>';
+            printContent += '</div>';
+
+            printContent += '<div class="details">';
+            printContent += '<div class="detail-box">';
+            printContent += '<h3>BILL TO (SENDER)</h3>';
+            printContent += '<p><strong>Name:</strong> ' + companyName + '</p>';
+            printContent += '<p><strong>Address:</strong> ' + companyAddress + '</p>';
+            printContent += '<p><strong>Phone:</strong> ' + companyPhone + '</p>';
+            printContent += '</div>';
+            printContent += '<div class="detail-box">';
+            printContent += '<h3>SHIP TO (RECEIVER)</h3>';
+            printContent += '<p><strong>Name:</strong> ' + order.customerName + '</p>';
+            printContent += '<p><strong>Phone:</strong> ' + order.phone + '</p>';
+            printContent += '<p><strong>Destination:</strong> ' + order.destination + '</p>';
+            printContent += '<p><strong>Email:</strong> ' + (order.email || 'N/A') + '</p>';
+            printContent += '</div>';
+            printContent += '</div>';
+
+            printContent += '<table>';
+            printContent += '<tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr>';
+            printContent += '<tr><td>Shipping Service - ' + order.shippingMethod + '</td>';
+            printContent += '<td>1</td><td>₹' + subtotal.toFixed(2) + '</td><td>₹' + subtotal.toFixed(2) + '</td></tr>';
+            printContent += '</table>';
+
+            printContent += '<div class="summary">';
+            printContent += '<p><strong>Subtotal:</strong> ₹' + subtotal.toFixed(2) + '</p>';
+            printContent += '<p><strong>IGST (18%):</strong> ₹' + taxAmount.toFixed(2) + '</p>';
+            printContent += '<p class="total-row"><strong>TOTAL AMOUNT: ₹' + total.toFixed(2) + '</strong></p>';
+            printContent += '<p style="margin-top: 20px; color: #666; font-size: 12px;">Thank you for your business!</p>';
+            printContent += '</div>';
+            printContent += '</div>';
+
+            printContent += '</body></html>';
+
+            // Create an iframe and print from it (bypasses pop-up blocker)
+            try {
+                var iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(printContent);
+                iframeDoc.close();
+                
+                setTimeout(function() {
+                    if (document.body.contains(iframe)) {
+                        iframe.contentWindow.print();
+                        setTimeout(function() {
+                            document.body.removeChild(iframe);
+                        }, 100);
+                    }
+                }, 250);
+                
+            } catch(e) {
+                alert('❌ Print error: ' + e.message);
+            }
+        }
+
         function deleteOrder(orderId) {
             if (currentRole !== 'admin') {
                 alert('❌ UNAUTHORIZED\n\nOnly Admin can delete orders.\nYou can only edit orders in your dashboard.');
@@ -4668,6 +4778,7 @@
                 <td><span style="background: ${paymentBgColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${paymentIcon} ${order.paymentMethod || 'N/A'}</span></td>
                 <td>${order.createdOn}</td>
                 <td style="text-align: center;">
+                    <button onclick="printInvoice('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print</button>
                     <button onclick="editOrder('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
                     <button onclick="deleteOrder('${order.id}')" style="padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
                 </td>
