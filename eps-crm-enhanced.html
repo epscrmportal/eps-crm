@@ -1712,11 +1712,13 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Customer</th>
+                            <th>Origin</th>
                             <th>Destination</th>
                             <th>Boxes</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Service</th>
+                            <th>Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -4231,6 +4233,12 @@
             }
         }
 
+        function generateOrderId() {
+            // Generate EPS + 6 random digits that never repeat
+            const randomDigits = Math.floor(100000 + Math.random() * 900000);
+            return `EPS${randomDigits}`;
+        }
+        
         function createOrder(event) {
             event.preventDefault();
             
@@ -4238,30 +4246,58 @@
             
             // Get form
             const form = event.target;
+            const inputs = form.querySelectorAll('input, textarea, select');
             
-            // Get values
-            const customerName = form.querySelector('[placeholder*="Name"]')?.value || 
-                                form.querySelector('input:nth-of-type(1)')?.value || '';
-            const customerPhone = form.querySelector('[placeholder*="Phone"]')?.value || 
-                                 form.querySelector('input:nth-of-type(2)')?.value || '';
-            const items = form.querySelector('[placeholder*="Items"]')?.value || 
-                         form.querySelector('textarea:nth-of-type(1)')?.value || '';
-            const amount = form.querySelector('[placeholder*="Amount"]')?.value || 
-                          form.querySelector('input:nth-of-type(3)')?.value || '';
+            // Extract all form values by position
+            const formValues = {
+                employeeName: inputs[0]?.value || '',
+                employeeId: inputs[1]?.value || '',
+                customerName: inputs[2]?.value || '',
+                email: inputs[3]?.value || '',
+                phone: inputs[4]?.value || '',
+                altPhone: inputs[5]?.value || '',
+                senderAddress: inputs[6]?.value || '',
+                senderPincode: inputs[7]?.value || '',
+                gstNumber: inputs[8]?.value || '',
+                receiverName: inputs[9]?.value || '',
+                receiverPhone: inputs[10]?.value || '',
+                receiverAddress: inputs[11]?.value || '',
+                receiverPincode: inputs[12]?.value || '',
+                origin: inputs[13]?.value || '',
+                destination: inputs[14]?.value || '',
+                serviceType: inputs[15]?.value || '',
+                shippingMethod: inputs[16]?.value || '',
+                boxes: inputs[17]?.value || '0',
+                weight: inputs[18]?.value || '0',
+                length: inputs[19]?.value || '',
+                width: inputs[20]?.value || '',
+                height: inputs[21]?.value || '',
+                description: inputs[22]?.value || '',
+                amount: inputs[23]?.value || '0',
+                paymentMethod: inputs[24]?.value || '',
+                notes: inputs[25]?.value || ''
+            };
             
-            // Validate
-            if (!customerName || !amount) {
-                alert('❌ Please fill in all required fields (Name & Amount)');
+            // Validate required fields
+            if (!formValues.customerName || !formValues.destination || !formValues.amount) {
+                alert('❌ Please fill in all required fields');
                 return;
             }
             
             // Create order object
             const order = {
-                id: 'ORD-' + Date.now(),
-                customerName: customerName.trim(),
-                customerPhone: customerPhone.trim(),
-                items: items.trim(),
-                amount: parseFloat(amount),
+                id: generateOrderId(),
+                employeeName: formValues.employeeName,
+                customerName: formValues.customerName,
+                email: formValues.email,
+                phone: formValues.phone,
+                origin: formValues.origin,
+                destination: formValues.destination,
+                boxes: parseInt(formValues.boxes) || 0,
+                amount: parseFloat(formValues.amount) || 0,
+                serviceType: formValues.serviceType,
+                shippingMethod: formValues.shippingMethod,
+                paymentMethod: formValues.paymentMethod,
                 status: 'pending',
                 createdOn: new Date().toLocaleDateString(),
                 createdAt: new Date().toLocaleTimeString(),
@@ -4286,11 +4322,31 @@
             form.reset();
             
             // Show success
-            alert(`✅ Order created successfully!\n\nOrder ID: ${order.id}\nCustomer: ${order.customerName}\nAmount: ₹${order.amount}`);
+            alert(`✅ Order created successfully!\n\nOrder ID: ${order.id}\nCustomer: ${order.customerName}\nFrom: ${order.origin} → ${order.destination}\nShipping: ${order.shippingMethod}\nAmount: ₹${order.amount}`);
         }
 
         function editOrder(orderId) {
-            alert('✏️ Edit order ' + orderId);
+            const order = window.orders.find(o => o.id === orderId);
+            if (!order) {
+                alert('❌ Order not found');
+                return;
+            }
+            
+            const newAmount = prompt(`Edit Amount for Order ${orderId}:\n\nCurrent Amount: ₹${order.amount}`, order.amount);
+            
+            if (newAmount !== null && newAmount !== '') {
+                const numAmount = parseFloat(newAmount);
+                if (isNaN(numAmount)) {
+                    alert('❌ Please enter a valid amount');
+                    return;
+                }
+                
+                order.amount = numAmount;
+                saveOrdersToStorage();
+                displayOrders();
+                updateOrdersDashboard();
+                alert(`✅ Order updated!\n\nNew Amount: ₹${order.amount}`);
+            }
         }
 
         function deleteOrder(orderId) {
@@ -4337,9 +4393,12 @@
             row.innerHTML = `
                 <td><strong>${order.id}</strong></td>
                 <td>${order.customerName}</td>
-                <td>${order.customerPhone}</td>
-                <td style="text-align: right;">₹${order.amount}</td>
+                <td>${order.origin || 'N/A'}</td>
+                <td>${order.destination || 'N/A'}</td>
+                <td style="text-align: center;">${order.boxes}</td>
+                <td style="text-align: right;">₹${order.amount.toFixed(2)}</td>
                 <td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${order.status}</span></td>
+                <td>${order.shippingMethod || 'N/A'}</td>
                 <td>${order.createdOn}</td>
                 <td style="text-align: center;">
                     <button onclick="editOrder('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
