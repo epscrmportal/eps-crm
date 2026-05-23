@@ -2405,18 +2405,51 @@
             }
         }
         
-        // Load on startup
+        // ============ INITIALIZE DATA ============
         window.addEventListener('load', () => {
             loadContactsFromStorage();
             loadBusinessCardsFromStorage();
             loadOwnMeetingsFromStorage();
+            loadOrdersFromStorage();
             console.log('📱 Total contacts after load:', importedContacts.length);
+            console.log('📦 Total orders after load:', window.orders?.length || 0);
         });
         
         // Auto-save when contacts change
         window.addEventListener('beforeunload', () => {
             saveContactsToStorage();
+            saveOrdersToStorage();
         });
+        
+        // ============ ORDERS STORAGE ============
+        window.orders = [];
+        
+        function loadOrdersFromStorage() {
+            try {
+                const saved = localStorage.getItem('eps_crm_orders');
+                if (saved) {
+                    window.orders = JSON.parse(saved);
+                    console.log('✅ Loaded', window.orders.length, 'orders from localStorage');
+                    displayOrders();
+                    updateOrdersDashboard();
+                } else {
+                    window.orders = [];
+                    console.log('ℹ️ No orders found in localStorage');
+                }
+            } catch (e) {
+                console.error('❌ Error loading orders:', e);
+                window.orders = [];
+            }
+        }
+        
+        function saveOrdersToStorage() {
+            try {
+                localStorage.setItem('eps_crm_orders', JSON.stringify(window.orders));
+                console.log('💾 Orders saved to localStorage');
+            } catch (e) {
+                console.error('❌ Error saving orders:', e);
+            }
+        }
         const validAccounts = {
             'admin@eps.com': { password: 'admin123', role: 'Admin', name: 'Admin User' },
             'telecaller@eps.com': { password: 'telecaller123', role: 'Telecaller', name: 'Telecaller' },
@@ -4188,8 +4221,60 @@
 
         function createOrder(event) {
             event.preventDefault();
-            alert('✅ Order created successfully!');
-            event.target.reset();
+            
+            console.log('📦 Creating new order...');
+            
+            // Get form
+            const form = event.target;
+            
+            // Get values
+            const customerName = form.querySelector('[placeholder*="Name"]')?.value || 
+                                form.querySelector('input:nth-of-type(1)')?.value || '';
+            const customerPhone = form.querySelector('[placeholder*="Phone"]')?.value || 
+                                 form.querySelector('input:nth-of-type(2)')?.value || '';
+            const items = form.querySelector('[placeholder*="Items"]')?.value || 
+                         form.querySelector('textarea:nth-of-type(1)')?.value || '';
+            const amount = form.querySelector('[placeholder*="Amount"]')?.value || 
+                          form.querySelector('input:nth-of-type(3)')?.value || '';
+            
+            // Validate
+            if (!customerName || !amount) {
+                alert('❌ Please fill in all required fields (Name & Amount)');
+                return;
+            }
+            
+            // Create order object
+            const order = {
+                id: 'ORD-' + Date.now(),
+                customerName: customerName.trim(),
+                customerPhone: customerPhone.trim(),
+                items: items.trim(),
+                amount: parseFloat(amount),
+                status: 'pending',
+                createdOn: new Date().toLocaleDateString(),
+                createdAt: new Date().toLocaleTimeString(),
+                createdBy: currentUser?.name || 'User'
+            };
+            
+            console.log('✅ Order created:', order);
+            
+            // Save to array
+            window.orders.push(order);
+            
+            // Save to localStorage
+            saveOrdersToStorage();
+            
+            // Add to table
+            addOrderToTable(order);
+            
+            // Update dashboard metrics
+            updateOrdersDashboard();
+            
+            // Reset form
+            form.reset();
+            
+            // Show success
+            alert(`✅ Order created successfully!\n\nOrder ID: ${order.id}\nCustomer: ${order.customerName}\nAmount: ₹${order.amount}`);
         }
 
         function editOrder(orderId) {
@@ -4203,8 +4288,104 @@
             }
             
             if (confirm('⚠️ Are you sure you want to delete this order? This action cannot be undone!')) {
+                window.orders = window.orders.filter(o => o.id !== orderId);
+                saveOrdersToStorage();
+                displayOrders();
+                updateOrdersDashboard();
                 alert('✅ Order deleted permanently!');
             }
+        }
+        
+        function displayOrders() {
+            console.log('📋 Displaying orders...');
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (!tbody) {
+                console.log('⚠️ ordersTableBody not found');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (window.orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No orders created yet</td></tr>';
+                return;
+            }
+            
+            window.orders.forEach(order => {
+                addOrderToTable(order);
+            });
+        }
+        
+        function addOrderToTable(order) {
+            const tbody = document.getElementById('ordersTableBody');
+            if (!tbody) return;
+            
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><strong>${order.id}</strong></td>
+                <td>${order.customerName}</td>
+                <td>${order.customerPhone}</td>
+                <td style="text-align: right;">₹${order.amount}</td>
+                <td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${order.status}</span></td>
+                <td>${order.createdOn}</td>
+                <td style="text-align: center;">
+                    <button onclick="editOrder('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
+                    <button onclick="deleteOrder('${order.id}')" style="padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                </td>
+            `;
+        }
+        
+        function updateOrdersDashboard() {
+            console.log('📊 Updating orders dashboard...');
+            
+            const today = new Date().toLocaleDateString();
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            
+            // Calculate today's metrics
+            let todayCount = 0;
+            let todayAmount = 0;
+            
+            window.orders.forEach(order => {
+                if (order.createdOn === today) {
+                    todayCount++;
+                    todayAmount += order.amount;
+                }
+            });
+            
+            // Calculate monthly metrics
+            let monthCount = 0;
+            let monthAmount = 0;
+            
+            window.orders.forEach(order => {
+                // Parse date format: "23/05/2026" or "5/23/2026"
+                const dateParts = order.createdOn.split('/');
+                if (dateParts.length === 3) {
+                    const year = dateParts[2];
+                    const month = dateParts[1].padStart(2, '0');
+                    const orderMonth = `${year}-${month}`;
+                    if (orderMonth === currentMonth) {
+                        monthCount++;
+                        monthAmount += order.amount;
+                    }
+                }
+            });
+            
+            // Update dashboard elements
+            const dailyCountEl = document.getElementById('dailyOrdersCount');
+            const monthlyCountEl = document.getElementById('monthlyOrdersCount');
+            
+            if (dailyCountEl) dailyCountEl.textContent = todayCount;
+            if (monthlyCountEl) monthlyCountEl.textContent = monthCount;
+            
+            console.log(`📊 Today: ${todayCount} orders, ₹${todayAmount}`);
+            console.log(`📊 This Month: ${monthCount} orders, ₹${monthAmount}`);
+        }
+        
+        function refreshDailyOrders() {
+            console.log('🔄 Refreshing daily orders...');
+            updateOrdersDashboard();
+            alert('✅ Daily orders data refreshed!');
         }
 
         function filterOrders(value) {
