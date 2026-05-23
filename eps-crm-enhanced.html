@@ -4778,7 +4778,7 @@
                 <td><span style="background: ${paymentBgColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${paymentIcon} ${order.paymentMethod || 'N/A'}</span></td>
                 <td>${order.createdOn}</td>
                 <td style="text-align: center;">
-                    <button onclick="printInvoice('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print</button>
+                    <button onclick="window.printInvoice('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print</button>
                     <button onclick="editOrder('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
                     <button onclick="deleteOrder('${order.id}')" style="padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
                 </td>
