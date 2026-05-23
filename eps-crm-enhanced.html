@@ -1458,7 +1458,17 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-icon">💰</div>
-                        <div class="metric-label">Amount Collected</div>
+                        <div class="metric-label">Total Amount</div>
+                        <div class="metric-value">₹0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">💳</div>
+                        <div class="metric-label">Razorpay</div>
+                        <div class="metric-value">₹0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">💵</div>
+                        <div class="metric-label">Cash</div>
                         <div class="metric-value">₹0</div>
                     </div>
                     <div class="metric-card">
@@ -1682,8 +1692,6 @@
                             <select required>
                                 <option>Razorpay</option>
                                 <option>Cash</option>
-                                <option>Bank Transfer</option>
-                                <option>Cheque</option>
                             </select>
                         </div>
                     </div>
@@ -4500,14 +4508,22 @@
                 }
             });
             
-            // Calculate overall metrics
+            // Calculate overall metrics WITH PAYMENT METHOD BIFURCATION
             let totalOrders = window.orders.length;
             let totalBoxes = 0, totalRevenue = 0, totalCompleted = 0;
+            let razorpayAmount = 0, cashAmount = 0;
             
             window.orders.forEach(order => {
                 totalBoxes += order.boxes || 0;
                 totalRevenue += order.amount || 0;
                 if (order.status === 'completed') totalCompleted++;
+                
+                // Bifurcate by payment method
+                if (order.paymentMethod === 'Razorpay') {
+                    razorpayAmount += order.amount || 0;
+                } else if (order.paymentMethod === 'Cash') {
+                    cashAmount += order.amount || 0;
+                }
             });
             
             const completionRate = totalOrders > 0 ? Math.round((totalCompleted / totalOrders) * 100) : 0;
@@ -4540,15 +4556,17 @@
                 if (el) el.textContent = value;
             });
             
-            // Update Orders Dashboard (top section) - overall metrics
+            // Update Orders Dashboard (top section) - overall metrics with bifurcation
             const metricCards = document.querySelectorAll('#ord-dashboard .metric-card');
-            if (metricCards.length >= 6) {
+            if (metricCards.length >= 8) {
                 metricCards[0].querySelector('.metric-value').textContent = totalOrders;
                 metricCards[1].querySelector('.metric-value').textContent = totalBoxes;
-                metricCards[2].querySelector('.metric-value').textContent = `₹${totalRevenue}`;
-                metricCards[3].querySelector('.metric-value').textContent = totalCompleted;
-                metricCards[4].querySelector('.metric-value').textContent = totalOrders - totalCompleted;
-                metricCards[5].querySelector('.metric-value').textContent = '0';
+                metricCards[2].querySelector('.metric-value').textContent = `₹${totalRevenue}`;           // Total Amount
+                metricCards[3].querySelector('.metric-value').textContent = `₹${razorpayAmount}`;       // Razorpay
+                metricCards[4].querySelector('.metric-value').textContent = `₹${cashAmount}`;           // Cash
+                metricCards[5].querySelector('.metric-value').textContent = totalCompleted;
+                metricCards[6].querySelector('.metric-value').textContent = totalOrders - totalCompleted;
+                metricCards[7].querySelector('.metric-value').textContent = '0';
             }
             
             // Update stat boxes (Total Revenue, Avg Order Value, etc.)
@@ -4563,7 +4581,7 @@
             console.log(`✅ Dashboard Updated:`);
             console.log(`   Today: ${todayCount} orders, ₹${todayRevenue}, ${todayBoxes} boxes`);
             console.log(`   Month: ${monthCount} orders, ₹${monthRevenue}, ${monthBoxes} boxes`);
-            console.log(`   Total: ${totalOrders} orders, ₹${totalRevenue}, Completion: ${completionRate}%`);
+            console.log(`   Total: ${totalOrders} orders, ₹${totalRevenue} (Razorpay: ₹${razorpayAmount}, Cash: ₹${cashAmount})`);
         }
         
         function refreshDailyOrders() {
