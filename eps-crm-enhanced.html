@@ -1726,6 +1726,7 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Service</th>
+                            <th>Payment</th>
                             <th>Date</th>
                             <th>Actions</th>
                         </tr>
@@ -4492,6 +4493,32 @@
                                 </div>
                             </div>
                             
+                            <div style="border-top: 2px solid #e5e7eb; padding-top: 15px; margin-top: 10px;">
+                                <h3 style="margin-top: 0; margin-bottom: 15px; color: #333;">Customer Address</h3>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Customer Address *</label>
+                                    <input type="text" id="editCustomerAddress" value="${order.customerAddress || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; margin-bottom: 10px;">
+                                </div>
+                            </div>
+                            
+                            <div style="border-top: 2px solid #e5e7eb; padding-top: 15px; margin-top: 10px;">
+                                <h3 style="margin-top: 0; margin-bottom: 15px; color: #333;">Receiver Details</h3>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Receiver Name *</label>
+                                        <input type="text" id="editReceiverName" value="${order.receiverName || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Receiver Phone *</label>
+                                        <input type="tel" id="editReceiverPhone" value="${order.receiverPhone || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Receiver Address *</label>
+                                    <input type="text" id="editReceiverAddress" value="${order.receiverAddress || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                            </div>
+                            
                             <div style="display: flex; gap: 10px; margin-top: 20px;">
                                 <button type="button" onclick="saveEditOrder('${orderId}', event)" style="
                                     flex: 1;
@@ -4540,17 +4567,21 @@
                 customerName: document.getElementById('editCustomerName').value,
                 email: document.getElementById('editEmail').value,
                 phone: document.getElementById('editPhone').value,
+                customerAddress: document.getElementById('editCustomerAddress').value,
                 origin: document.getElementById('editOrigin').value,
                 destination: document.getElementById('editDestination').value,
                 boxes: parseInt(document.getElementById('editBoxes').value) || 0,
                 amount: parseFloat(document.getElementById('editAmount').value) || 0,
                 shippingMethod: document.getElementById('editShippingMethod').value,
                 paymentMethod: document.getElementById('editPaymentMethod').value,
+                receiverName: document.getElementById('editReceiverName').value,
+                receiverPhone: document.getElementById('editReceiverPhone').value,
+                receiverAddress: document.getElementById('editReceiverAddress').value,
                 status: document.getElementById('editStatus').value
             };
             
             // Validate required fields
-            if (!updatedData.customerName || !updatedData.destination || !updatedData.amount) {
+            if (!updatedData.customerName || !updatedData.destination || !updatedData.amount || !updatedData.customerAddress || !updatedData.receiverName || !updatedData.receiverPhone || !updatedData.receiverAddress) {
                 alert('❌ Please fill all required fields');
                 return;
             }
@@ -4620,6 +4651,10 @@
             const tbody = document.getElementById('ordersTableBody');
             if (!tbody) return;
             
+            // Get payment badge color
+            const paymentBgColor = order.paymentMethod === 'Razorpay' ? '#667eea' : '#10b981';
+            const paymentIcon = order.paymentMethod === 'Razorpay' ? '💳' : '💵';
+            
             const row = tbody.insertRow();
             row.innerHTML = `
                 <td><strong>${order.id}</strong></td>
@@ -4630,6 +4665,7 @@
                 <td style="text-align: right;">₹${order.amount.toFixed(2)}</td>
                 <td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${order.status}</span></td>
                 <td>${order.shippingMethod || 'N/A'}</td>
+                <td><span style="background: ${paymentBgColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${paymentIcon} ${order.paymentMethod || 'N/A'}</span></td>
                 <td>${order.createdOn}</td>
                 <td style="text-align: center;">
                     <button onclick="editOrder('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
