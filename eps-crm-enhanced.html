@@ -4610,7 +4610,7 @@
             if (modal) modal.remove();
         }
 
-        function printInvoice(orderId) {
+        window.printInvoice = function(orderId) {
             const order = window.orders.find(o => o.id === orderId);
             if (!order) {
                 alert('❌ Order not found');
@@ -4718,7 +4718,7 @@
             } catch(e) {
                 alert('❌ Print error: ' + e.message);
             }
-        }
+        };
 
         function deleteOrder(orderId) {
             if (currentRole !== 'admin') {
