@@ -4395,22 +4395,188 @@
                 return;
             }
             
-            const newAmount = prompt(`Edit Amount for Order ${orderId}:\n\nCurrent Amount: ₹${order.amount}`, order.amount);
+            // Create edit modal HTML
+            const modalHTML = `
+                <div id="editOrderModal" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.7);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                ">
+                    <div style="
+                        background: white;
+                        padding: 30px;
+                        border-radius: 10px;
+                        max-width: 600px;
+                        width: 90%;
+                        max-height: 90vh;
+                        overflow-y: auto;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                    ">
+                        <h2 style="margin-top: 0; color: #333;">Edit Order ${orderId}</h2>
+                        
+                        <form id="editOrderForm" style="display: flex; flex-direction: column; gap: 15px;">
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Customer Name *</label>
+                                    <input type="text" id="editCustomerName" value="${order.customerName}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Email *</label>
+                                    <input type="email" id="editEmail" value="${order.email || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Phone *</label>
+                                    <input type="tel" id="editPhone" value="${order.phone || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Origin City *</label>
+                                    <input type="text" id="editOrigin" value="${order.origin || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Destination City *</label>
+                                    <input type="text" id="editDestination" value="${order.destination || ''}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Number of Boxes *</label>
+                                    <input type="number" id="editBoxes" value="${order.boxes || 0}" required min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Amount (₹) *</label>
+                                    <input type="number" id="editAmount" value="${order.amount || 0}" required min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Shipping Method *</label>
+                                    <select id="editShippingMethod" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                        <option value="Express" ${order.shippingMethod === 'Express' ? 'selected' : ''}>Express</option>
+                                        <option value="Air" ${order.shippingMethod === 'Air' ? 'selected' : ''}>Air</option>
+                                        <option value="Surface" ${order.shippingMethod === 'Surface' ? 'selected' : ''}>Surface</option>
+                                        <option value="Train" ${order.shippingMethod === 'Train' ? 'selected' : ''}>Train</option>
+                                        <option value="One Day" ${order.shippingMethod === 'One Day' ? 'selected' : ''}>One Day</option>
+                                        <option value="Within Maharashtra" ${order.shippingMethod === 'Within Maharashtra' ? 'selected' : ''}>Within Maharashtra</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Payment Method *</label>
+                                    <select id="editPaymentMethod" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                        <option value="Razorpay" ${order.paymentMethod === 'Razorpay' ? 'selected' : ''}>Razorpay</option>
+                                        <option value="Cash" ${order.paymentMethod === 'Cash' ? 'selected' : ''}>Cash</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Status</label>
+                                    <select id="editStatus" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button type="button" onclick="saveEditOrder('${orderId}', event)" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    background: #10b981;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    font-size: 16px;
+                                ">💾 Save Changes</button>
+                                <button type="button" onclick="closeEditModal()" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    background: #ef4444;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    font-size: 16px;
+                                ">❌ Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
             
-            if (newAmount !== null && newAmount !== '') {
-                const numAmount = parseFloat(newAmount);
-                if (isNaN(numAmount)) {
-                    alert('❌ Please enter a valid amount');
-                    return;
-                }
-                
-                order.amount = numAmount;
-                saveOrdersToStorage();
-                displayOrders();
-                updateOrdersDashboard();
-                createOrderCharts();
-                alert(`✅ Order updated!\n\nNew Amount: ₹${order.amount}`);
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        function saveEditOrder(orderId, event) {
+            event.preventDefault();
+            
+            const order = window.orders.find(o => o.id === orderId);
+            if (!order) {
+                alert('❌ Order not found');
+                closeEditModal();
+                return;
             }
+            
+            // Get updated values
+            const updatedData = {
+                customerName: document.getElementById('editCustomerName').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value,
+                origin: document.getElementById('editOrigin').value,
+                destination: document.getElementById('editDestination').value,
+                boxes: parseInt(document.getElementById('editBoxes').value) || 0,
+                amount: parseFloat(document.getElementById('editAmount').value) || 0,
+                shippingMethod: document.getElementById('editShippingMethod').value,
+                paymentMethod: document.getElementById('editPaymentMethod').value,
+                status: document.getElementById('editStatus').value
+            };
+            
+            // Validate required fields
+            if (!updatedData.customerName || !updatedData.destination || !updatedData.amount) {
+                alert('❌ Please fill all required fields');
+                return;
+            }
+            
+            // Update order
+            Object.assign(order, updatedData);
+            
+            // Save to localStorage
+            saveOrdersToStorage();
+            
+            // Refresh table and dashboard
+            displayOrders();
+            updateOrdersDashboard();
+            createOrderCharts();
+            
+            // Close modal
+            closeEditModal();
+            
+            // Show success message
+            alert(`✅ Order ${orderId} updated successfully!`);
+            console.log('✅ Order updated:', order);
+        }
+        
+        function closeEditModal() {
+            const modal = document.getElementById('editOrderModal');
+            if (modal) modal.remove();
         }
 
         function deleteOrder(orderId) {
