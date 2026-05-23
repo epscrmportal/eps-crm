@@ -4470,23 +4470,22 @@
             const today = new Date().toLocaleDateString();
             const currentMonth = new Date().toISOString().slice(0, 7);
             
-            // Calculate today's metrics
-            let todayCount = 0;
-            let todayAmount = 0;
+            // Calculate TODAY's metrics
+            let todayCount = 0, todayBoxes = 0, todayRevenue = 0, todayCompleted = 0;
             
             window.orders.forEach(order => {
                 if (order.createdOn === today) {
                     todayCount++;
-                    todayAmount += order.amount;
+                    todayBoxes += order.boxes || 0;
+                    todayRevenue += order.amount || 0;
+                    if (order.status === 'completed') todayCompleted++;
                 }
             });
             
-            // Calculate monthly metrics
-            let monthCount = 0;
-            let monthAmount = 0;
+            // Calculate MONTHLY metrics
+            let monthCount = 0, monthBoxes = 0, monthRevenue = 0, monthCompleted = 0;
             
             window.orders.forEach(order => {
-                // Parse date format: "23/05/2026" or "5/23/2026"
                 const dateParts = order.createdOn.split('/');
                 if (dateParts.length === 3) {
                     const year = dateParts[2];
@@ -4494,20 +4493,77 @@
                     const orderMonth = `${year}-${month}`;
                     if (orderMonth === currentMonth) {
                         monthCount++;
-                        monthAmount += order.amount;
+                        monthBoxes += order.boxes || 0;
+                        monthRevenue += order.amount || 0;
+                        if (order.status === 'completed') monthCompleted++;
                     }
                 }
             });
             
-            // Update dashboard elements
-            const dailyCountEl = document.getElementById('dailyOrdersCount');
-            const monthlyCountEl = document.getElementById('monthlyOrdersCount');
+            // Calculate overall metrics
+            let totalOrders = window.orders.length;
+            let totalBoxes = 0, totalRevenue = 0, totalCompleted = 0;
             
-            if (dailyCountEl) dailyCountEl.textContent = todayCount;
-            if (monthlyCountEl) monthlyCountEl.textContent = monthCount;
+            window.orders.forEach(order => {
+                totalBoxes += order.boxes || 0;
+                totalRevenue += order.amount || 0;
+                if (order.status === 'completed') totalCompleted++;
+            });
             
-            console.log(`📊 Today: ${todayCount} orders, ₹${todayAmount}`);
-            console.log(`📊 This Month: ${monthCount} orders, ₹${monthAmount}`);
+            const completionRate = totalOrders > 0 ? Math.round((totalCompleted / totalOrders) * 100) : 0;
+            const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(0) : 0;
+            const avgBoxes = totalOrders > 0 ? (totalBoxes / totalOrders).toFixed(2) : 0;
+            
+            // Update TODAY's Admin Report metrics
+            const todayElements = {
+                'dailyOrdersCount': todayCount,
+                'dailyBoxesCount': todayBoxes,
+                'dailyRevenueCount': `₹${todayRevenue}`,
+                'dailyCompletedCount': todayCompleted
+            };
+            
+            Object.entries(todayElements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            });
+            
+            // Update MONTHLY Admin Report metrics
+            const monthElements = {
+                'monthlyOrdersCount': monthCount,
+                'monthlyBoxesCount': monthBoxes,
+                'monthlyRevenueCount': `₹${monthRevenue}`,
+                'monthlyCompletedCount': monthCompleted
+            };
+            
+            Object.entries(monthElements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            });
+            
+            // Update Orders Dashboard (top section) - overall metrics
+            const metricCards = document.querySelectorAll('#ord-dashboard .metric-card');
+            if (metricCards.length >= 6) {
+                metricCards[0].querySelector('.metric-value').textContent = totalOrders;
+                metricCards[1].querySelector('.metric-value').textContent = totalBoxes;
+                metricCards[2].querySelector('.metric-value').textContent = `₹${totalRevenue}`;
+                metricCards[3].querySelector('.metric-value').textContent = totalCompleted;
+                metricCards[4].querySelector('.metric-value').textContent = totalOrders - totalCompleted;
+                metricCards[5].querySelector('.metric-value').textContent = '0';
+            }
+            
+            // Update stat boxes (Total Revenue, Avg Order Value, etc.)
+            const statBoxes = document.querySelectorAll('#ord-dashboard .stat-box h3');
+            if (statBoxes.length >= 4) {
+                statBoxes[0].textContent = `₹${totalRevenue}`;
+                statBoxes[1].textContent = `₹${avgOrderValue}`;
+                statBoxes[2].textContent = `${completionRate}%`;
+                statBoxes[3].textContent = avgBoxes;
+            }
+            
+            console.log(`✅ Dashboard Updated:`);
+            console.log(`   Today: ${todayCount} orders, ₹${todayRevenue}, ${todayBoxes} boxes`);
+            console.log(`   Month: ${monthCount} orders, ₹${monthRevenue}, ${monthBoxes} boxes`);
+            console.log(`   Total: ${totalOrders} orders, ₹${totalRevenue}, Completion: ${completionRate}%`);
         }
         
         function refreshDailyOrders() {
