@@ -2388,6 +2388,7 @@
                 const saved = localStorage.getItem('eps_crm_contacts');
                 const savedMeetings = localStorage.getItem('eps_crm_fieldExecMeetings');
                 const savedGoalTracking = localStorage.getItem('eps_crm_goalTracking');
+                const savedBusinessCards = localStorage.getItem('eps_crm_businessCards');
                 
                 if (saved) {
                     const data = JSON.parse(saved);
@@ -2398,6 +2399,11 @@
                 if (savedMeetings) {
                     window.fieldExecMeetings = JSON.parse(savedMeetings);
                     console.log('✅ Loaded meetings from localStorage');
+                }
+                
+                if (savedBusinessCards) {
+                    window.businessCards = JSON.parse(savedBusinessCards);
+                    console.log('✅ Loaded', window.businessCards.length, 'business cards from localStorage');
                 }
                 
                 if (savedGoalTracking) {
@@ -2434,6 +2440,7 @@
         
         // ============ ORDERS STORAGE ============
         window.orders = [];
+        window.businessCards = [];
         
         function loadOrdersFromStorage() {
             try {
@@ -2742,32 +2749,44 @@
             let html = '';
             
             // Display Business Cards collected by Field Execs
-            if (window.businessCards && Object.keys(window.businessCards).length > 0) {
+            if (window.businessCards && window.businessCards.length > 0) {
                 html += '<h3 style="margin-bottom: 15px; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px;">📇 Business Cards from Field Executives</h3>';
                 
-                for (const [fieldExecName, cards] of Object.entries(window.businessCards)) {
-                    if (cards && cards.length > 0) {
-                        cards.forEach((card, idx) => {
-                            html += `<div class="contact-item" style="background: #fef3c7; border-left-color: #f59e0b; opacity: 0.95;">
-                                <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
-                                    <div style="flex: 1; min-width: 250px;">
-                                        <h4 style="color: #f59e0b;">📇 ${card.name}</h4>
-                                        <p><strong>Company:</strong> ${card.company}</p>
-                                        <p><strong>Designation:</strong> ${card.designation || 'N/A'}</p>
-                                        <p><strong>Phone:</strong> ${card.phone}${card.email ? ` | <strong>Email:</strong> ${card.email}` : ''}</p>
-                                        <p><span class="badge" style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 11px;">🎯 ${card.leadType}</span></p>
-                                        <p style="margin-top: 8px; font-size: 12px; color: #666;">
-                                            <strong>Collected by:</strong> ${fieldExecName} on ${card.collectedOn}
-                                        </p>
-                                    </div>
-                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                                        <button type="button" class="btn-primary" onclick="convertCardToContact('${card.name}', '${card.company}', '${card.phone}', '${card.email}')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">➕ Add to Contacts</button>
-                                    </div>
-                                </div>
-                            </div>`;
-                        });
+                window.businessCards.forEach((card, idx) => {
+                    const cardName = card.personName || card.name || 'Unknown';
+                    const cardEmail = card.email || 'N/A';
+                    const cardPhone = card.phone || 'N/A';
+                    const cardCompany = card.company || 'N/A';
+                    const cardDesignation = card.designation || 'N/A';
+                    const cardDate = card.receivedDate || card.collectedOn || new Date().toLocaleDateString();
+                    
+                    html += '<div class="contact-item" style="background: #fef3c7; border-left-color: #f59e0b; opacity: 0.95;">';
+                    html += '<div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">';
+                    html += '<div style="flex: 1; min-width: 250px;">';
+                    html += '<h4 style="color: #f59e0b;">📇 ' + cardName + '</h4>';
+                    html += '<p><strong>Company:</strong> ' + cardCompany + '</p>';
+                    html += '<p><strong>Designation:</strong> ' + cardDesignation + '</p>';
+                    html += '<p><strong>Phone:</strong> ' + cardPhone;
+                    if (cardEmail !== 'N/A') {
+                        html += ' | <strong>Email:</strong> ' + cardEmail;
                     }
-                }
+                    html += '</p>';
+                    if (card.address) {
+                        html += '<p><strong>Address:</strong> ' + card.address + '</p>';
+                    }
+                    if (card.notes) {
+                        html += '<p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Notes:</strong> ' + card.notes + '</p>';
+                    }
+                    html += '<p style="margin-top: 8px; font-size: 12px; color: #666;">';
+                    html += '<strong>Collected by:</strong> ' + (card.receivedFrom || 'Field Exec') + ' on ' + cardDate;
+                    html += '</p>';
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">';
+                    html += '<button type="button" class="btn-primary" onclick="convertCardToContact(\'' + cardName + '\', \'' + cardCompany + '\', \'' + cardPhone + '\', \'' + cardEmail + '\')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">➕ Add to Contacts</button>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
             }
             
             // Display regular contacts
