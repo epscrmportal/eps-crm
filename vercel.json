@@ -1,11 +1,10 @@
 {
-  "version": 2,
-  "public": false,
-  "builds": [],
-  "routes": [
+  "buildCommand": "echo 'Static site'",
+  "outputDirectory": ".",
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/eps-crm-enhanced.html"
+      "source": "/",
+      "destination": "/eps-crm-dashboard.html"
     }
   ]
 }
