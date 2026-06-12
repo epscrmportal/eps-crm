@@ -4650,74 +4650,137 @@
         // ===== RAZORPAY PAYMENT FUNCTIONS =====
         const RAZORPAY_KEY_ID = 'rzp_live_SlzoWnL8lxdnLU';
 
+        // Check if Razorpay SDK is loaded
+        function isRazorpayLoaded() {
+            console.log('🔍 Checking Razorpay availability...');
+            if (typeof Razorpay === 'undefined') {
+                console.error('❌ Razorpay SDK not loaded!');
+                return false;
+            }
+            console.log('✅ Razorpay SDK is available');
+            return true;
+        }
+
         function initiateRazorpayPayment(orderId, orderAmount) {
+            console.log('💳 Initiating payment for order:', orderId, 'Amount:', orderAmount);
+            
+            // Step 1: Check if Razorpay is loaded
+            if (!isRazorpayLoaded()) {
+                alert('❌ Payment Gateway Error\n\nRazorpay is not loaded. Please reload the page and try again.');
+                return;
+            }
+
+            // Step 2: Find order
             const order = window.orders.find(o => o.id === orderId);
             if (!order) {
                 alert('❌ Order not found');
                 return;
             }
 
+            console.log('📦 Order found:', order);
+
+            // Step 3: Validate order data
+            if (!order.customerName || !order.email) {
+                alert('❌ Order missing required data\n\nCustomer name or email is missing.');
+                return;
+            }
+
+            // Step 4: Create Razorpay options
             const options = {
                 key: RAZORPAY_KEY_ID,
-                amount: Math.round(orderAmount * 100),
+                amount: Math.round(orderAmount * 100), // Convert to paise
                 currency: 'INR',
                 name: 'EPS Worldwide Integrated Logistics',
                 description: 'Order Payment - ' + orderId,
-                image: 'https://epsworldwide.in/logo.png',
                 order_id: orderId,
                 handler: function(response) {
+                    console.log('✅ Payment handler called with response:', response);
                     handleRazorpaySuccess(response, order, orderAmount);
                 },
                 prefill: {
                     name: order.customerName,
-                    email: order.email,
-                    contact: order.phone
+                    email: order.email || 'customer@example.com',
+                    contact: order.phone || '9999999999'
                 },
                 notes: {
                     orderId: orderId,
-                    customerName: order.customerName,
-                    origin: order.origin,
-                    destination: order.destination
+                    customerName: order.customerName
                 },
                 theme: {
                     color: '#667eea'
                 }
             };
 
+            console.log('⚙️ Razorpay options created:', options);
+
+            // Step 5: Open Razorpay checkout
             try {
-                const rzp1 = new Razorpay(options);
-                rzp1.open();
+                console.log('🔓 Opening Razorpay checkout...');
+                const rzp = new Razorpay(options);
                 
-                rzp1.on('payment.failed', function(response) {
+                rzp.on('payment.failed', function(response) {
+                    console.log('❌ Payment failed event:', response);
                     handleRazorpayFailure(response, order);
                 });
+
+                rzp.open();
+                console.log('✅ Razorpay checkout opened');
             } catch (error) {
-                alert('❌ Error opening payment gateway: ' + error.message);
+                console.error('❌ Error in Razorpay:', error);
+                alert('❌ Payment Gateway Error\n\nError: ' + error.message + '\n\nPlease try again or contact support.');
             }
         }
 
         function handleRazorpaySuccess(response, order, amount) {
-            console.log('✅ Payment successful:', response);
+            console.log('🎉 Payment successful!');
+            console.log('   Response:', response);
+            console.log('   Order:', order);
             
+            // Update order
             order.status = 'paid';
             order.paymentMethod = 'Razorpay';
             order.transactionID = response.razorpay_payment_id;
             order.paidOn = new Date().toLocaleDateString();
             order.paidAt = new Date().toLocaleTimeString();
             
+            console.log('💾 Saving updated order:', order);
+            
+            // Save to storage
             saveOrdersToStorage();
+            
+            // Refresh displays
             displayOrders();
             updateOrdersDashboard();
             
+            // Success message
             alert('✅ PAYMENT SUCCESSFUL!\n\nOrder ID: ' + order.id + '\nTransaction ID: ' + response.razorpay_payment_id + '\nAmount: ₹' + amount + '\n\nPayment has been processed successfully!');
             
-            console.log('💾 Order updated:', order);
+            console.log('✅ Payment process complete');
         }
 
         function handleRazorpayFailure(response, order) {
-            console.log('❌ Payment failed:', response);
+            console.log('❌ Payment failed');
+            console.log('   Error:', response.error);
             
-            alert('❌ PAYMENT FAILED\n\nError Code: ' + response.error.code + '\nError Description: ' + response.error.description + '\n\nPlease try again or contact support.');
+            const errorMsg = response.error ? 
+                ('Error Code: ' + response.error.code + '\nError: ' + response.error.description) : 
+                'Unknown error occurred';
+            
+            alert('❌ PAYMENT FAILED\n\n' + errorMsg + '\n\nPlease try again or contact support.');
+        }
+
+        // Razorpay verification function for debugging
+        function testRazorpaySetup() {
+            console.log('🧪 Testing Razorpay Setup...');
+            console.log('   Razorpay loaded:', typeof Razorpay !== 'undefined');
+            console.log('   Key ID:', RAZORPAY_KEY_ID);
+            console.log('   Test orders:', window.orders ? window.orders.length : 0);
+            
+            if (typeof Razorpay === 'undefined') {
+                alert('❌ Razorpay SDK not loaded!\n\nThe SDK script failed to load. Check your internet connection and try reloading the page.');
+            } else {
+                alert('✅ Razorpay SDK is ready!\n\nKey ID: ' + RAZORPAY_KEY_ID + '\nOrders: ' + (window.orders ? window.orders.length : 0) + '\n\nYou can now test payments.');
+            }
         }
 
         function addOrderToTable(order) {
@@ -4729,23 +4792,33 @@
             const paymentIcon = order.paymentMethod === 'Razorpay' ? '💳' : '💵';
             
             const row = tbody.insertRow();
-            row.innerHTML = `
-                <td><strong>${order.id}</strong></td>
-                <td>${order.customerName}</td>
-                <td>${order.origin || 'N/A'}</td>
-                <td>${order.destination || 'N/A'}</td>
-                <td style="text-align: center;">${order.boxes}</td>
-                <td style="text-align: right;">₹${order.amount.toFixed(2)}</td>
-                <td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${order.status}</span></td>
-                <td>${order.shippingMethod || 'N/A'}</td>
-                <td><span style="background: ${paymentBgColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${paymentIcon} ${order.paymentMethod || 'N/A'}</span></td>
-                <td>${order.createdOn}</td>
-                <td style="text-align: center;">
-                    <button onclick="${order.status === 'paid' ? 'alert(\'✅ Already Paid\')' : 'initiateRazorpayPayment(\'' + order.id + '\', ' + order.amount + ')'}" style="padding: 5px 10px; margin-right: 5px; background: ${order.status === 'paid' ? '#10b981' : '#f59e0b'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">${order.status === 'paid' ? '✅ Paid' : '💳 Pay'}</button>
-                    <button onclick="editOrder('${order.id}')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
-                    <button onclick="deleteOrder('${order.id}')" style="padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-                </td>
-            `;
+            
+            // Build HTML using string concatenation ONLY - NO TEMPLATE LITERALS
+            let html = '<td><strong>' + order.id + '</strong></td>' +
+                '<td>' + order.customerName + '</td>' +
+                '<td>' + (order.origin || 'N/A') + '</td>' +
+                '<td>' + (order.destination || 'N/A') + '</td>' +
+                '<td style="text-align: center;">' + order.boxes + '</td>' +
+                '<td style="text-align: right;">₹' + order.amount.toFixed(2) + '</td>' +
+                '<td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">' + order.status + '</span></td>' +
+                '<td>' + (order.shippingMethod || 'N/A') + '</td>' +
+                '<td><span style="background: ' + paymentBgColor + '; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">' + paymentIcon + ' ' + (order.paymentMethod || 'N/A') + '</span></td>' +
+                '<td>' + order.createdOn + '</td>' +
+                '<td style="text-align: center;">';
+            
+            // Add payment button
+            if (order.status === 'paid') {
+                html += '<button style="padding: 5px 10px; margin-right: 5px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">✅ Paid</button>';
+            } else {
+                html += '<button onclick="initiateRazorpayPayment(\'' + order.id + '\', ' + order.amount + ')" style="padding: 5px 10px; margin-right: 5px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">💳 Pay</button>';
+            }
+            
+            // Add Edit and Delete buttons
+            html += '<button onclick="editOrder(\'' + order.id + '\')" style="padding: 5px 10px; margin-right: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>' +
+                '<button onclick="deleteOrder(\'' + order.id + '\')" style="padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>' +
+                '</td>';
+            
+            row.innerHTML = html;
         }
         
         function updateOrdersDashboard() {
