@@ -1285,6 +1285,48 @@
         // ============================================================
 
         window.addEventListener('load', async () => {
+            // Check localStorage first (fastest)
+            const storedUser = localStorage.getItem('eps_crm_user');
+            const storedRole = localStorage.getItem('eps_crm_user_role');
+            
+            if (storedUser && storedRole) {
+                try {
+                    const userData = JSON.parse(storedUser);
+                    currentUser = userData;
+                    currentUserProfile = { role: storedRole };
+                    
+                    console.log('User from localStorage:', userData.email, 'Role:', storedRole);
+                    
+                    // Get fresh profile from Supabase
+                    const { data: profile } = await supabase
+                        .from('user_profiles')
+                        .select('*')
+                        .eq('id', userData.id)
+                        .single();
+                    
+                    if (profile) {
+                        currentUserProfile = profile;
+                    }
+                    
+                    // Skip login form, load dashboard directly
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.add('active');
+                    document.getElementById('userDisplay').textContent = userData.email + ' (' + (currentUserProfile?.role || 'user') + ')';
+                    
+                    if (currentUserProfile?.role === 'admin') {
+                        document.getElementById('teamTabBtn').style.display = 'block';
+                    }
+                    
+                    loadAllData();
+                    return;
+                } catch (e) {
+                    console.log('localStorage auth failed:', e);
+                    localStorage.removeItem('eps_crm_user');
+                    localStorage.removeItem('eps_crm_user_role');
+                }
+            }
+            
+            // Fallback to Supabase session
             const { data } = await supabase.auth.getSession();
             if (data.session) {
                 currentUser = data.session.user;
@@ -1293,21 +1335,14 @@
                     .select('*')
                     .eq('id', currentUser.id)
                     .single();
-                currentUserProfile = profile;
+                currentUserProfile = profile || { role: 'telecaller' };
                 
-                // Check if user has access to this page
-                const allowedRoles = ['telecaller', 'admin'];
-                if (!allowedRoles.includes(currentUserProfile?.role)) {
-                    showAlert('❌ Access Denied! This page is for Telecallers and Admins only.', 'error');
-                    setTimeout(() => {
-                        window.location.href = 'eps-crm-dashboard.html';
-                    }, 2000);
-                    return;
-                }
+                localStorage.setItem('eps_crm_user', JSON.stringify(currentUser));
+                localStorage.setItem('eps_crm_user_role', currentUserProfile?.role || 'telecaller');
                 
                 showLoginSuccess();
             } else {
-                // Redirect to login if not authenticated
+                // Not logged in, go to dashboard
                 window.location.href = 'eps-crm-dashboard.html';
             }
         });
