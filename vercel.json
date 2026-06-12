@@ -1,10 +1,20 @@
 {
-  "buildCommand": "echo 'Static site'",
-  "outputDirectory": ".",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/",
-      "destination": "/eps-crm-dashboard.html"
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "^/$",
+      "dest": "/eps-crm-dashboard.html",
+      "status": 200
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
