@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS CRM - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1000px;
+            width: 100%;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .company-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .company-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .company-info p {
+            color: #555;
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .module-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .module-card.admin {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .module-card.telecaller {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .module-card.fieldexec {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .module-card.orders {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .module-card.collections {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .module-card .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .module-card .name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .module-card .description {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .login-form {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 40px;
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .login-form h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #ccc;
+        }
+
+        .credentials {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .credentials h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .credential-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-left: 3px solid #667eea;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .credential-item strong {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 30px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🎯 EPS CRM System</h1>
+            <p>Complete Customer Relationship Management</p>
+        </div>
+
+        <div class="company-info">
+            <h3>📍 EPS Worldwide Integrated Logistics Pvt. Ltd.</h3>
+            <p><strong>Address:</strong> UNI No. 166, Solaris 1, Saki-Vihar Road, Andheri East, Mumbai - 400072</p>
+            <p><strong>Phone:</strong> 9594987185 | <strong>Email:</strong> info@epsworldwide.in</p>
+            <p><strong>GST:</strong> 27AAFCE0777JIZE | <strong>PAN:</strong> AAFCE0777J</p>
+        </div>
+
+        <div class="modules-grid">
+            <div class="module-card telecaller" onclick="selectModule('telecaller')">
+                <div class="icon">📞</div>
+                <div class="name">Telecaller</div>
+                <div class="description">Contacts, Calls, Follow-ups</div>
+            </div>
+
+            <div class="module-card fieldexec" onclick="selectModule('fieldexec')">
+                <div class="icon">👔</div>
+                <div class="name">Field Executive</div>
+                <div class="description">Meetings, Business Cards</div>
+            </div>
+
+            <div class="module-card orders" onclick="selectModule('orders')">
+                <div class="icon">📦</div>
+                <div class="name">Orders</div>
+                <div class="description">Orders, Invoices, Payments</div>
+            </div>
+
+            <div class="module-card collections" onclick="selectModule('collections')">
+                <div class="icon">💰</div>
+                <div class="name">Collections</div>
+                <div class="description">Cash Bookings</div>
+            </div>
+
+            <div class="module-card admin" onclick="selectModule('admin')">
+                <div class="icon">📊</div>
+                <div class="name">Admin</div>
+                <div class="description">Reports, Analytics, All Data</div>
+            </div>
+        </div>
+
+        <div id="loginForm" class="login-form">
+            <h3 id="moduleName">Login to Module</h3>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="loginUser()">Login</button>
+                <button class="btn btn-secondary" onclick="cancelLogin()">Cancel</button>
+            </div>
+
+            <div class="credentials">
+                <h4>📋 Sample Credentials:</h4>
+                <div class="credential-item">
+                    <strong>Telecaller:</strong> telecaller@eps.com / telecaller123
+                </div>
+                <div class="credential-item">
+                    <strong>Field Exec:</strong> fieldexec@eps.com / fieldexec123
+                </div>
+                <div class="credential-item">
+                    <strong>Orders:</strong> orders@eps.com / orders123
+                </div>
+                <div class="credential-item">
+                    <strong>Collections:</strong> collections@eps.com / collections123
+                </div>
+                <div class="credential-item">
+                    <strong>Admin:</strong> admin@eps.com / admin123
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedModule = null;
+
+        function selectModule(module) {
+            selectedModule = module;
+            const moduleName = {
+                'telecaller': 'Telecaller',
+                'fieldexec': 'Field Executive',
+                'orders': 'Orders',
+                'collections': 'Collections',
+                'admin': 'Admin'
+            };
+
+            document.getElementById('moduleName').textContent = 'Login to ' + moduleName[module];
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('email').focus();
+        }
+
+        function cancelLogin() {
+            selectedModule = null;
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function loginUser() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email || !password) {
+                alert('❌ Please enter email and password');
+                return;
+            }
+
+            // Credentials mapping
+            const credentials = {
+                'telecaller@eps.com': 'telecaller123',
+                'fieldexec@eps.com': 'fieldexec123',
+                'orders@eps.com': 'orders123',
+                'collections@eps.com': 'collections123',
+                'admin@eps.com': 'admin123'
+            };
+
+            if (credentials[email] && credentials[email] === password) {
+                // Save current user to localStorage
+                localStorage.setItem('eps_crm_currentUser', JSON.stringify({
+                    email: email,
+                    module: selectedModule,
+                    role: selectedModule
+                }));
+
+                // Redirect to module
+                const moduleFiles = {
+                    'telecaller': 'eps-crm-telecaller.html',
+                    'fieldexec': 'eps-crm-fieldexec.html',
+                    'orders': 'eps-crm-orders.html',
+                    'collections': 'eps-crm-collections.html',
+                    'admin': 'eps-crm-admin.html'
+                };
+
+                window.location.href = moduleFiles[selectedModule];
+            } else {
+                alert('❌ Invalid email or password');
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        }
+
+        // Allow Enter key to login
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') loginUser();
+            });
+        });
+    </script>
+</body>
+</html>
