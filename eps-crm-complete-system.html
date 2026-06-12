@@ -506,6 +506,28 @@
         let goals = [];
         let userProfiles = {};
         let allTeamMembers = [];
+        
+        // Chart tracking to prevent "canvas already in use" error
+        let chartInstances = {
+            weeklyChart: null,
+            callOutcomeChart: null,
+            leadQualityChart: null,
+            interestChart: null,
+            durationChart: null
+        };
+
+        function destroyAllCharts() {
+            for (const [key, chart] of Object.entries(chartInstances)) {
+                if (chart) {
+                    try {
+                        chart.destroy();
+                        chartInstances[key] = null;
+                    } catch (e) {
+                        console.log('Chart destroy error:', e);
+                    }
+                }
+            }
+        }
 
         // ============================================================
         // AUTHENTICATION
@@ -1011,6 +1033,8 @@
         }
 
         function createAnalyticsCharts() {
+            destroyAllCharts();
+            
             // Call Outcome Chart
             const outcomes = { connected: 0, not: 0 };
             myCalls.forEach(c => {
@@ -1020,7 +1044,7 @@
 
             const ctx1 = document.getElementById('callOutcomeChart');
             if (ctx1) {
-                new Chart(ctx1, {
+                chartInstances.callOutcomeChart = new Chart(ctx1, {
                     type: 'doughnut',
                     data: {
                         labels: ['Connected', 'Not Connected'],
@@ -1038,7 +1062,7 @@
 
             const ctx2 = document.getElementById('leadQualityChart');
             if (ctx2) {
-                new Chart(ctx2, {
+                chartInstances.leadQualityChart = new Chart(ctx2, {
                     type: 'bar',
                     data: {
                         labels: ['Hot', 'Warm', 'Cold'],
@@ -1060,7 +1084,7 @@
 
             const ctx3 = document.getElementById('interestChart');
             if (ctx3) {
-                new Chart(ctx3, {
+                chartInstances.interestChart = new Chart(ctx3, {
                     type: 'pie',
                     data: {
                         labels: ['Interested', 'Not Interested'],
@@ -1077,7 +1101,7 @@
 
             const ctx4 = document.getElementById('durationChart');
             if (ctx4) {
-                new Chart(ctx4, {
+                chartInstances.durationChart = new Chart(ctx4, {
                     type: 'line',
                     data: {
                         labels: ['Call ' + (durations.length - 6), 'Call ' + (durations.length - 5), 'Call ' + (durations.length - 4), 'Call ' + (durations.length - 3), 'Call ' + (durations.length - 2), 'Call ' + (durations.length - 1), 'Latest'],
@@ -1194,6 +1218,8 @@
         }
 
         function createWeeklyChart() {
+            destroyAllCharts();
+            
             const weekData = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -1204,7 +1230,7 @@
 
             const ctx = document.getElementById('weeklyChart');
             if (ctx) {
-                new Chart(ctx, {
+                chartInstances.weeklyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: Object.keys(weekData),
