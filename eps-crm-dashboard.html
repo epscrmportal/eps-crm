@@ -22,6 +22,7 @@
         .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95em; }
         .alert-error { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
         .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .alert-info { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
         .loading { display: none; text-align: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -58,26 +59,17 @@
     </div>
 
     <script>
-        // ============================================================
-        // SUPABASE SETUP
-        // ============================================================
         const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Module redirect mapping
         const MODULE_ROUTES = {
-    'telecaller': 'eps-crm-complete-system.html',
-    'admin': 'eps-crm-admin.html',  // ✅ FIXED
-    'field_exec': 'eps-crm-fieldexec.html',
-    'orders': 'eps-crm-orders.html',
-    'collections': 'eps-crm-collections.html'
-};
+            'telecaller': 'eps-crm-complete-system.html',
+            'admin': 'eps-crm-admin.html',
+            'field_exec': 'eps-crm-fieldexec.html',
+            'orders': 'eps-crm-orders.html',
+            'collections': 'eps-crm-collections.html'
         };
-
-        // ============================================================
-        // LOGIN HANDLER
-        // ============================================================
 
         async function handleLogin(event) {
             event.preventDefault();
@@ -91,11 +83,9 @@
             }
 
             try {
-                // Show loading state
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('loadingDiv').style.display = 'block';
 
-                // Authenticate with Supabase
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: email,
                     password: password
@@ -103,7 +93,6 @@
 
                 if (error) throw error;
 
-                // Get user profile to determine role
                 const { data: profile, error: profileError } = await supabase
                     .from('user_profiles')
                     .select('role')
@@ -114,14 +103,11 @@
 
                 const userRole = profile?.role || 'telecaller';
                 
-                // Store user data
                 localStorage.setItem('eps_crm_user', JSON.stringify(data.user));
                 localStorage.setItem('eps_crm_user_role', userRole);
 
-                // Show success message
-                showAlert(`✅ Welcome!`, 'success');
+                showAlert('✅ Welcome!', 'success');
 
-                // Redirect based on role
                 setTimeout(() => {
                     const targetModule = MODULE_ROUTES[userRole] || MODULE_ROUTES['telecaller'];
                     window.location.href = targetModule;
@@ -131,12 +117,9 @@
                 document.getElementById('loginForm').style.display = 'block';
                 document.getElementById('loadingDiv').style.display = 'none';
                 showAlert('❌ Invalid email or password', 'error');
+                console.error('Login error:', error);
             }
         }
-
-        // ============================================================
-        // ALERTS
-        // ============================================================
 
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
@@ -150,15 +133,10 @@
             }
         }
 
-        // ============================================================
-        // CHECK EXISTING SESSION
-        // ============================================================
-
         window.addEventListener('load', async () => {
             try {
                 const { data } = await supabase.auth.getSession();
                 if (data.session) {
-                    // User already logged in, redirect
                     const { data: profile } = await supabase
                         .from('user_profiles')
                         .select('role')
@@ -174,7 +152,6 @@
             }
         });
 
-        // Enter key to login
         document.getElementById('loginPassword').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 document.getElementById('loginForm').dispatchEvent(new Event('submit'));
