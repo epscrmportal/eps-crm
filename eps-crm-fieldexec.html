@@ -805,12 +805,13 @@
                     lead_status: potential.includes('Hot') ? 'Hot' : potential.includes('Warm') ? 'Warm' : 'Cold',
                     notes: contactNotes,
                     status: 'new',
-                    created_by: currentUser.id
+                    created_by: currentUser.id,
+                    assigned_to: null
                 });
 
                 if (contactError) throw contactError;
 
-                alert('✅ Business card saved and added as new contact!');
+                alert('✅ Business card saved and added as new contact for telecallers!');
                 clearCardForm();
                 loadAllData();
             } catch (error) {
