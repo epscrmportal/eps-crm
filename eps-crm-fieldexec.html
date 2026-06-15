@@ -206,6 +206,36 @@
                             <button class="btn btn-secondary" onclick="clearActivityForm()" style="flex: 1;">🔄 Clear Form</button>
                         </div>
                     </div>
+
+                    <div style="background: #e3f2fd; border-left: 4px solid #43e97b; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <h3 style="margin: 0 0 15px 0; color: #43e97b;">📞 Create Meeting from Telecaller Contact</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Select Contact *</label>
+                                <select id="selectContactForMeeting" onchange="loadContactDetails()" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
+                                    <option value="">-- Choose a Contact --</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Meeting Date *</label>
+                                <input type="date" id="meetingFromContactDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Meeting Time *</label>
+                                <input type="time" id="meetingFromContactTime" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Meeting Notes</label>
+                                <input type="text" id="meetingFromContactNotes" placeholder="Meeting notes (optional)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
+                            </div>
+                        </div>
+                        <div id="contactDetailsDisplay" style="margin-top: 15px; padding: 10px; background: white; border-radius: 5px; display: none;">
+                            <p style="margin: 0; color: #666; font-size: 0.9em;">Contact: <strong id="selectedContactInfo"></strong></p>
+                        </div>
+                        <button class="btn btn-success" onclick="createMeetingFromContact()" style="width: 100%; margin-top: 15px;">✅ Create & Schedule Meeting</button>
+                    </div>
                 </div>
             </div>
 
@@ -422,6 +452,11 @@
             
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
+
+            // Populate contacts dropdown when switching to Log Activity tab
+            if (tabName === 'logActivity') {
+                populateContactsDropdown();
+            }
         }
 
         // ==================== DATA LOADING ====================
@@ -732,7 +767,7 @@
             const phone = document.getElementById('cardPhone').value.trim();
             const howMet = document.getElementById('cardHowMet').value.trim();
             const potential = document.getElementById('cardPotential').value;
-            const notes = document.getElementById('cardNotes').value.trim();
+            const cardNotes = document.getElementById('cardNotes').value.trim();
 
             if (!name || !company) {
                 alert('Please fill in Contact Name and Company');
@@ -750,23 +785,27 @@
                     phone: phone,
                     how_met: howMet,
                     lead_potential: potential,
-                    notes: notes,
+                    notes: cardNotes,
                     created_at: new Date().toISOString()
                 });
 
                 if (error) throw error;
 
+                // Combine notes for contact
+                const contactNotes = 'Business Card from: ' + currentUser.email + '. How met: ' + howMet + '. ' + cardNotes;
+
                 // Also create a contact in the contacts table for telecallers to follow up
                 const { error: contactError } = await supabase.from('contacts').insert({
+                    user_id: currentUser.id,
                     name: name,
                     company: company,
                     phone: phone,
                     email: email,
                     city: 'Unknown',
                     lead_status: potential.includes('Hot') ? 'Hot' : potential.includes('Warm') ? 'Warm' : 'Cold',
-                    source: 'Business Card - ' + currentUser.email,
-                    notes: notes,
-                    assigned_to: null
+                    notes: contactNotes,
+                    status: 'new',
+                    created_by: currentUser.id
                 });
 
                 if (contactError) throw contactError;
@@ -788,6 +827,88 @@
             document.getElementById('cardHowMet').value = '';
             document.getElementById('cardPotential').value = 'Warm - Follow up Soon';
             document.getElementById('cardNotes').value = '';
+        }
+
+        // ==================== CREATE MEETING FROM CONTACT ====================
+        async function populateContactsDropdown() {
+            const dropdown = document.getElementById('selectContactForMeeting');
+            if (!dropdown || allContacts.length === 0) return;
+
+            dropdown.innerHTML = '<option value="">-- Choose a Contact --</option>';
+            
+            allContacts.forEach(contact => {
+                const option = document.createElement('option');
+                option.value = contact.id;
+                option.textContent = contact.name + ' - ' + contact.company;
+                option.dataset.email = contact.email || '';
+                option.dataset.phone = contact.phone || '';
+                option.dataset.company = contact.company || '';
+                dropdown.appendChild(option);
+            });
+        }
+
+        function loadContactDetails() {
+            const dropdown = document.getElementById('selectContactForMeeting');
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            const detailsDiv = document.getElementById('contactDetailsDisplay');
+            const detailsText = document.getElementById('selectedContactInfo');
+
+            if (selectedOption.value === '') {
+                detailsDiv.style.display = 'none';
+                return;
+            }
+
+            const email = selectedOption.dataset.email;
+            const phone = selectedOption.dataset.phone;
+            const company = selectedOption.dataset.company;
+            
+            let info = selectedOption.textContent;
+            if (email) info += ' | ' + email;
+            if (phone) info += ' | ' + phone;
+            
+            detailsText.textContent = info;
+            detailsDiv.style.display = 'block';
+        }
+
+        async function createMeetingFromContact() {
+            const dropdown = document.getElementById('selectContactForMeeting');
+            const contactId = dropdown.value;
+            const date = document.getElementById('meetingFromContactDate').value;
+            const time = document.getElementById('meetingFromContactTime').value;
+            const notes = document.getElementById('meetingFromContactNotes').value;
+
+            if (!contactId || !date || !time) {
+                alert('Please fill in Contact, Date, and Time');
+                return;
+            }
+
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            const contactName = selectedOption.textContent.split(' - ')[0];
+
+            try {
+                const { error } = await supabase.from('meetings').insert({
+                    contact_id: contactId,
+                    contact_name: contactName,
+                    date: date,
+                    time: time,
+                    agenda: notes,
+                    assigned_to: currentUser.email,
+                    status: 'scheduled',
+                    created_by: currentUser.email
+                });
+
+                if (error) throw error;
+
+                alert('✅ Meeting created and scheduled!');
+                document.getElementById('selectContactForMeeting').value = '';
+                document.getElementById('meetingFromContactDate').value = '';
+                document.getElementById('meetingFromContactTime').value = '';
+                document.getElementById('meetingFromContactNotes').value = '';
+                document.getElementById('contactDetailsDisplay').style.display = 'none';
+                loadAllData();
+            } catch (error) {
+                alert('Error creating meeting: ' + error.message);
+            }
         }
 
         async function loadActivities() {
