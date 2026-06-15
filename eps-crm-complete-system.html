@@ -145,8 +145,8 @@
 
                 <div class="section">
                     <h2>📈 This Week's Activity</h2>
-                    <div style="width: 100%; height: 300px; position: relative;">
-                        <canvas id="weeklyChart" style="display: block; max-width: 100%;"></canvas>
+                    <div style="width: 100%; height: 400px; position: relative; background: white; border-radius: 8px; padding: 10px; box-sizing: border-box;">
+                        <canvas id="weeklyChart" style="display: block; max-width: 100%; max-height: 100%;"></canvas>
                     </div>
                 </div>
 
@@ -2007,19 +2007,6 @@
 
         function createWeeklyChart() {
             console.log('===== WEEKLY CHART DEBUG START =====');
-            console.log('Step 0: Function called - adding fallback message');
-            
-            // Add fallback message to canvas container
-            const container = document.querySelector('div[style*="height: 300px"]');
-            if (container && !container.querySelector('.chart-loading')) {
-                const fallback = document.createElement('div');
-                fallback.className = 'chart-loading';
-                fallback.style.cssText = 'text-align: center; padding: 140px 20px; color: #999; font-size: 14px; background: #fafafa; border-radius: 8px;';
-                fallback.innerHTML = '⏳ Chart loading... (If you see this for >5s, there may be an issue)';
-                container.appendChild(fallback);
-            }
-            
-            console.log('Step 1: Check Chart library');
             
             // Check if Chart library is loaded
             if (typeof Chart === 'undefined') {
@@ -2029,25 +2016,20 @@
             }
             console.log('✅ Chart library loaded');
 
-            console.log('Step 2: Destroy old instances');
             destroyAllCharts();
             console.log('✅ Old instances destroyed');
             
-            console.log('Step 3: Build data structures');
             const weekData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const connectedData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const meetingsData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            console.log('✅ Data structures created');
 
-            console.log('Step 4: Calculate week start');
             const weekStart = new Date();
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
             weekStart.setHours(0, 0, 0, 0);
             console.log('✅ Week start:', weekStart.toISOString());
 
             console.log('Step 5: Process calls (' + myCalls.length + ' total)');
-            // Count calls
             myCalls.forEach(c => {
                 const callDate = new Date(c.created_at);
                 if (callDate >= weekStart) {
@@ -2061,10 +2043,8 @@
                 }
             });
             console.log('✅ Calls processed. Week data:', weekData);
-            console.log('✅ Connected data:', connectedData);
 
             console.log('Step 6: Process follow-ups (' + followups.length + ' total)');
-            // Count scheduled meetings
             followups.forEach(f => {
                 if (f.follow_up_type === 'Meeting') {
                     const meetingDate = new Date(f.follow_up_date);
@@ -2078,28 +2058,16 @@
             });
             console.log('✅ Meetings processed. Meetings data:', meetingsData);
 
-            console.log('Step 7: Get canvas element');
             const ctx = document.getElementById('weeklyChart');
-            console.log('Canvas element found:', !!ctx);
+            console.log('Canvas found:', !!ctx);
             
             if (!ctx) {
-                console.error('❌ FATAL: weeklyChart canvas element not found!');
+                console.error('❌ FATAL: weeklyChart canvas not found');
                 return;
             }
-            console.log('✅ Canvas element found');
 
-            console.log('Step 8: Prepare data arrays');
-            const totalCallsData = [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']];
-            const connectedCallsData = [connectedData['Sun'], connectedData['Mon'], connectedData['Tue'], connectedData['Wed'], connectedData['Thu'], connectedData['Fri'], connectedData['Sat']];
-            const meetingsDataArray = [meetingsData['Sun'], meetingsData['Mon'], meetingsData['Tue'], meetingsData['Wed'], meetingsData['Thu'], meetingsData['Fri'], meetingsData['Sat']];
-            console.log('✅ Data arrays prepared');
-            console.log('  Total calls:', totalCallsData);
-            console.log('  Connected calls:', connectedCallsData);
-            console.log('  Meetings:', meetingsDataArray);
-
-            console.log('Step 9: Create Chart.js instance');
             try {
-                console.log('Creating chart with type: bar');
+                console.log('Step 9: Creating Chart.js instance');
                 
                 chartInstances.weeklyChart = new Chart(ctx, {
                     type: 'bar',
@@ -2108,44 +2076,51 @@
                         datasets: [
                             {
                                 label: 'Total Calls',
-                                data: totalCallsData,
-                                backgroundColor: '#4facfe'
+                                data: [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']],
+                                backgroundColor: '#4facfe',
+                                borderColor: '#2a9cdc',
+                                borderWidth: 1
                             },
                             {
                                 label: 'Connected',
-                                data: connectedCallsData,
-                                backgroundColor: '#10b981'
+                                data: [connectedData['Sun'], connectedData['Mon'], connectedData['Tue'], connectedData['Wed'], connectedData['Thu'], connectedData['Fri'], connectedData['Sat']],
+                                backgroundColor: '#10b981',
+                                borderColor: '#059669',
+                                borderWidth: 1
                             },
                             {
                                 label: 'Meetings',
-                                data: meetingsDataArray,
-                                backgroundColor: '#f59e0b'
+                                data: [meetingsData['Sun'], meetingsData['Mon'], meetingsData['Tue'], meetingsData['Wed'], meetingsData['Thu'], meetingsData['Fri'], meetingsData['Sat']],
+                                backgroundColor: '#f59e0b',
+                                borderColor: '#d97706',
+                                borderWidth: 1
                             }
                         ]
                     },
                     options: { 
                         responsive: true, 
                         maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
                         scales: {
-                            y: { beginAtZero: true }
+                            y: { 
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
                         }
                     }
                 });
                 
                 console.log('✅ Chart instance created successfully');
-                
-                // Remove fallback message if chart created
-                const fallback = document.querySelector('.chart-loading');
-                if (fallback) {
-                    fallback.remove();
-                }
-                
-                console.log('===== WEEKLY CHART DEBUG SUCCESS ✅ =====');
+                console.log('===== WEEKLY CHART SUCCESS ✅ =====');
             } catch (e) {
-                console.error('❌ FATAL: Error creating chart:', e);
-                console.error('Error message:', e.message);
-                console.error('Error type:', e.name);
-                if (e.stack) console.error('Stack:', e.stack);
+                console.error('❌ Error creating chart:', e.message);
             }
         }
 
