@@ -763,7 +763,7 @@
                     phone: phone,
                     email: email,
                     city: 'Unknown',
-                    lead_quality: potential.includes('Hot') ? 'Hot' : potential.includes('Warm') ? 'Warm' : 'Cold',
+                    lead_status: potential.includes('Hot') ? 'Hot' : potential.includes('Warm') ? 'Warm' : 'Cold',
                     source: 'Business Card - ' + currentUser.email,
                     notes: notes,
                     assigned_to: null
@@ -800,9 +800,48 @@
 
                 if (error) throw error;
                 allActivities = data || [];
+                displayActivities();
             } catch (error) {
                 console.error('Error loading activities:', error);
             }
+        }
+
+        function displayActivities() {
+            const logActivitySection = document.querySelector('#logActivity .section');
+            if (!logActivitySection) return;
+
+            let html = '<div style="margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"><h3 style="color: #43e97b; margin-bottom: 15px; border-bottom: 2px solid #43e97b; padding-bottom: 10px;">📊 Recent Activities</h3>';
+
+            if (allActivities.length === 0) {
+                html += '<p style="color: #999; text-align: center;">No activities logged yet</p>';
+            } else {
+                html += '<table style="width: 100%;"><thead><tr><th>TYPE</th><th>EVENT</th><th>DATE</th><th>DURATION</th><th>CARDS</th><th>CONNECTIONS</th><th>LEADS</th></tr></thead><tbody>';
+                
+                allActivities.forEach(activity => {
+                    html += '<tr>' +
+                        '<td>' + activity.activity_type + '</td>' +
+                        '<td><strong>' + activity.event_name + '</strong></td>' +
+                        '<td>' + activity.activity_date + '</td>' +
+                        '<td>' + activity.duration_hours + 'h</td>' +
+                        '<td>' + activity.cards_collected + '</td>' +
+                        '<td>' + activity.new_connections + '</td>' +
+                        '<td>' + activity.potential_leads + '</td>' +
+                        '</tr>';
+                });
+                
+                html += '</tbody></table>';
+            }
+
+            html += '</div>';
+
+            // Find or create activities display container
+            let displayContainer = logActivitySection.querySelector('#activitiesDisplay');
+            if (!displayContainer) {
+                displayContainer = document.createElement('div');
+                displayContainer.id = 'activitiesDisplay';
+                logActivitySection.appendChild(displayContainer);
+            }
+            displayContainer.innerHTML = html;
         }
 
         async function loadBusinessCards() {
