@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPS CRM - Complete Telecaller System</title>
+    <title>EPS CRM - Telecaller System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <style>
@@ -69,20 +69,13 @@
     </style>
 </head>
 <body>
-    <!-- Login Section -->
-    <div id="loginSection" class="login-container">
+    <!-- Login Section (Hidden - use dashboard instead) -->
+    <div id="loginSection" class="login-container" style="display: none;">
         <div class="login-box">
-            <h2 style="color: #4facfe; margin-bottom: 30px; text-align: center;">📞 EPS CRM - Complete System</h2>
+            <h2 style="color: #4facfe; margin-bottom: 30px; text-align: center;">📞 EPS CRM</h2>
             <div id="loginAlert"></div>
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="loginEmail" placeholder="darshana@epsworldwide.in">
-            </div>
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="password" id="loginPassword" placeholder="password">
-            </div>
-            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="handleLogin()">Login</button>
+            <p style="text-align: center; color: #999; margin-bottom: 20px;">Please use the main login page</p>
+            <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='eps-crm-dashboard.html'">Go to Login</button>
         </div>
     </div>
 
@@ -513,6 +506,28 @@
         let goals = [];
         let userProfiles = {};
         let allTeamMembers = [];
+        
+        // Chart tracking to prevent "canvas already in use" error
+        let chartInstances = {
+            weeklyChart: null,
+            callOutcomeChart: null,
+            leadQualityChart: null,
+            interestChart: null,
+            durationChart: null
+        };
+
+        function destroyAllCharts() {
+            for (const [key, chart] of Object.entries(chartInstances)) {
+                if (chart) {
+                    try {
+                        chart.destroy();
+                        chartInstances[key] = null;
+                    } catch (e) {
+                        console.log('Chart destroy error:', e);
+                    }
+                }
+            }
+        }
 
         // ============================================================
         // AUTHENTICATION
@@ -693,6 +708,11 @@
 
         async function claimLead(leadId) {
             try {
+                if (!currentUser || !currentUser.id) {
+                    showAlert('User not authenticated', 'error');
+                    return;
+                }
+                
                 const { error } = await supabase
                     .from('contacts')
                     .update({
@@ -702,14 +722,15 @@
                         status: 'assigned'
                     })
                     .eq('id', leadId)
-                    .eq('assigned_to', null);
+                    .is('assigned_to', null);
 
                 if (error) throw error;
 
                 showAlert('🎉 Lead claimed!', 'success');
                 loadAllData();
             } catch (error) {
-                showAlert('Error: ' + error.message, 'error');
+                showAlert('Error claiming lead: ' + error.message, 'error');
+                console.error('Claim error:', error);
             }
         }
 
@@ -764,7 +785,7 @@
 
             table.innerHTML = myLeads.map(lead => `
                 <tr>
-                    <td><strong>${lead.name}</strong></td>
+                    <td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail('${lead.id}')">${lead.name}</strong></td>
                     <td>${lead.phone}</td>
                     <td>${lead.company || 'N/A'}</td>
                     <td><span class="badge badge-${lead.lead_status}">${lead.lead_status.toUpperCase()}</span></td>
@@ -775,6 +796,329 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function showContactDetail(leadId) {
+            const lead = allLeads.find(l => l.id === leadId);
+            if (!lead) {
+                showAlert('Lead not found', 'error');
+                return;
+            }
+
+            const contactCalls = myCalls.filter(c => c.contact_id === leadId);
+            
+            // Build call history HTML
+            let callsHtml = '';
+            if (contactCalls.length === 0) {
+                callsHtml = '<p style="color: #999; text-align: center; padding: 20px;">No calls logged yet</p>';
+            } else {
+                callsHtml = contactCalls.map((call, index) => `
+                    <div style="background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #4facfe;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <p style="margin: 0 0 8px 0;"><strong style="color: #4facfe;">Call ${contactCalls.length - index}</strong></p>
+                                <p style="margin: 0 0 5px 0; font-size: 0.9em; color: #666;">
+                                    📅 ${new Date(call.created_at).toLocaleDateString()} 
+                                    ⏰ ${new Date(call.created_at).toLocaleTimeString()}
+                                </p>
+                                <p style="margin: 0 0 8px 0; font-size: 0.9em;">
+                                    📞 ${call.call_status} | ⏱️ ${call.duration_minutes || 0} min | 🎯 Interested: ${call.interested}
+                                </p>
+                                <p style="margin: 0; font-size: 0.85em; color: #555; background: white; padding: 8px; border-radius: 5px;">
+                                    <strong>Notes:</strong> ${call.discussion_notes || 'No notes added'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const modalId = 'modal_' + leadId + '_' + Date.now();
+            
+            const modalHtml = `
+                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; overflow-y: auto;">
+                    <div style="background: white; width: 95%; max-width: 900px; margin: 20px auto; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow-y: auto; max-height: 90vh;">
+                        
+                        <!-- Header -->
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h2 style="margin: 0 0 8px 0;">👤 ${lead.name}</h2>
+                                <p style="margin: 0; font-size: 0.9em; opacity: 0.9;">${lead.company || 'Company not specified'}</p>
+                            </div>
+                            <button onclick="document.getElementById('${modalId}').remove();" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 1.8em; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">✕</button>
+                        </div>
+
+                        <div style="padding: 25px;">
+                            
+                            <!-- Contact Info -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                    <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">PHONE</p>
+                                    <p style="margin: 0; font-size: 1.1em; font-weight: bold; color: #333;">${lead.phone}</p>
+                                </div>
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                    <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">EMAIL</p>
+                                    <p style="margin: 0; font-size: 1em; color: #333;">${lead.email || 'Not provided'}</p>
+                                </div>
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                    <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">LEAD QUALITY</p>
+                                    <p style="margin: 0;"><span class="badge badge-${lead.lead_status}" style="padding: 8px 15px;">${lead.lead_status.toUpperCase()}</span></p>
+                                </div>
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                    <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">CLAIMED ON</p>
+                                    <p style="margin: 0; font-size: 1em; color: #333;">${new Date(lead.assigned_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+
+                            <!-- Notes Section -->
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 3px solid #10b981;">
+                                <h3 style="margin: 0 0 12px 0; color: #10b981;">📝 Notes</h3>
+                                <p style="margin: 0; color: #555; line-height: 1.6;">${lead.notes || '<span style="color: #999;">No notes added yet. Add notes to track important information.</span>'}</p>
+                            </div>
+
+                            <!-- Call History -->
+                            <div style="margin-bottom: 25px;">
+                                <h3 style="color: #4facfe; border-bottom: 2px solid #4facfe; padding-bottom: 10px; margin: 0 0 15px 0;">📞 Call History (${contactCalls.length} calls)</h3>
+                                <div style="max-height: 350px; overflow-y: auto;">
+                                    ${callsHtml}
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                                <button class="btn btn-primary" onclick="openLogCallModal('${leadId}')" style="width: 100%; padding: 12px;">
+                                    ➕ Log New Call
+                                </button>
+                                <button class="btn btn-success" onclick="openSetReminderModal('${leadId}')" style="width: 100%; padding: 12px;">
+                                    ⏰ Set Reminder
+                                </button>
+                                <button class="btn btn-warning" onclick="openScheduleMeetingModal('${leadId}')" style="width: 100%; padding: 12px;">
+                                    📅 Schedule with Field Exec
+                                </button>
+                                <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="width: 100%; padding: 12px;">
+                                    ❌ Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function openLogCallModal(leadId) {
+            const modalId = 'logCall_' + leadId + '_' + Date.now();
+            const lead = allLeads.find(l => l.id === leadId);
+            
+            const html = `
+                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <h2 style="margin: 0 0 20px 0; color: #4facfe;">📞 Log New Call - ${lead.name}</h2>
+                        
+                        <div class="form-group">
+                            <label>Call Status</label>
+                            <select id="callStatus_${leadId}" class="form-group input">
+                                <option>Connected</option>
+                                <option>Not Reachable</option>
+                                <option>Callback Later</option>
+                                <option>Wrong Number</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Duration (minutes)</label>
+                            <input type="number" id="duration_${leadId}" placeholder="5" value="5" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Interested?</label>
+                            <select id="interested_${leadId}">
+                                <option>Yes</option>
+                                <option>No</option>
+                                <option>Maybe</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Discussion Notes</label>
+                            <textarea id="notes_${leadId}" placeholder="What was discussed?" style="height: 100px;"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="saveCall('${leadId}')" style="flex: 1; padding: 12px;">✅ Save Call</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function openSetReminderModal(leadId) {
+            const modalId = 'reminder_' + leadId + '_' + Date.now();
+            const lead = allLeads.find(l => l.id === leadId);
+            
+            const html = `
+                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <h2 style="margin: 0 0 20px 0; color: #4facfe;">⏰ Set Reminder - ${lead.name}</h2>
+                        
+                        <div class="form-group">
+                            <label>Reminder Type</label>
+                            <select id="reminderType_${leadId}">
+                                <option value="1">Follow up in 1 day</option>
+                                <option value="3">Follow up in 3 days</option>
+                                <option value="7">Follow up in 7 days</option>
+                                <option value="14">Follow up in 2 weeks</option>
+                                <option value="30">Follow up in 1 month</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reminder Notes</label>
+                            <textarea id="reminderNotes_${leadId}" placeholder="What to remind about?" style="height: 100px;"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="saveReminder('${leadId}')" style="flex: 1; padding: 12px;">✅ Set Reminder</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function openScheduleMeetingModal(leadId) {
+            const modalId = 'meeting_' + leadId + '_' + Date.now();
+            const lead = allLeads.find(l => l.id === leadId);
+            
+            const html = `
+                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <h2 style="margin: 0 0 20px 0; color: #4facfe;">📅 Schedule Meeting - ${lead.name}</h2>
+                        
+                        <div class="form-group">
+                            <label>Meeting Date</label>
+                            <input type="date" id="meetingDate_${leadId}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Meeting Time</label>
+                            <input type="time" id="meetingTime_${leadId}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Field Executive</label>
+                            <select id="fieldExec_${leadId}">
+                                <option value="">Select Field Executive</option>
+                                <option value="sales@epsworldwide.in">Sales Team</option>
+                                <option value="fieldexec@epsworldwide.in">Field Executive</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Meeting Notes</label>
+                            <textarea id="meetingNotes_${leadId}" placeholder="Meeting agenda / details" style="height: 100px;"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-warning" onclick="scheduleMeeting('${leadId}')" style="flex: 1; padding: 12px;">✅ Schedule</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function saveCall(leadId) {
+            try {
+                const callStatus = document.getElementById('callStatus_' + leadId).value;
+                const duration = parseInt(document.getElementById('duration_' + leadId).value) || 0;
+                const interested = document.getElementById('interested_' + leadId).value;
+                const notes = document.getElementById('notes_' + leadId).value;
+
+                const { error } = await supabase.from('calls').insert({
+                    contact_id: leadId,
+                    user_id: currentUser.id,
+                    call_status: callStatus,
+                    duration_minutes: duration,
+                    interested: interested,
+                    discussion_notes: notes,
+                    created_at: new Date().toISOString()
+                });
+
+                if (error) throw error;
+
+                showAlert('✅ Call logged successfully!', 'success');
+                document.querySelectorAll('[id^="logCall_"]').forEach(el => el.remove());
+                loadAllData();
+            } catch (error) {
+                showAlert('Error saving call: ' + error.message, 'error');
+            }
+        }
+
+        async function saveReminder(leadId) {
+            try {
+                const days = parseInt(document.getElementById('reminderType_' + leadId).value);
+                const notes = document.getElementById('reminderNotes_' + leadId).value;
+                const reminderDate = new Date();
+                reminderDate.setDate(reminderDate.getDate() + days);
+
+                const { error } = await supabase.from('reminders').insert({
+                    user_id: currentUser.id,
+                    contact_id: leadId,
+                    reminder_date: reminderDate.toISOString(),
+                    reminder_text: notes || 'Follow up reminder',
+                    status: 'pending'
+                });
+
+                if (error) throw error;
+
+                showAlert('✅ Reminder set for ' + days + ' days!', 'success');
+                document.querySelectorAll('[id^="reminder_"]').forEach(el => el.remove());
+                loadAllData();
+            } catch (error) {
+                showAlert('Error setting reminder: ' + error.message, 'error');
+            }
+        }
+
+        async function scheduleMeeting(leadId) {
+            try {
+                const date = document.getElementById('meetingDate_' + leadId).value;
+                const time = document.getElementById('meetingTime_' + leadId).value;
+                const fieldExec = document.getElementById('fieldExec_' + leadId).value;
+                const notes = document.getElementById('meetingNotes_' + leadId).value;
+
+                if (!date || !time || !fieldExec) {
+                    showAlert('Please fill all fields', 'error');
+                    return;
+                }
+
+                const meetingDateTime = date + 'T' + time + ':00';
+
+                const { error } = await supabase.from('meetings').insert({
+                    contact_id: leadId,
+                    assigned_to: currentUser.id,
+                    scheduled_with: fieldExec,
+                    meeting_date: meetingDateTime,
+                    meeting_notes: notes,
+                    status: 'scheduled'
+                });
+
+                if (error) throw error;
+
+                showAlert('✅ Meeting scheduled with ' + fieldExec + '!', 'success');
+                document.querySelectorAll('[id^="meeting_"]').forEach(el => el.remove());
+                loadAllData();
+            } catch (error) {
+                showAlert('Error scheduling meeting: ' + error.message, 'error');
+            }
         }
 
         // ============================================================
@@ -1018,6 +1362,8 @@
         }
 
         function createAnalyticsCharts() {
+            destroyAllCharts();
+            
             // Call Outcome Chart
             const outcomes = { connected: 0, not: 0 };
             myCalls.forEach(c => {
@@ -1027,7 +1373,7 @@
 
             const ctx1 = document.getElementById('callOutcomeChart');
             if (ctx1) {
-                new Chart(ctx1, {
+                chartInstances.callOutcomeChart = new Chart(ctx1, {
                     type: 'doughnut',
                     data: {
                         labels: ['Connected', 'Not Connected'],
@@ -1045,7 +1391,7 @@
 
             const ctx2 = document.getElementById('leadQualityChart');
             if (ctx2) {
-                new Chart(ctx2, {
+                chartInstances.leadQualityChart = new Chart(ctx2, {
                     type: 'bar',
                     data: {
                         labels: ['Hot', 'Warm', 'Cold'],
@@ -1067,7 +1413,7 @@
 
             const ctx3 = document.getElementById('interestChart');
             if (ctx3) {
-                new Chart(ctx3, {
+                chartInstances.interestChart = new Chart(ctx3, {
                     type: 'pie',
                     data: {
                         labels: ['Interested', 'Not Interested'],
@@ -1084,7 +1430,7 @@
 
             const ctx4 = document.getElementById('durationChart');
             if (ctx4) {
-                new Chart(ctx4, {
+                chartInstances.durationChart = new Chart(ctx4, {
                     type: 'line',
                     data: {
                         labels: ['Call ' + (durations.length - 6), 'Call ' + (durations.length - 5), 'Call ' + (durations.length - 4), 'Call ' + (durations.length - 3), 'Call ' + (durations.length - 2), 'Call ' + (durations.length - 1), 'Latest'],
@@ -1201,6 +1547,8 @@
         }
 
         function createWeeklyChart() {
+            destroyAllCharts();
+            
             const weekData = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -1211,7 +1559,7 @@
 
             const ctx = document.getElementById('weeklyChart');
             if (ctx) {
-                new Chart(ctx, {
+                chartInstances.weeklyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: Object.keys(weekData),
@@ -1292,6 +1640,48 @@
         // ============================================================
 
         window.addEventListener('load', async () => {
+            // Check localStorage first (fastest)
+            const storedUser = localStorage.getItem('eps_crm_user');
+            const storedRole = localStorage.getItem('eps_crm_user_role');
+            
+            if (storedUser && storedRole) {
+                try {
+                    const userData = JSON.parse(storedUser);
+                    currentUser = userData;
+                    currentUserProfile = { role: storedRole };
+                    
+                    console.log('User from localStorage:', userData.email, 'Role:', storedRole);
+                    
+                    // Get fresh profile from Supabase
+                    const { data: profile } = await supabase
+                        .from('user_profiles')
+                        .select('*')
+                        .eq('id', userData.id)
+                        .single();
+                    
+                    if (profile) {
+                        currentUserProfile = profile;
+                    }
+                    
+                    // Skip login form, load dashboard directly
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.add('active');
+                    document.getElementById('userDisplay').textContent = userData.email + ' (' + (currentUserProfile?.role || 'user') + ')';
+                    
+                    if (currentUserProfile?.role === 'admin') {
+                        document.getElementById('teamTabBtn').style.display = 'block';
+                    }
+                    
+                    loadAllData();
+                    return;
+                } catch (e) {
+                    console.log('localStorage auth failed:', e);
+                    localStorage.removeItem('eps_crm_user');
+                    localStorage.removeItem('eps_crm_user_role');
+                }
+            }
+            
+            // Fallback to Supabase session
             const { data } = await supabase.auth.getSession();
             if (data.session) {
                 currentUser = data.session.user;
@@ -1300,13 +1690,25 @@
                     .select('*')
                     .eq('id', currentUser.id)
                     .single();
-                currentUserProfile = profile;
+                currentUserProfile = profile || { role: 'telecaller' };
+                
+                localStorage.setItem('eps_crm_user', JSON.stringify(currentUser));
+                localStorage.setItem('eps_crm_user_role', currentUserProfile?.role || 'telecaller');
+                
                 showLoginSuccess();
+            } else {
+                // Not logged in, go to dashboard
+                window.location.href = 'eps-crm-dashboard.html';
             }
         });
 
-        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleLogin();
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginPasswordEl = document.getElementById('loginPassword');
+            if (loginPasswordEl) {
+                loginPasswordEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
         });
     </script>
 </body>
