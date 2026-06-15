@@ -491,15 +491,15 @@
 
         async function loadContacts() {
             try {
+                // Load ALL contacts (for meeting dropdown & business card selection)
                 const { data, error } = await supabase
                     .from('contacts')
-                    .select('*')
-                    .eq('assigned_to', currentUser.id);
+                    .select('*');
 
                 if (error) throw error;
                 allContacts = data || [];
             } catch (error) {
-                console.error('Error loading contacts:', error);
+                console.error('Error loading all contacts:', error);
             }
         }
 
