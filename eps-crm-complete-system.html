@@ -502,6 +502,7 @@
         let allCalls = [];
         let myCalls = [];
         let followups = [];
+        let reminders = [];
         let templates = [];
         let goals = [];
         let userProfiles = {};
@@ -629,6 +630,15 @@
                     .order('follow_up_date', { ascending: true });
 
                 followups = followupsData || [];
+
+                // Load reminders
+                const { data: remindersData } = await supabase
+                    .from('reminders')
+                    .select('*')
+                    .eq('created_by', currentUser.email)
+                    .order('reminder_date', { ascending: true });
+
+                reminders = remindersData || [];
 
                 // Load templates
                 const { data: templatesData } = await supabase
@@ -1433,42 +1443,40 @@
 
         function displayReminders() {
             const container = document.getElementById('remindersContainer');
-            const reminders = [];
+            const remindersList = [];
 
-            // Overdue follow-ups
-            followups.filter(f => f.status === 'pending').forEach(f => {
-                const daysLeft = Math.ceil((new Date(f.follow_up_date) - new Date()) / (1000 * 60 * 60 * 24));
+            // Overdue reminders
+            reminders.filter(r => r.status === 'pending').forEach(r => {
+                const daysLeft = Math.ceil((new Date(r.reminder_date) - new Date()) / (1000 * 60 * 60 * 24));
                 if (daysLeft <= 0) {
-                    const lead = allLeads.find(l => l.id === f.contact_id);
-                    reminders.push({
+                    remindersList.push({
                         type: 'overdue',
-                        title: '🔴 Overdue Follow-up',
-                        message: lead?.name + ' - Due ' + daysLeft + ' days ago',
+                        title: '🔴 Overdue Reminder',
+                        message: r.contact_name + ' - ' + r.reminder_text + ' (Due ' + daysLeft + ' days ago)',
                         color: '#fee2e2'
                     });
                 }
             });
 
-            // Upcoming follow-ups (today & tomorrow)
-            followups.filter(f => f.status === 'pending').forEach(f => {
-                const daysLeft = Math.ceil((new Date(f.follow_up_date) - new Date()) / (1000 * 60 * 60 * 24));
+            // Upcoming reminders (today & tomorrow)
+            reminders.filter(r => r.status === 'pending').forEach(r => {
+                const daysLeft = Math.ceil((new Date(r.reminder_date) - new Date()) / (1000 * 60 * 60 * 24));
                 if (daysLeft <= 1 && daysLeft > 0) {
-                    const lead = allLeads.find(l => l.id === f.contact_id);
-                    reminders.push({
+                    remindersList.push({
                         type: 'upcoming',
-                        title: '⏰ Upcoming Follow-up',
-                        message: lead?.name + ' - Due ' + f.follow_up_date,
+                        title: '⏰ Upcoming Reminder',
+                        message: r.contact_name + ' - ' + r.reminder_text + ' (Due ' + r.reminder_date.substring(0, 10) + ')',
                         color: '#fef3c7'
                     });
                 }
             });
 
-            if (reminders.length === 0) {
+            if (remindersList.length === 0) {
                 container.innerHTML = '<p style="color: #999;">No reminders - all caught up! 🎉</p>';
                 return;
             }
 
-            container.innerHTML = reminders.map(r => 
+            container.innerHTML = remindersList.map(r => 
                 '<div style="background: ' + r.color + '; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 5px;">' +
                 '<h3>' + r.title + '</h3>' +
                 '<p>' + r.message + '</p>' +
