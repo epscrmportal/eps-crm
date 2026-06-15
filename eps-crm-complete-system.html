@@ -2007,11 +2007,23 @@
 
         function createWeeklyChart() {
             console.log('===== WEEKLY CHART DEBUG START =====');
+            console.log('Step 0: Function called - adding fallback message');
+            
+            // Add fallback message to canvas container
+            const container = document.querySelector('div[style*="height: 300px"]');
+            if (container && !container.querySelector('.chart-loading')) {
+                const fallback = document.createElement('div');
+                fallback.className = 'chart-loading';
+                fallback.style.cssText = 'text-align: center; padding: 140px 20px; color: #999; font-size: 14px; background: #fafafa; border-radius: 8px;';
+                fallback.innerHTML = '⏳ Chart loading... (If you see this for >5s, there may be an issue)';
+                container.appendChild(fallback);
+            }
+            
             console.log('Step 1: Check Chart library');
             
             // Check if Chart library is loaded
             if (typeof Chart === 'undefined') {
-                console.warn('Chart.js library not loaded yet, retrying in 500ms');
+                console.warn('⚠️  Chart.js library not loaded yet, retrying in 500ms');
                 setTimeout(createWeeklyChart, 500);
                 return;
             }
@@ -2068,29 +2080,26 @@
 
             console.log('Step 7: Get canvas element');
             const ctx = document.getElementById('weeklyChart');
-            console.log('Canvas element:', ctx);
+            console.log('Canvas element found:', !!ctx);
             
             if (!ctx) {
                 console.error('❌ FATAL: weeklyChart canvas element not found!');
-                console.error('HTML structure check: Does id="weeklyChart" exist in Dashboard tab?');
                 return;
             }
             console.log('✅ Canvas element found');
 
-            console.log('Step 8: Get 2D context');
-            const context = ctx.getContext('2d');
-            if (!context) {
-                console.error('❌ FATAL: Cannot get 2D context from canvas!');
-                return;
-            }
-            console.log('✅ 2D context obtained');
+            console.log('Step 8: Prepare data arrays');
+            const totalCallsData = [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']];
+            const connectedCallsData = [connectedData['Sun'], connectedData['Mon'], connectedData['Tue'], connectedData['Wed'], connectedData['Thu'], connectedData['Fri'], connectedData['Sat']];
+            const meetingsDataArray = [meetingsData['Sun'], meetingsData['Mon'], meetingsData['Tue'], meetingsData['Wed'], meetingsData['Thu'], meetingsData['Fri'], meetingsData['Sat']];
+            console.log('✅ Data arrays prepared');
+            console.log('  Total calls:', totalCallsData);
+            console.log('  Connected calls:', connectedCallsData);
+            console.log('  Meetings:', meetingsDataArray);
 
             console.log('Step 9: Create Chart.js instance');
             try {
-                console.log('Creating chart with options:');
-                console.log('- Type: bar');
-                console.log('- Responsive: true');
-                console.log('- MaintainAspectRatio: false');
+                console.log('Creating chart with type: bar');
                 
                 chartInstances.weeklyChart = new Chart(ctx, {
                     type: 'bar',
@@ -2099,17 +2108,17 @@
                         datasets: [
                             {
                                 label: 'Total Calls',
-                                data: [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']],
+                                data: totalCallsData,
                                 backgroundColor: '#4facfe'
                             },
                             {
                                 label: 'Connected',
-                                data: [connectedData['Sun'], connectedData['Mon'], connectedData['Tue'], connectedData['Wed'], connectedData['Thu'], connectedData['Fri'], connectedData['Sat']],
+                                data: connectedCallsData,
                                 backgroundColor: '#10b981'
                             },
                             {
                                 label: 'Meetings',
-                                data: [meetingsData['Sun'], meetingsData['Mon'], meetingsData['Tue'], meetingsData['Wed'], meetingsData['Thu'], meetingsData['Fri'], meetingsData['Sat']],
+                                data: meetingsDataArray,
                                 backgroundColor: '#f59e0b'
                             }
                         ]
@@ -2122,12 +2131,21 @@
                         }
                     }
                 });
-                console.log('✅ Chart instance created:', chartInstances.weeklyChart);
+                
+                console.log('✅ Chart instance created successfully');
+                
+                // Remove fallback message if chart created
+                const fallback = document.querySelector('.chart-loading');
+                if (fallback) {
+                    fallback.remove();
+                }
+                
                 console.log('===== WEEKLY CHART DEBUG SUCCESS ✅ =====');
             } catch (e) {
-                console.error('❌ FATAL: Error creating weekly chart:', e);
+                console.error('❌ FATAL: Error creating chart:', e);
                 console.error('Error message:', e.message);
-                console.error('Error stack:', e.stack);
+                console.error('Error type:', e.name);
+                if (e.stack) console.error('Stack:', e.stack);
             }
         }
 
