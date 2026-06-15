@@ -145,8 +145,8 @@
 
                 <div class="section">
                     <h2>📈 This Week's Activity</h2>
-                    <div style="height: 300px;">
-                        <canvas id="weeklyChart"></canvas>
+                    <div style="width: 100%; height: 300px; position: relative;">
+                        <canvas id="weeklyChart" style="display: block; max-width: 100%;"></canvas>
                     </div>
                 </div>
 
@@ -2006,28 +2006,35 @@
         }
 
         function createWeeklyChart() {
+            console.log('===== WEEKLY CHART DEBUG START =====');
+            console.log('Step 1: Check Chart library');
+            
             // Check if Chart library is loaded
             if (typeof Chart === 'undefined') {
                 console.warn('Chart.js library not loaded yet, retrying in 500ms');
                 setTimeout(createWeeklyChart, 500);
                 return;
             }
+            console.log('✅ Chart library loaded');
 
+            console.log('Step 2: Destroy old instances');
             destroyAllCharts();
+            console.log('✅ Old instances destroyed');
             
-            console.log('Creating weekly chart with myCalls:', myCalls.length, 'followups:', followups.length);
-            
+            console.log('Step 3: Build data structures');
             const weekData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const connectedData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const meetingsData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            console.log('✅ Data structures created');
 
+            console.log('Step 4: Calculate week start');
             const weekStart = new Date();
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
             weekStart.setHours(0, 0, 0, 0);
+            console.log('✅ Week start:', weekStart.toISOString());
 
-            console.log('Week start:', weekStart);
-
+            console.log('Step 5: Process calls (' + myCalls.length + ' total)');
             // Count calls
             myCalls.forEach(c => {
                 const callDate = new Date(c.created_at);
@@ -2041,7 +2048,10 @@
                     }
                 }
             });
+            console.log('✅ Calls processed. Week data:', weekData);
+            console.log('✅ Connected data:', connectedData);
 
+            console.log('Step 6: Process follow-ups (' + followups.length + ' total)');
             // Count scheduled meetings
             followups.forEach(f => {
                 if (f.follow_up_type === 'Meeting') {
@@ -2054,18 +2064,34 @@
                     }
                 }
             });
+            console.log('✅ Meetings processed. Meetings data:', meetingsData);
 
-            console.log('Week data:', weekData);
-            console.log('Connected data:', connectedData);
-            console.log('Meetings data:', meetingsData);
-
+            console.log('Step 7: Get canvas element');
             const ctx = document.getElementById('weeklyChart');
+            console.log('Canvas element:', ctx);
+            
             if (!ctx) {
-                console.warn('weeklyChart canvas element not found');
+                console.error('❌ FATAL: weeklyChart canvas element not found!');
+                console.error('HTML structure check: Does id="weeklyChart" exist in Dashboard tab?');
                 return;
             }
+            console.log('✅ Canvas element found');
 
+            console.log('Step 8: Get 2D context');
+            const context = ctx.getContext('2d');
+            if (!context) {
+                console.error('❌ FATAL: Cannot get 2D context from canvas!');
+                return;
+            }
+            console.log('✅ 2D context obtained');
+
+            console.log('Step 9: Create Chart.js instance');
             try {
+                console.log('Creating chart with options:');
+                console.log('- Type: bar');
+                console.log('- Responsive: true');
+                console.log('- MaintainAspectRatio: false');
+                
                 chartInstances.weeklyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -2096,9 +2122,12 @@
                         }
                     }
                 });
-                console.log('Weekly chart created successfully');
+                console.log('✅ Chart instance created:', chartInstances.weeklyChart);
+                console.log('===== WEEKLY CHART DEBUG SUCCESS ✅ =====');
             } catch (e) {
-                console.error('Error creating weekly chart:', e);
+                console.error('❌ FATAL: Error creating weekly chart:', e);
+                console.error('Error message:', e.message);
+                console.error('Error stack:', e.stack);
             }
         }
 
