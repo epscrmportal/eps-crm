@@ -911,47 +911,40 @@
             const modalId = 'logCall_' + leadId + '_' + Date.now();
             const lead = allLeads.find(l => l.id === leadId);
             
-            const html = `
-                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">
-                    <div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                        <h2 style="margin: 0 0 20px 0; color: #4facfe;">📞 Log New Call - ${lead.name}</h2>
-                        
-                        <div class="form-group">
-                            <label>Call Status</label>
-                            <select id="callStatus_${leadId}">
-                                <option>Connected</option>
-                                <option>Not Reachable</option>
-                                <option>Callback Later</option>
-                                <option>Wrong Number</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Duration (minutes)</label>
-                            <input type="number" id="duration_${leadId}" placeholder="5" value="5" min="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Interested?</label>
-                            <select id="interested_${leadId}">
-                                <option>Yes</option>
-                                <option>No</option>
-                                <option>Maybe</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Discussion Notes</label>
-                            <textarea id="notes_${leadId}" placeholder="What was discussed?" style="height: 100px;"></textarea>
-                        </div>
-
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-primary" onclick="saveCall('${leadId}')" style="flex: 1; padding: 12px;">✅ Save Call</button>
-                            <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const html = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">' +
+                '<div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">' +
+                '<h2 style="margin: 0 0 20px 0; color: #4facfe;">📞 Log New Call - ' + lead.name + '</h2>' +
+                '<div class="form-group">' +
+                '<label>Call Status</label>' +
+                '<select id="callStatus_' + leadId + '">' +
+                '<option>Connected</option>' +
+                '<option>Not Reachable</option>' +
+                '<option>Callback Later</option>' +
+                '<option>Wrong Number</option>' +
+                '</select>' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Duration (minutes)</label>' +
+                '<input type="number" id="duration_' + leadId + '" placeholder="5" value="5" min="0">' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Interested?</label>' +
+                '<select id="interested_' + leadId + '">' +
+                '<option>Yes</option>' +
+                '<option>No</option>' +
+                '<option>Maybe</option>' +
+                '</select>' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Discussion Notes</label>' +
+                '<textarea id="notes_' + leadId + '" placeholder="What was discussed?" style="height: 100px;"></textarea>' +
+                '</div>' +
+                '<div style="display: flex; gap: 10px;">' +
+                '<button class="btn btn-primary" onclick="saveCall(\'' + leadId + '\')" style="flex: 1; padding: 12px;">✅ Save Call</button>' +
+                '<button class="btn btn-secondary" onclick="document.getElementById(\'' + modalId + '\').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
 
             document.body.insertAdjacentHTML('beforeend', html);
         }
@@ -960,34 +953,29 @@
             const modalId = 'reminder_' + leadId + '_' + Date.now();
             const lead = allLeads.find(l => l.id === leadId);
             
-            const html = `
-                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">
-                    <div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                        <h2 style="margin: 0 0 20px 0; color: #4facfe;">⏰ Set Reminder - ${lead.name}</h2>
-                        
-                        <div class="form-group">
-                            <label>Reminder Type</label>
-                            <select id="reminderType_${leadId}">
-                                <option value="1">Follow up in 1 day</option>
-                                <option value="3">Follow up in 3 days</option>
-                                <option value="7">Follow up in 7 days</option>
-                                <option value="14">Follow up in 2 weeks</option>
-                                <option value="30">Follow up in 1 month</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Reminder Notes</label>
-                            <textarea id="reminderNotes_${leadId}" placeholder="What to remind about?" style="height: 100px;"></textarea>
-                        </div>
-
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-success" onclick="saveReminder('${leadId}')" style="flex: 1; padding: 12px;">✅ Set Reminder</button>
-                            <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const html = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">' +
+                '<div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">' +
+                '<h2 style="margin: 0 0 20px 0; color: #4facfe;">⏰ Set Reminder - ' + lead.name + '</h2>' +
+                '<div class="form-group">' +
+                '<label>Reminder Type</label>' +
+                '<select id="reminderType_' + leadId + '">' +
+                '<option value="1">Follow up in 1 day</option>' +
+                '<option value="3">Follow up in 3 days</option>' +
+                '<option value="7">Follow up in 7 days</option>' +
+                '<option value="14">Follow up in 2 weeks</option>' +
+                '<option value="30">Follow up in 1 month</option>' +
+                '</select>' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Reminder Notes</label>' +
+                '<textarea id="reminderNotes_' + leadId + '" placeholder="What to remind about?" style="height: 100px;"></textarea>' +
+                '</div>' +
+                '<div style="display: flex; gap: 10px;">' +
+                '<button class="btn btn-success" onclick="saveReminder(\'' + leadId + '\')" style="flex: 1; padding: 12px;">✅ Set Reminder</button>' +
+                '<button class="btn btn-secondary" onclick="document.getElementById(\'' + modalId + '\').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
 
             document.body.insertAdjacentHTML('beforeend', html);
         }
@@ -996,42 +984,35 @@
             const modalId = 'meeting_' + leadId + '_' + Date.now();
             const lead = allLeads.find(l => l.id === leadId);
             
-            const html = `
-                <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">
-                    <div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                        <h2 style="margin: 0 0 20px 0; color: #4facfe;">📅 Schedule Meeting - ${lead.name}</h2>
-                        
-                        <div class="form-group">
-                            <label>Meeting Date</label>
-                            <input type="date" id="meetingDate_${leadId}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Meeting Time</label>
-                            <input type="time" id="meetingTime_${leadId}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Field Executive</label>
-                            <select id="fieldExec_${leadId}">
-                                <option value="">Select Field Executive</option>
-                                <option value="sales@epsworldwide.in">Sales Team</option>
-                                <option value="fieldexec@epsworldwide.in">Field Executive</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Meeting Notes</label>
-                            <textarea id="meetingNotes_${leadId}" placeholder="Meeting agenda / details" style="height: 100px;"></textarea>
-                        </div>
-
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-warning" onclick="scheduleMeeting('${leadId}')" style="flex: 1; padding: 12px;">✅ Schedule</button>
-                            <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const html = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">' +
+                '<div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">' +
+                '<h2 style="margin: 0 0 20px 0; color: #4facfe;">📅 Schedule Meeting - ' + lead.name + '</h2>' +
+                '<div class="form-group">' +
+                '<label>Meeting Date</label>' +
+                '<input type="date" id="meetingDate_' + leadId + '" required>' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Meeting Time</label>' +
+                '<input type="time" id="meetingTime_' + leadId + '" required>' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Field Executive</label>' +
+                '<select id="fieldExec_' + leadId + '">' +
+                '<option value="">Select Field Executive</option>' +
+                '<option value="sales@epsworldwide.in">Sales Team</option>' +
+                '<option value="fieldexec@epsworldwide.in">Field Executive</option>' +
+                '</select>' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label>Meeting Notes</label>' +
+                '<textarea id="meetingNotes_' + leadId + '" placeholder="Meeting agenda / details" style="height: 100px;"></textarea>' +
+                '</div>' +
+                '<div style="display: flex; gap: 10px;">' +
+                '<button class="btn btn-warning" onclick="scheduleMeeting(\'' + leadId + '\')" style="flex: 1; padding: 12px;">✅ Schedule</button>' +
+                '<button class="btn btn-secondary" onclick="document.getElementById(\'' + modalId + '\').remove();" style="flex: 1; padding: 12px;">❌ Cancel</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
 
             document.body.insertAdjacentHTML('beforeend', html);
         }
