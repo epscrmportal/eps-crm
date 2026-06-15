@@ -708,6 +708,11 @@
 
         async function claimLead(leadId) {
             try {
+                if (!currentUser || !currentUser.id) {
+                    showAlert('User not authenticated', 'error');
+                    return;
+                }
+                
                 const { error } = await supabase
                     .from('contacts')
                     .update({
@@ -717,14 +722,15 @@
                         status: 'assigned'
                     })
                     .eq('id', leadId)
-                    .eq('assigned_to', null);
+                    .is('assigned_to', null);
 
                 if (error) throw error;
 
                 showAlert('🎉 Lead claimed!', 'success');
                 loadAllData();
             } catch (error) {
-                showAlert('Error: ' + error.message, 'error');
+                showAlert('Error claiming lead: ' + error.message, 'error');
+                console.error('Claim error:', error);
             }
         }
 
@@ -779,7 +785,7 @@
 
             table.innerHTML = myLeads.map(lead => `
                 <tr>
-                    <td><strong>${lead.name}</strong></td>
+                    <td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail('${lead.id}')">${lead.name}</strong></td>
                     <td>${lead.phone}</td>
                     <td>${lead.company || 'N/A'}</td>
                     <td><span class="badge badge-${lead.lead_status}">${lead.lead_status.toUpperCase()}</span></td>
@@ -790,6 +796,60 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function showContactDetail(leadId) {
+            const lead = allLeads.find(l => l.id === leadId);
+            if (!lead) return;
+
+            const contactCalls = myCalls.filter(c => c.contact_id === leadId);
+            
+            let callsHtml = '';
+            if (contactCalls.length === 0) {
+                callsHtml = '<p style="color: #999;">No calls logged yet</p>';
+            } else {
+                callsHtml = contactCalls.map(call => `
+                    <div style="background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 5px; border-left: 3px solid #4facfe;">
+                        <p><strong>${call.call_status}</strong> - ${new Date(call.created_at).toLocaleDateString()} ${new Date(call.created_at).toLocaleTimeString()}</p>
+                        <p>Duration: ${call.duration_minutes} min | Interested: ${call.interested}</p>
+                        <p style="color: #666; font-size: 0.9em;">${call.discussion_notes || 'No notes'}</p>
+                    </div>
+                `).join('');
+            }
+
+            const detailHtml = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;" onclick="if(event.target === this) document.getElementById('contactDetailModal').style.display = 'none';">
+                    <div id="contactDetailModal" style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #4facfe; margin: 0;">${lead.name}</h2>
+                            <button style="background: none; border: none; font-size: 1.5em; cursor: pointer;" onclick="document.getElementById('contactDetailModal').parentElement.style.display = 'none';">✕</button>
+                        </div>
+
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <p><strong>📞 Phone:</strong> ${lead.phone}</p>
+                            <p><strong>📧 Email:</strong> ${lead.email || 'N/A'}</p>
+                            <p><strong>🏢 Company:</strong> ${lead.company || 'N/A'}</p>
+                            <p><strong>📍 City:</strong> ${lead.city || 'N/A'}</p>
+                            <p><strong>🎯 Lead Quality:</strong> <span class="badge badge-${lead.lead_status}">${lead.lead_status.toUpperCase()}</span></p>
+                        </div>
+
+                        <h3 style="color: #4facfe; border-bottom: 2px solid #4facfe; padding-bottom: 10px;">📝 Notes</h3>
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; min-height: 80px;">
+                            ${lead.notes ? `<p>${lead.notes}</p>` : '<p style="color: #999;">No notes yet</p>'}
+                        </div>
+
+                        <h3 style="color: #4facfe; border-bottom: 2px solid #4facfe; padding-bottom: 10px;">📞 Call History (${contactCalls.length})</h3>
+                        <div style="margin-bottom: 20px;">
+                            ${callsHtml}
+                        </div>
+
+                        <button class="btn btn-secondary" onclick="document.getElementById('contactDetailModal').parentElement.style.display = 'none';" style="width: 100%;">Close</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', detailHtml);
+            document.getElementById('contactDetailModal').parentElement.style.display = 'flex';
         }
 
         // ============================================================
@@ -1373,8 +1433,13 @@
             }
         });
 
-        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleLogin();
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginPasswordEl = document.getElementById('loginPassword');
+            if (loginPasswordEl) {
+                loginPasswordEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
         });
     </script>
 </body>
