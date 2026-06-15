@@ -438,7 +438,7 @@
                     <button class="btn btn-primary" onclick="toggleTemplateForm()" style="margin-bottom: 20px;">➕ Create Template</button>
 
                     <div style="background: #f0f9ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #4facfe;">
-                        <h3 style="margin-top: 0; color: #1a3a52; margin-bottom: 15px;">⭐ Quick Templates</h3>
+                        <h3 style="margin-top: 0; color: #1a3a52; margin-bottom: 15px;">⭐ Quick Templates (8 Professional Templates)</h3>
                         <p style="color: #666; margin-bottom: 15px; font-size: 13px;">One-click ready templates - Click to use</p>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
@@ -453,6 +453,26 @@
                             <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; cursor: pointer;" onclick="useQuickTemplate('Proposal')">
                                 <h4 style="margin: 0 0 10px 0; color: #f59e0b;">📋 Proposal</h4>
                                 <p style="margin: 0; font-size: 12px; color: #666;">Service proposal email</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6; cursor: pointer;" onclick="useQuickTemplate('Meeting Confirmation')">
+                                <h4 style="margin: 0 0 10px 0; color: #8b5cf6;">📅 Meeting Confirmation</h4>
+                                <p style="margin: 0; font-size: 12px; color: #666;">Confirm scheduled meeting details</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ec4899; cursor: pointer;" onclick="useQuickTemplate('Proposal Submission')">
+                                <h4 style="margin: 0 0 10px 0; color: #ec4899;">📤 Proposal Submission</h4>
+                                <p style="margin: 0; font-size: 12px; color: #666;">Submit detailed proposal with attachments</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #06b6d4; cursor: pointer;" onclick="useQuickTemplate('Price Quotation')">
+                                <h4 style="margin: 0 0 10px 0; color: #06b6d4;">💰 Price Quotation</h4>
+                                <p style="margin: 0; font-size: 12px; color: #666;">Submit competitive pricing quote</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #14b8a6; cursor: pointer;" onclick="useQuickTemplate('Follow-up Quotation')">
+                                <h4 style="margin: 0 0 10px 0; color: #14b8a6;">📧 Follow-up Quotation</h4>
+                                <p style="margin: 0; font-size: 12px; color: #666;">Follow up on submitted proposal</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f97316; cursor: pointer;" onclick="useQuickTemplate('Thank You Meeting')">
+                                <h4 style="margin: 0 0 10px 0; color: #f97316;">🙏 Thank You Meeting</h4>
+                                <p style="margin: 0; font-size: 12px; color: #666;">Thank you for meeting & feedback</p>
                             </div>
                         </div>
                     </div>
@@ -1367,13 +1387,14 @@
             const modalId = 'followupModal_' + fuId;
 
             const modalHtml = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; overflow-y: auto;">' +
-                '<div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin: 20px;">' +
-                '<h2 style="margin-top: 0; color: #1a3a52;">📋 Follow-up Update</h2>' +
-                '<p style="color: #666; margin-bottom: 20px;">Update follow-up: <strong>' + (lead?.name || 'Unknown') + '</strong> - <strong>' + fu.company || '' + '</strong></p>' +
+                '<div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin: 20px;">' +
+                '<h2 style="margin-top: 0; color: #1a3a52; margin-bottom: 8px;">📋 Follow-up Update</h2>' +
+                '<p style="color: #666; margin-bottom: 20px; font-size: 14px;">Update follow-up: <strong>' + (lead?.name || 'Unknown') + '</strong> - <strong>' + (fu.company || '') + '</strong></p>' +
                 
+                // Follow-up Type
                 '<div style="margin-bottom: 20px;">' +
                 '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Follow-up Type</label>' +
-                '<select id="fuType_' + fuId + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">' +
+                '<select id="fuType_' + fuId + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">' +
                 '<option value="Call" ' + (fu.follow_up_type === 'Call' ? 'selected' : '') + '>📞 Call</option>' +
                 '<option value="Email" ' + (fu.follow_up_type === 'Email' ? 'selected' : '') + '>✉️ Email</option>' +
                 '<option value="Meeting" ' + (fu.follow_up_type === 'Meeting' ? 'selected' : '') + '>📅 Meeting</option>' +
@@ -1381,25 +1402,35 @@
                 '</select>' +
                 '</div>' +
 
+                // Follow-up Date
                 '<div style="margin-bottom: 20px;">' +
                 '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Follow-up Date</label>' +
-                '<input type="date" id="fuDate_' + fuId + '" value="' + fu.follow_up_date + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">' +
+                '<input type="date" id="fuDate_' + fuId + '" value="' + (fu.follow_up_date || '') + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">' +
                 '</div>' +
 
-                '<div style="margin-bottom: 20px;">' +
-                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Notes/Update</label>' +
-                '<textarea id="fuNotes_' + fuId + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; height: 100px; font-family: Arial;">' + (fu.follow_up_notes || '') + '</textarea>' +
-                '</div>' +
-
-                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">' +
-                '<button class="btn btn-success" onclick="updateFollowupStatus(\'' + fuId + '\', \'completed\')" style="padding: 12px; font-size: 14px; font-weight: bold;">✅ Follow-up Done</button>' +
-                '<button class="btn btn-warning" onclick="rescheduleFollowup(\'' + fuId + '\')" style="padding: 12px; font-size: 14px; font-weight: bold;">🔄 Reschedule</button>' +
-                '</div>' +
-
+                // Mark Follow-up Status
+                '<div style="margin-bottom: 20px; background: #f5f5f5; padding: 15px; border-radius: 8px;">' +
+                '<label style="display: block; margin-bottom: 12px; font-weight: 600; color: #333;">Mark Follow-up Status</label>' +
                 '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">' +
-                '<button class="btn btn-primary" onclick="saveFollowupUpdate(\'' + fuId + '\')" style="padding: 12px; font-size: 14px; font-weight: bold;">💾 Save & Update</button>' +
-                '<button class="btn btn-secondary" onclick="closeModal(\'' + modalId + '\')" style="padding: 12px; font-size: 14px; font-weight: bold;">✖️ Close</button>' +
+                '<button class="btn btn-success" onclick="updateFollowupStatus(\'' + fuId + '\', \'completed\')" style="padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer;">✓ Follow-up Done</button>' +
+                '<button class="btn btn-danger" onclick="updateFollowupStatus(\'' + fuId + '\', \'deal_closed\')" style="padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #10b981;">✓ Deal Closed</button>' +
                 '</div>' +
+                '</div>' +
+
+                // Add Latest Notes/Update
+                '<div style="margin-bottom: 20px;">' +
+                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Add Latest Notes/Update</label>' +
+                '<textarea id="fuNotes_' + fuId + '" placeholder="Email sent with company brochure. Schedule meeting with procurement team next week. Has authority to make decisions." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; height: 110px; font-family: Arial; font-size: 14px; resize: vertical;">' + (fu.follow_up_notes || '') + '</textarea>' +
+                '</div>' +
+
+                // Action Buttons
+                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">' +
+                '<button class="btn btn-warning" onclick="rescheduleFollowup(\'' + fuId + '\')" style="padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #f59e0b; color: white;">↻ Reschedule</button>' +
+                '<button class="btn btn-secondary" onclick="closeModal(\'' + modalId + '\')" style="padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #6b7280; color: white;">✕ Close</button>' +
+                '</div>' +
+
+                // Save Button
+                '<button class="btn btn-primary" onclick="saveFollowupUpdate(\'' + fuId + '\')" style="width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #2563eb; color: white;">💾 Save Notes & Update</button>' +
                 '</div>' +
                 '</div>';
 
@@ -1550,6 +1581,26 @@
             'Proposal': {
                 subject: 'Logistics Proposal - EPS Worldwide Services',
                 body: 'Dear [Contact Name],\n\nThank you for considering EPS Worldwide Integrated Logistics for your logistics requirements.\n\nBased on our discussion, we have prepared a customized proposal that addresses your specific needs in terms of:\n• Transportation modes and frequency\n• Delivery timelines\n• Cost optimization\n• Service quality standards\n\nKey highlights of our proposal:\n✓ Competitive pricing with volume discounts\n✓ Real-time tracking and visibility\n✓ 24/7 customer support\n✓ Proven track record with similar clients\n✓ Flexible contract terms\n\nWe are confident that our services will exceed your expectations. Please review the attached proposal and feel free to reach out with any questions or clarifications.\n\nWe look forward to partnering with you.\n\nBest Regards,\nEPS Worldwide Integrated Logistics'
+            },
+            "Meeting Confirmation": {
+                subject: "Meeting Confirmation - EPS Worldwide Integrated Logistics",
+                body: "Dear Sir/Madam,\n\nThank you for providing us the opportunity to meet with you.\n\nThis is to confirm our meeting scheduled on [Date] at [Time] at your office. We look forward to introducing EPS Worldwide Integrated Logistics Pvt. Ltd. and discussing how our logistics, courier, warehousing, and supply chain solutions can support your business requirements.\n\nOur representative, [Name], will be attending the meeting and will present our service offerings, network capabilities, and customized logistics solutions.\n\nWe are confident that this meeting will provide valuable insights into how we can partner effectively to support your logistics operations and help you achieve your business objectives.\n\nShould there be any changes to the schedule or if you have specific topics you would like us to cover, please feel free to contact us at your earliest convenience.\n\nThank you for your time and consideration. We look forward to meeting you.\n\nBest Regards,\nEPS Worldwide Integrated Logistics Pvt. Ltd.\n[Your Name]\n[Mobile Number]\n[Email Address]"
+            },
+            "Proposal Submission": {
+                subject: "Submission of Logistics Service Proposal - EPS Worldwide",
+                body: "Dear Sir/Madam,\n\nGreetings from EPS Worldwide Integrated Logistics Pvt. Ltd.\n\nFurther to our discussion, please find attached our proposal for your kind review and consideration.\n\nThe proposal outlines our service offerings, operational capabilities, coverage network, and commercial terms designed to support your logistics and supply chain requirements. We are confident that our experience, nationwide reach, and commitment to service excellence will add value to your operations.\n\nKey elements of our proposal include:\n• Comprehensive logistics solutions tailored to your needs\n• Nationwide coverage with 24,000+ pin codes\n• Competitive pricing with flexible payment terms\n• Real-time tracking and proactive customer support\n• Proven track record with diverse client portfolio\n• Dedicated account management\n\nWe would appreciate the opportunity to discuss the proposal in detail and address any questions or specific requirements you may have. Our team is available for a meeting or call at your convenience to clarify any aspects of the proposal.\n\nPlease feel free to reach out if you need any additional information or would like to schedule a discussion with our team.\n\nThank you for your time and consideration. We look forward to your valuable feedback and the possibility of working together to enhance your logistics operations.\n\nBest Regards,\nEPS Worldwide Integrated Logistics Pvt. Ltd.\n[Your Name]\n[Mobile Number]\n[Email Address]"
+            },
+            "Price Quotation": {
+                subject: "Submission of Price Quotation - EPS Worldwide Integrated Logistics",
+                body: "Dear Sir/Madam,\n\nGreetings from EPS Worldwide Integrated Logistics Pvt. Ltd.\n\nThank you for the opportunity to serve your logistics requirements.\n\nPlease find attached our price quotation for your review and consideration. We have proposed competitive rates while ensuring the high level of service, reliability, and operational support that EPS Worldwide is known for.\n\nKey highlights of our quotation:\n• Competitive pricing structure\n• Flexible payment terms\n• Volume-based discounts available\n• Transparent cost breakdown\n• Additional services on request\n• Dedicated account support\n\nOur quotation is valid for 30 days from the date of this email. We are open to negotiating specific terms based on your requirements and volume commitments.\n\nWe hope our quotation meets your expectations and would be pleased to discuss any specific requirements or clarifications you may have. Our team is available to provide additional details or customize the quotation based on your logistics needs.\n\nPlease feel free to reach out at your convenience to discuss further.\n\nWe look forward to your positive response and the opportunity to work with your esteemed organization.\n\nThank you for your time and consideration.\n\nBest Regards,\nEPS Worldwide Integrated Logistics Pvt. Ltd.\n[Your Name]\n[Mobile Number]\n[Email Address]"
+            },
+            "Follow-up Quotation": {
+                subject: "Follow-Up on Proposal / Quotation Submitted - EPS Worldwide",
+                body: "Dear Sir/Madam,\n\nI hope you are doing well.\n\nI am writing to follow up on the proposal and quotation we shared earlier regarding your logistics requirements. We wanted to check if you had an opportunity to review the same and whether there are any questions or clarifications we can assist with.\n\nWe understand that decision-making requires thorough evaluation and discussion. Our team is here to support you with:\n• Detailed breakdowns of proposed costs\n• Customized solutions based on your specific needs\n• References from similar organizations we serve\n• Trial period options to evaluate our services\n• Flexible contract terms and payment options\n\nWe would appreciate your feedback and would be happy to discuss any specific requirements or customized solutions that may better suit your needs. If you have any concerns or would like us to adjust our proposal, please do not hesitate to let us know.\n\nWe are available for a meeting or call at your convenience to discuss further and address any questions you may have.\n\nWe look forward to hearing from you and exploring the possibility of working together to meet your logistics objectives.\n\nThank you for your time and consideration.\n\nBest Regards,\nEPS Worldwide Integrated Logistics Pvt. Ltd.\n[Your Name]\n[Mobile Number]\n[Email Address]"
+            },
+            "Thank You Meeting": {
+                subject: "Thank You for Choosing EPS Worldwide Integrated Logistics",
+                body: "Dear Sir/Madam,\n\nThank you for taking the time to meet with us and learn more about EPS Worldwide Integrated Logistics Pvt. Ltd.\n\nWe sincerely appreciate the opportunity to present our services and discuss your logistics requirements. Your insights, questions, and feedback are invaluable to us as we continuously strive to improve and provide solutions that best meet our clients' needs.\n\nDuring our meeting, we discussed:\n• Your current logistics challenges and opportunities\n• Our service offerings and capabilities\n• How EPS Worldwide can support your operations\n• Implementation timeline and next steps\n\nWe are impressed by your organization's commitment to operational excellence and believe that our partnership can create significant value for your business through:\n• Cost optimization\n• Improved delivery efficiency\n• Enhanced supply chain visibility\n• Reliable and professional service delivery\n\nWe would be grateful if you could share your feedback on our proposal and services. Any suggestions, observations, or specific requirements from your end will help us serve you better and customize our offerings to your exact needs.\n\nOur team remains committed to supporting you at every step of the journey. Please feel free to reach out if you need any additional information or would like to discuss any aspect of our proposal further.\n\nThank you once again for your time, consideration, and for allowing us to present our services. We look forward to the opportunity of working together and building a long-term, mutually beneficial business relationship.\n\nBest Regards,\nEPS Worldwide Integrated Logistics Pvt. Ltd.\n[Your Name]\n[Mobile Number]\n[Email Address]"
             }
         };
 
@@ -1636,7 +1687,16 @@
         }
 
         function createAnalyticsCharts() {
+            // Check if Chart library is loaded
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js library not loaded yet, retrying in 500ms');
+                setTimeout(createAnalyticsCharts, 500);
+                return;
+            }
+
             destroyAllCharts();
+            
+            console.log('Creating analytics charts with myCalls:', myCalls.length, 'myLeads:', myLeads.length);
             
             // Call Outcome Chart
             const outcomes = { connected: 0, not: 0 };
@@ -1644,6 +1704,8 @@
                 if (c.call_status === 'Connected') outcomes.connected++;
                 else outcomes.not++;
             });
+
+            console.log('Call outcomes:', outcomes);
 
             const ctx1 = document.getElementById('callOutcomeChart');
             if (ctx1) {
@@ -1665,9 +1727,12 @@
                             plugins: { legend: { position: 'bottom' } }
                         }
                     });
+                    console.log('Call outcome chart created successfully');
                 } catch (e) {
                     console.error('Error creating call outcome chart:', e);
                 }
+            } else {
+                console.warn('callOutcomeChart canvas not found');
             }
 
             // Lead Quality Chart
@@ -1677,6 +1742,8 @@
                 if (qualities.hasOwnProperty(status)) qualities[status]++;
                 else qualities['Cold']++;
             });
+
+            console.log('Lead qualities:', qualities);
 
             const ctx2 = document.getElementById('leadQualityChart');
             if (ctx2) {
@@ -1700,9 +1767,12 @@
                             plugins: { legend: { display: true } }
                         }
                     });
+                    console.log('Lead quality chart created successfully');
                 } catch (e) {
                     console.error('Error creating lead quality chart:', e);
                 }
+            } else {
+                console.warn('leadQualityChart canvas not found');
             }
 
             // Interest Chart
@@ -1711,6 +1781,8 @@
                 if (c.interested === 'Yes') interest.yes++;
                 else interest.no++;
             });
+
+            console.log('Interest data:', interest);
 
             const ctx3 = document.getElementById('interestChart');
             if (ctx3) {
@@ -1732,13 +1804,18 @@
                             plugins: { legend: { position: 'bottom' } }
                         }
                     });
+                    console.log('Interest chart created successfully');
                 } catch (e) {
                     console.error('Error creating interest chart:', e);
                 }
+            } else {
+                console.warn('interestChart canvas not found');
             }
 
             // Duration Trend
             const durations = myCalls.map(c => c.duration_minutes || 0).slice(-7);
+
+            console.log('Duration data:', durations);
 
             const ctx4 = document.getElementById('durationChart');
             if (ctx4) {
@@ -1775,9 +1852,12 @@
                             plugins: { legend: { display: true } }
                         }
                     });
+                    console.log('Duration chart created successfully');
                 } catch (e) {
                     console.error('Error creating duration chart:', e);
                 }
+            } else {
+                console.warn('durationChart canvas not found');
             }
         }
 
@@ -2047,16 +2127,33 @@
         // ============================================================
 
         function saveGoalTargets() {
+            // Check if elements exist before getting values
+            const dailyCallsTarget = document.getElementById('dailyCallsTarget');
+            const dailyConnectedTarget = document.getElementById('dailyConnectedTarget');
+            const dailyMeetingsTarget = document.getElementById('dailyMeetingsTarget');
+            const weeklyCallsTarget = document.getElementById('weeklyCallsTarget');
+            const weeklyConnectedTarget = document.getElementById('weeklyConnectedTarget');
+            const weeklyMeetingsTarget = document.getElementById('weeklyMeetingsTarget');
+            const monthlyCallsTarget = document.getElementById('monthlyCallsTarget');
+            const monthlyConnectedTarget = document.getElementById('monthlyConnectedTarget');
+            const monthlyMeetingsTarget = document.getElementById('monthlyMeetingsTarget');
+
+            // If any element is missing, show error
+            if (!dailyCallsTarget || !dailyConnectedTarget || !dailyMeetingsTarget) {
+                showAlert('Goals form not loaded. Please refresh the page.', 'error');
+                return;
+            }
+
             const targets = {
-                daily_calls: document.getElementById('dailyCallsTarget').value,
-                daily_connected: document.getElementById('dailyConnectedTarget').value,
-                daily_meetings: document.getElementById('dailyMeetingsTarget').value,
-                weekly_calls: document.getElementById('weeklyCallsTarget').value,
-                weekly_connected: document.getElementById('weeklyConnectedTarget').value,
-                weekly_meetings: document.getElementById('weeklyMeetingsTarget').value,
-                monthly_calls: document.getElementById('monthlyCallsTarget').value,
-                monthly_connected: document.getElementById('monthlyConnectedTarget').value,
-                monthly_meetings: document.getElementById('monthlyMeetingsTarget').value
+                daily_calls: dailyCallsTarget.value,
+                daily_connected: dailyConnectedTarget.value,
+                daily_meetings: dailyMeetingsTarget.value,
+                weekly_calls: weeklyCallsTarget.value,
+                weekly_connected: weeklyConnectedTarget.value,
+                weekly_meetings: weeklyMeetingsTarget.value,
+                monthly_calls: monthlyCallsTarget.value,
+                monthly_connected: monthlyConnectedTarget.value,
+                monthly_meetings: monthlyMeetingsTarget.value
             };
             localStorage.setItem('goalTargets_' + currentUser.id, JSON.stringify(targets));
             showAlert('Goals saved successfully!', 'success');
@@ -2065,15 +2162,30 @@
 
         function loadGoalTargets() {
             const targets = getGoalTargets();
-            document.getElementById('dailyCallsTarget').value = targets.daily_calls;
-            document.getElementById('dailyConnectedTarget').value = targets.daily_connected;
-            document.getElementById('dailyMeetingsTarget').value = targets.daily_meetings;
-            document.getElementById('weeklyCallsTarget').value = targets.weekly_calls;
-            document.getElementById('weeklyConnectedTarget').value = targets.weekly_connected;
-            document.getElementById('weeklyMeetingsTarget').value = targets.weekly_meetings;
-            document.getElementById('monthlyCallsTarget').value = targets.monthly_calls;
-            document.getElementById('monthlyConnectedTarget').value = targets.monthly_connected;
-            document.getElementById('monthlyMeetingsTarget').value = targets.monthly_meetings;
+            
+            // Check if elements exist before setting values (they won't exist if hidden)
+            const els = {
+                daily_calls: document.getElementById('dailyCallsTarget'),
+                daily_connected: document.getElementById('dailyConnectedTarget'),
+                daily_meetings: document.getElementById('dailyMeetingsTarget'),
+                weekly_calls: document.getElementById('weeklyCallsTarget'),
+                weekly_connected: document.getElementById('weeklyConnectedTarget'),
+                weekly_meetings: document.getElementById('weeklyMeetingsTarget'),
+                monthly_calls: document.getElementById('monthlyCallsTarget'),
+                monthly_connected: document.getElementById('monthlyConnectedTarget'),
+                monthly_meetings: document.getElementById('monthlyMeetingsTarget')
+            };
+
+            // Only set values if elements exist
+            if (els.daily_calls) els.daily_calls.value = targets.daily_calls;
+            if (els.daily_connected) els.daily_connected.value = targets.daily_connected;
+            if (els.daily_meetings) els.daily_meetings.value = targets.daily_meetings;
+            if (els.weekly_calls) els.weekly_calls.value = targets.weekly_calls;
+            if (els.weekly_connected) els.weekly_connected.value = targets.weekly_connected;
+            if (els.weekly_meetings) els.weekly_meetings.value = targets.weekly_meetings;
+            if (els.monthly_calls) els.monthly_calls.value = targets.monthly_calls;
+            if (els.monthly_connected) els.monthly_connected.value = targets.monthly_connected;
+            if (els.monthly_meetings) els.monthly_meetings.value = targets.monthly_meetings;
         }
 
         function getGoalTargets() {
@@ -2087,38 +2199,47 @@
         }
 
         function updateGoalsDisplay() {
-            const targets = getGoalTargets();
-            
-            // Today's progress
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
-            const todayEnd = new Date();
-            todayEnd.setHours(23, 59, 59, 999);
-            
-            const todayCalls = myCalls.filter(c => new Date(c.created_at) >= todayStart && new Date(c.created_at) <= todayEnd).length;
-            const todayConnected = myCalls.filter(c => new Date(c.created_at) >= todayStart && new Date(c.created_at) <= todayEnd && c.call_status === 'Connected').length;
-            const todayMeetings = followups.filter(f => f.follow_up_type === 'Meeting' && new Date(f.created_at || f.follow_up_date) >= todayStart).length;
+            try {
+                const todayProgressEl = document.getElementById('todayProgress');
+                const weekProgressEl = document.getElementById('weekProgress');
+                const monthProgressEl = document.getElementById('monthProgress');
 
-            // Week's progress
-            const weekStart = new Date();
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            weekStart.setHours(0, 0, 0, 0);
-            
-            const weekCalls = myCalls.filter(c => new Date(c.created_at) >= weekStart).length;
-            const weekConnected = myCalls.filter(c => new Date(c.created_at) >= weekStart && c.call_status === 'Connected').length;
-            const weekMeetings = followups.filter(f => f.follow_up_type === 'Meeting' && new Date(f.created_at || f.follow_up_date) >= weekStart).length;
+                if (!todayProgressEl || !weekProgressEl || !monthProgressEl) {
+                    return;
+                }
 
-            // Month's progress
-            const monthStart = new Date();
-            monthStart.setDate(1);
-            monthStart.setHours(0, 0, 0, 0);
-            
-            const monthCalls = myCalls.filter(c => new Date(c.created_at) >= monthStart).length;
-            const monthConnected = myCalls.filter(c => new Date(c.created_at) >= monthStart && c.call_status === 'Connected').length;
-            const monthMeetings = followups.filter(f => f.follow_up_type === 'Meeting' && new Date(f.created_at || f.follow_up_date) >= monthStart).length;
+                const targets = getGoalTargets();
+                
+                // Today's progress
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setHours(23, 59, 59, 999);
+                
+                const todayCalls = myCalls.filter(c => new Date(c.created_at) >= todayStart && new Date(c.created_at) <= todayEnd).length;
+                const todayConnected = myCalls.filter(c => new Date(c.created_at) >= todayStart && new Date(c.created_at) <= todayEnd && c.call_status === 'Connected').length;
+                const todayMeetings = followups.filter(f => f.follow_up_type === 'Meeting' && new Date(f.created_at || f.follow_up_date) >= todayStart).length;
 
-            // Display today
-            document.getElementById('todayProgress').innerHTML = 
+                // Week's progress
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                
+                const weekCalls = myCalls.filter(c => new Date(c.created_at) >= weekStart).length;
+                const weekConnected = myCalls.filter(c => new Date(c.created_at) >= weekStart && c.call_status === 'Connected').length;
+                const weekMeetings = followups.filter(f => f.follow_up_type === 'Meeting' && new Date(f.created_at || f.follow_up_date) >= weekStart).length;
+
+                // Month's progress
+                const monthStart = new Date();
+                monthStart.setDate(1);
+                monthStart.setHours(0, 0, 0, 0);
+                
+                const monthCalls = myCalls.filter(c => new Date(c.created_at) >= monthStart).length;
+                const monthConnected = myCalls.filter(c => new Date(c.created_at) >= monthStart && c.call_status === 'Connected').length;
+                const monthMeetings = followups.filter(f => f.follow_up_type === 'Meeting' && new Date(f.created_at || f.follow_up_date) >= monthStart).length;
+
+                // Display today
+                todayProgressEl.innerHTML = 
                 '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">' +
                 '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">' +
                 '<div style="font-size: 14px; color: #666;">📞 Total Calls</div>' +
@@ -2140,7 +2261,7 @@
                 '</div></div>';
 
             // Display week
-            document.getElementById('weekProgress').innerHTML = 
+            weekProgressEl.innerHTML = 
                 '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">' +
                 '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">' +
                 '<div style="font-size: 14px; color: #666;">📞 Total Calls</div>' +
@@ -2162,7 +2283,7 @@
                 '</div></div>';
 
             // Display month
-            document.getElementById('monthProgress').innerHTML = 
+            monthProgressEl.innerHTML = 
                 '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">' +
                 '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">' +
                 '<div style="font-size: 14px; color: #666;">📞 Total Calls</div>' +
@@ -2182,6 +2303,9 @@
                 '<div style="width: 100%; height: 8px; background: #fef3c7; border-radius: 4px; margin-top: 10px;">' +
                 '<div style="width: ' + Math.min((monthMeetings / targets.monthly_meetings) * 100, 100) + '%; height: 100%; background: #f59e0b; border-radius: 4px;"></div></div>' +
                 '</div></div>';
+            } catch (e) {
+                console.error('Error updating goals display:', e);
+            }
         }
 
         // ============================================================
