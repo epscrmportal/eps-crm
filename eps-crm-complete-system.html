@@ -764,16 +764,16 @@
                 return;
             }
 
-            table.innerHTML = unclaimedLeads.map(lead => `
-                <tr>
-                    <td><strong>${lead.name}</strong></td>
-                    <td>${lead.phone}</td>
-                    <td>${lead.company || 'N/A'}</td>
-                    <td><span class="badge badge-${lead.lead_status}">${lead.lead_status.toUpperCase()}</span></td>
-                    <td>${userProfiles[lead.created_by]?.full_name || 'Unknown'}</td>
-                    <td><button class="btn btn-sm btn-success" onclick="claimLead('${lead.id}')">CLAIM</button></td>
-                </tr>
-            `).join('');
+            table.innerHTML = unclaimedLeads.map(lead => 
+                '<tr>' +
+                '<td><strong>' + lead.name + '</strong></td>' +
+                '<td>' + lead.phone + '</td>' +
+                '<td>' + (lead.company || 'N/A') + '</td>' +
+                '<td><span class="badge badge-' + lead.lead_status + '">' + lead.lead_status.toUpperCase() + '</span></td>' +
+                '<td>' + (userProfiles[lead.created_by]?.full_name || 'Unknown') + '</td>' +
+                '<td><button class="btn btn-sm btn-success" onclick="claimLead(\'' + lead.id + '\')">CLAIM</button></td>' +
+                '</tr>'
+            ).join('');
         }
 
         function displayMyLeads() {
@@ -783,19 +783,19 @@
                 return;
             }
 
-            table.innerHTML = myLeads.map(lead => `
-                <tr>
-                    <td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail('${lead.id}')">${lead.name}</strong></td>
-                    <td>${lead.phone}</td>
-                    <td>${lead.company || 'N/A'}</td>
-                    <td><span class="badge badge-${lead.lead_status}">${lead.lead_status.toUpperCase()}</span></td>
-                    <td><span class="badge badge-claimed">${lead.status.toUpperCase()}</span></td>
-                    <td>${new Date(lead.assigned_at).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" onclick="releaseLead('${lead.id}')">Release</button>
-                    </td>
-                </tr>
-            `).join('');
+            table.innerHTML = myLeads.map(lead => 
+                '<tr>' +
+                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail(\'' + lead.id + '\')">' + lead.name + '</strong></td>' +
+                '<td>' + lead.phone + '</td>' +
+                '<td>' + (lead.company || 'N/A') + '</td>' +
+                '<td><span class="badge badge-' + lead.lead_status + '">' + lead.lead_status.toUpperCase() + '</span></td>' +
+                '<td><span class="badge badge-claimed">' + lead.status.toUpperCase() + '</span></td>' +
+                '<td>' + new Date(lead.assigned_at).toLocaleDateString() + '</td>' +
+                '<td>' +
+                '<button class="btn btn-sm btn-warning" onclick="releaseLead(\'' + lead.id + '\')">Release</button>' +
+                '</td>' +
+                '</tr>'
+            ).join('');
         }
 
         function showContactDetail(leadId) {
@@ -1162,16 +1162,14 @@
 
             table.innerHTML = myCalls.map(call => {
                 const lead = allLeads.find(l => l.id === call.contact_id);
-                return `
-                    <tr>
-                        <td>${lead?.name || 'Unknown'}</td>
-                        <td><span class="badge ${call.call_status === 'Connected' ? 'badge-connected' : 'badge-notconnected'}">${call.call_status}</span></td>
-                        <td>${call.duration_minutes} min</td>
-                        <td>${call.interested === 'Yes' ? '✅' : '❌'}</td>
-                        <td>${new Date(call.created_at).toLocaleDateString()}</td>
-                        <td>${call.discussion_notes || 'N/A'}</td>
-                    </tr>
-                `;
+                return '<tr>' +
+                '<td>' + (lead?.name || 'Unknown') + '</td>' +
+                '<td><span class="badge ' + (call.call_status === 'Connected' ? 'badge-connected' : 'badge-notconnected') + '">' + call.call_status + '</span></td>' +
+                '<td>' + call.duration_minutes + ' min</td>' +
+                '<td>' + (call.interested === 'Yes' ? '✅' : '❌') + '</td>' +
+                '<td>' + new Date(call.created_at).toLocaleDateString() + '</td>' +
+                '<td>' + (call.discussion_notes || 'N/A') + '</td>' +
+                '</tr>';
             }).join('');
         }
 
@@ -1195,18 +1193,16 @@
             table.innerHTML = followups.map(fu => {
                 const lead = allLeads.find(l => l.id === fu.contact_id);
                 const daysLeft = Math.ceil((new Date(fu.follow_up_date) - new Date()) / (1000 * 60 * 60 * 24));
-                return `
-                    <tr>
-                        <td>${lead?.name || 'Unknown'}</td>
-                        <td>${fu.follow_up_date}</td>
-                        <td>${fu.follow_up_notes || 'N/A'}</td>
-                        <td style="color: ${daysLeft <= 0 ? 'red' : 'green'}">${daysLeft <= 0 ? '🔴 Overdue' : '✅ ' + daysLeft + 'd'}</td>
-                        <td><span class="badge">${fu.status}</span></td>
-                        <td>
-                            ${fu.status === 'pending' ? '<button class="btn btn-sm btn-success" onclick="completeFollowup(\'' + fu.id + '\')">Complete</button>' : 'Done'}
-                        </td>
-                    </tr>
-                `;
+                return '<tr>' +
+                '<td>' + (lead?.name || 'Unknown') + '</td>' +
+                '<td>' + fu.follow_up_date + '</td>' +
+                '<td>' + (fu.follow_up_notes || 'N/A') + '</td>' +
+                '<td style="color: ' + (daysLeft <= 0 ? 'red' : 'green') + '">' + (daysLeft <= 0 ? '🔴 Overdue' : '✅ ' + daysLeft + 'd') + '</td>' +
+                '<td><span class="badge">' + fu.status + '</span></td>' +
+                '<td>' +
+                (fu.status === 'pending' ? '<button class="btn btn-sm btn-success" onclick="completeFollowup(\'' + fu.id + '\')">Complete</button>' : 'Done') +
+                '</td>' +
+                '</tr>';
             }).join('');
         }
 
@@ -1246,15 +1242,13 @@
 
             container.innerHTML = goals.map(goal => {
                 const progress = Math.min((goal.current_value / goal.target_value) * 100, 100);
-                return `
-                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">
-                        <h3 style="margin-bottom: 10px;">${goal.goal_type}</h3>
-                        <p style="margin-bottom: 15px; opacity: 0.9;">Target: ${goal.target_value} | Current: ${goal.current_value}</p>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress}%;">${Math.round(progress)}%</div>
-                        </div>
-                    </div>
-                `;
+                return '<div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">' +
+                '<h3 style="margin-bottom: 10px;">' + goal.goal_type + '</h3>' +
+                '<p style="margin-bottom: 15px; opacity: 0.9;">Target: ' + goal.target_value + ' | Current: ' + goal.current_value + '</p>' +
+                '<div class="progress-bar">' +
+                '<div class="progress-fill" style="width: ' + progress + '%;">' + Math.round(progress) + '%</div>' +
+                '</div>' +
+                '</div>';
             }).join('');
         }
 
@@ -1269,16 +1263,16 @@
                 return;
             }
 
-            table.innerHTML = templates.map(t => `
-                <tr>
-                    <td><strong>${t.template_name}</strong></td>
-                    <td>${t.subject}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="viewTemplate('${t.id}')">View</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteTemplate('${t.id}')">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
+            table.innerHTML = templates.map(t => 
+                '<tr>' +
+                '<td><strong>' + t.template_name + '</strong></td>' +
+                '<td>' + t.subject + '</td>' +
+                '<td>' +
+                '<button class="btn btn-sm btn-primary" onclick="viewTemplate(\'' + t.id + '\')">View</button>' +
+                '<button class="btn btn-sm btn-danger" onclick="deleteTemplate(\'' + t.id + '\')">Delete</button>' +
+                '</td>' +
+                '</tr>'
+            ).join('');
         }
 
         async function saveTemplate() {
@@ -1469,12 +1463,12 @@
                 return;
             }
 
-            container.innerHTML = reminders.map(r => `
-                <div style="background: ${r.color}; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 5px;">
-                    <h3>${r.title}</h3>
-                    <p>${r.message}</p>
-                </div>
-            `).join('');
+            container.innerHTML = reminders.map(r => 
+                '<div style="background: ' + r.color + '; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 5px;">' +
+                '<h3>' + r.title + '</h3>' +
+                '<p>' + r.message + '</p>' +
+                '</div>'
+            ).join('');
         }
 
         // ============================================================
@@ -1489,16 +1483,14 @@
                 const connected = memberCalls.filter(c => c.call_status === 'Connected').length;
                 const rate = memberCalls.length > 0 ? Math.round((connected / memberCalls.length) * 100) : 0;
 
-                return `
-                    <tr>
-                        <td><strong>${member.full_name}</strong></td>
-                        <td>${member.email}</td>
-                        <td>${memberLeads.length}</td>
-                        <td>${memberCalls.length}</td>
-                        <td>${rate}%</td>
-                        <td><button class="btn btn-sm btn-primary" onclick="viewMemberDetails('${member.id}')">View</button></td>
-                    </tr>
-                `;
+                return '<tr>' +
+                '<td><strong>' + member.full_name + '</strong></td>' +
+                '<td>' + member.email + '</td>' +
+                '<td>' + memberLeads.length + '</td>' +
+                '<td>' + memberCalls.length + '</td>' +
+                '<td>' + rate + '%</td>' +
+                '<td><button class="btn btn-sm btn-primary" onclick="viewMemberDetails(\'' + member.id + '\')">View</button></td>' +
+                '</tr>';
             });
 
             table.innerHTML = teamData.length > 0 ? teamData.join('') : '<tr><td colspan="6" style="text-align: center; padding: 30px;">No team members</td></tr>';
@@ -1561,11 +1553,11 @@
 
             myCalls.slice(0, 5).forEach(c => {
                 const lead = allLeads.find(l => l.id === c.contact_id);
-                activities.push(`<div class="activity-item">📞 Called ${lead?.name} - ${c.call_status}</div>`);
+                activities.push('<div class="activity-item">📞 Called ' + (lead?.name || 'Unknown') + ' - ' + c.call_status + '</div>');
             });
 
             myLeads.slice(0, 3).forEach(l => {
-                activities.push(`<div class="activity-item">✅ Claimed ${l.name}</div>`);
+                activities.push('<div class="activity-item">✅ Claimed ' + l.name + '</div>');
             });
 
             container.innerHTML = activities.join('') || '<p style="color: #999;">No recent activity</p>';
