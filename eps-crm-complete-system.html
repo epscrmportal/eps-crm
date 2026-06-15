@@ -2006,7 +2006,16 @@
         }
 
         function createWeeklyChart() {
+            // Check if Chart library is loaded
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js library not loaded yet, retrying in 500ms');
+                setTimeout(createWeeklyChart, 500);
+                return;
+            }
+
             destroyAllCharts();
+            
+            console.log('Creating weekly chart with myCalls:', myCalls.length, 'followups:', followups.length);
             
             const weekData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const connectedData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
@@ -2016,6 +2025,8 @@
             const weekStart = new Date();
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
             weekStart.setHours(0, 0, 0, 0);
+
+            console.log('Week start:', weekStart);
 
             // Count calls
             myCalls.forEach(c => {
@@ -2044,42 +2055,50 @@
                 }
             });
 
+            console.log('Week data:', weekData);
+            console.log('Connected data:', connectedData);
+            console.log('Meetings data:', meetingsData);
+
             const ctx = document.getElementById('weeklyChart');
-            if (ctx) {
-                try {
-                    chartInstances.weeklyChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                            datasets: [
-                                {
-                                    label: 'Total Calls',
-                                    data: [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']],
-                                    backgroundColor: '#4facfe'
-                                },
-                                {
-                                    label: 'Connected',
-                                    data: [connectedData['Sun'], connectedData['Mon'], connectedData['Tue'], connectedData['Wed'], connectedData['Thu'], connectedData['Fri'], connectedData['Sat']],
-                                    backgroundColor: '#10b981'
-                                },
-                                {
-                                    label: 'Meetings',
-                                    data: [meetingsData['Sun'], meetingsData['Mon'], meetingsData['Tue'], meetingsData['Wed'], meetingsData['Thu'], meetingsData['Fri'], meetingsData['Sat']],
-                                    backgroundColor: '#f59e0b'
-                                }
-                            ]
-                        },
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: { beginAtZero: true }
+            if (!ctx) {
+                console.warn('weeklyChart canvas element not found');
+                return;
+            }
+
+            try {
+                chartInstances.weeklyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                        datasets: [
+                            {
+                                label: 'Total Calls',
+                                data: [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']],
+                                backgroundColor: '#4facfe'
+                            },
+                            {
+                                label: 'Connected',
+                                data: [connectedData['Sun'], connectedData['Mon'], connectedData['Tue'], connectedData['Wed'], connectedData['Thu'], connectedData['Fri'], connectedData['Sat']],
+                                backgroundColor: '#10b981'
+                            },
+                            {
+                                label: 'Meetings',
+                                data: [meetingsData['Sun'], meetingsData['Mon'], meetingsData['Tue'], meetingsData['Wed'], meetingsData['Thu'], meetingsData['Fri'], meetingsData['Sat']],
+                                backgroundColor: '#f59e0b'
                             }
+                        ]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
                         }
-                    });
-                } catch (e) {
-                    console.error('Error creating weekly chart:', e);
-                }
+                    }
+                });
+                console.log('Weekly chart created successfully');
+            } catch (e) {
+                console.error('Error creating weekly chart:', e);
             }
         }
 
