@@ -1051,12 +1051,15 @@
                 const reminderDate = new Date();
                 reminderDate.setDate(reminderDate.getDate() + days);
 
+                const lead = allLeads.find(l => l.id === leadId);
+
                 const { error } = await supabase.from('reminders').insert({
-                    user_id: currentUser.id,
                     contact_id: leadId,
+                    contact_name: lead?.name || 'Unknown',
                     reminder_date: reminderDate.toISOString(),
                     reminder_text: notes || 'Follow up reminder',
-                    status: 'pending'
+                    status: 'pending',
+                    created_by: currentUser.email
                 });
 
                 if (error) throw error;
@@ -1081,15 +1084,17 @@
                     return;
                 }
 
-                const meetingDateTime = date + 'T' + time + ':00';
+                const lead = allLeads.find(l => l.id === leadId);
 
                 const { error } = await supabase.from('meetings').insert({
                     contact_id: leadId,
-                    assigned_to: currentUser.id,
-                    scheduled_with: fieldExec,
-                    meeting_date: meetingDateTime,
-                    meeting_notes: notes,
-                    status: 'scheduled'
+                    contact_name: lead?.name || 'Unknown',
+                    assigned_to: fieldExec,
+                    date: date,
+                    time: time,
+                    agenda: notes,
+                    status: 'scheduled',
+                    created_by: currentUser.email
                 });
 
                 if (error) throw error;
