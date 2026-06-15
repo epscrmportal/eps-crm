@@ -888,6 +888,11 @@
 
         function displayUnclaimedLeads() {
             const table = document.getElementById('unclaimedTable');
+            if (!table) {
+                console.warn('unclaimedTable element not found');
+                return;
+            }
+
             if (unclaimedLeads.length === 0) {
                 table.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">No unclaimed leads</td></tr>';
                 return;
@@ -907,6 +912,11 @@
 
         function displayMyLeads() {
             const table = document.getElementById('myLeadsTable');
+            if (!table) {
+                console.warn('myLeadsTable element not found');
+                return;
+            }
+
             if (myLeads.length === 0) {
                 table.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">No claimed leads</td></tr>';
                 return;
@@ -1306,6 +1316,11 @@
 
         function displayCalls() {
             const table = document.getElementById('callsTable');
+            if (!table) {
+                console.warn('callsTable element not found');
+                return;
+            }
+
             if (myCalls.length === 0) {
                 table.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">No calls logged</td></tr>';
                 return;
@@ -1326,8 +1341,13 @@
 
         function populateLeadSelect() {
             const select = document.getElementById('callLead');
+            if (!select) {
+                console.warn('callLead select element not found');
+                return;
+            }
+
             select.innerHTML = '<option>-- Select Lead --</option>' + 
-                myLeads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+                myLeads.map(l => '<option value="' + l.id + '">' + l.name + '</option>').join('');
         }
 
         // ============================================================
@@ -1336,6 +1356,11 @@
 
         function displayFollowups() {
             const table = document.getElementById('followupsTable');
+            if (!table) {
+                console.warn('followupsTable element not found');
+                return;
+            }
+
             if (followups.length === 0) {
                 table.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">No follow-ups</td></tr>';
                 return;
@@ -1525,6 +1550,11 @@
 
         function displayGoals() {
             const container = document.getElementById('goalsContainer');
+            if (!container) {
+                console.warn('goalsContainer element not found');
+                return;
+            }
+
             if (goals.length === 0) {
                 container.innerHTML = '<p style="color: #999;">No goals set by admin yet</p>';
                 return;
@@ -1548,6 +1578,11 @@
 
         function displayTemplates() {
             const table = document.getElementById('templatesTable');
+            if (!table) {
+                console.warn('templatesTable element not found');
+                return;
+            }
+
             if (templates.length === 0) {
                 table.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 30px;">No templates yet</td></tr>';
                 return;
@@ -1867,6 +1902,11 @@
 
         function displayReminders() {
             const container = document.getElementById('remindersContainer');
+            if (!container) {
+                console.warn('remindersContainer element not found');
+                return;
+            }
+
             const remindersList = [];
 
             // Overdue reminders
@@ -1914,6 +1954,11 @@
 
         function displayTeam() {
             const table = document.getElementById('teamTable');
+            if (!table) {
+                console.warn('teamTable element not found');
+                return;
+            }
+
             const teamData = allTeamMembers.map(member => {
                 const memberLeads = allLeads.filter(l => l.assigned_to === member.id);
                 const memberCalls = allCalls.filter(c => c.user_id === member.id);
@@ -2040,6 +2085,11 @@
 
         function displayRecentActivity() {
             const container = document.getElementById('recentActivity');
+            if (!container) {
+                console.warn('recentActivity container not found');
+                return;
+            }
+
             const activitiesByDay = {};
             
             // Group activities by day
