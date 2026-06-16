@@ -338,7 +338,8 @@
             allMeetings.forEach(function(meeting) {
                 const badgeClass = meeting.status === 'attended' ? 'badge-attended' : 'badge-scheduled';
                 const statusText = meeting.status === 'attended' ? 'ATTENDED' : 'SCHEDULED';
-                html += '<tr><td><strong>' + meeting.contact_name + '</strong></td><td>' + meeting.date + ' ' + meeting.time + '</td><td><span class=\'badge ' + badgeClass + '\'>' + statusText + '</span></td><td><button class=\'btn btn-primary\' onclick=\'openMeetingModal("' + meeting.id + '")\'>👁️ View</button></td></tr>';
+                const viewBtn = '<button class="btn btn-primary" onclick="openMeetingModal(\'' + meeting.id + '\')">View</button>';
+                html += '<tr><td><strong>' + meeting.contact_name + '</strong></td><td>' + meeting.date + ' ' + meeting.time + '</td><td><span class="badge ' + badgeClass + '">' + statusText + '</span></td><td>' + viewBtn + '</td></tr>';
             });
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -350,24 +351,24 @@
 
             const badgeClass = currentMeeting.status === 'attended' ? 'badge-attended' : 'badge-scheduled';
             let html = '<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">CONTACT</p><p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #333;">' + currentMeeting.contact_name + '</p></div>';
-            html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;"><div style="background: #f9f9f9; padding: 12px; border-radius: 8px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">DATE & TIME</p><p style="margin: 0; font-size: 1em; font-weight: bold;">' + currentMeeting.date + '</p><p style="margin: 5px 0 0 0; color: #666;">' + currentMeeting.time + '</p></div><div style="background: #f9f9f9; padding: 12px; border-radius: 8px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">STATUS</p><p style="margin: 0;"><span class=\'badge ' + badgeClass + '\'>' + currentMeeting.status.toUpperCase() + '</span></p></div></div>';
+            html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;"><div style="background: #f9f9f9; padding: 12px; border-radius: 8px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">DATE & TIME</p><p style="margin: 0; font-size: 1em; font-weight: bold;">' + currentMeeting.date + '</p><p style="margin: 5px 0 0 0; color: #666;">' + currentMeeting.time + '</p></div><div style="background: #f9f9f9; padding: 12px; border-radius: 8px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">STATUS</p><p style="margin: 0;"><span class="badge ' + badgeClass + '">' + currentMeeting.status.toUpperCase() + '</span></p></div></div>';
             html += '<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">MEETING NOTES</p><p style="margin: 0; color: #555;">' + (currentMeeting.agenda || 'No notes') + '</p></div>';
 
             if (currentMeeting.feedback) {
-                html += '<div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">📝 FEEDBACK</p><p style="margin: 0; color: #333;">' + currentMeeting.feedback + '</p></div>';
+                html += '<div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">FEEDBACK</p><p style="margin: 0; color: #333;">' + currentMeeting.feedback + '</p></div>';
             }
 
-            document.getElementById('modalTitle').textContent = '📅 Meeting Details - ' + currentMeeting.contact_name;
+            document.getElementById('modalTitle').textContent = 'Meeting: ' + currentMeeting.contact_name;
             document.getElementById('modalContent').innerHTML = html;
 
             const attendBtn = document.getElementById('attendBtn');
             const feedbackBtn = document.getElementById('feedbackBtn');
             if (currentMeeting.status === 'attended') {
                 attendBtn.style.display = 'none';
-                feedbackBtn.textContent = '📝 View Feedback';
+                feedbackBtn.textContent = 'View Feedback';
             } else {
                 attendBtn.style.display = 'block';
-                feedbackBtn.textContent = '📝 Add Feedback';
+                feedbackBtn.textContent = 'Add Feedback';
             }
 
             document.getElementById('meetingModal').classList.add('active');
@@ -405,10 +406,13 @@
 
             currentMeeting = meeting;
             const modalId = 'feedbackModal_' + meetingId;
+            const feedbackHTML = document.createElement('div');
+            feedbackHTML.id = modalId;
+            feedbackHTML.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; overflow-y: auto;';
+            
+            feedbackHTML.innerHTML = '<div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin: 20px;"><h2 style="margin-top: 0; color: #43e97b; margin-bottom: 8px;">Meeting Feedback</h2><div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #43e97b;"><p style="margin: 8px 0; font-size: 14px;"><strong>Meeting:</strong> ' + meeting.contact_name + '</p><p style="margin: 8px 0; font-size: 14px;"><strong>Date:</strong> ' + meeting.date + '</p><p style="margin: 8px 0; font-size: 14px;"><strong>Time:</strong> ' + meeting.time + '</p></div><div style="margin-bottom: 20px;"><label style="display: block; margin-bottom: 8px; font-weight: 600;">Meeting Notes:</label><textarea id="notes_' + meetingId + '" placeholder="Write your meeting notes..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; height: 140px; font-family: Arial; font-size: 14px;">' + (meeting.feedback || '') + '</textarea></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><button class="btn btn-success" onclick="saveFeedback(' + meetingId + ')" style="padding: 12px;">Save Complete</button><button class="btn btn-secondary" onclick="closeFeedback(\'' + modalId + '\')" style="padding: 12px;">Close</button></div></div>';
 
-            const feedbackHTML = '<div id=\'' + modalId + '\' style=\'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; overflow-y: auto;\'><div style=\'background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin: 20px;\'><h2 style=\'margin-top: 0; color: #43e97b; margin-bottom: 8px;\'>📝 Meeting Feedback</h2><div style=\'background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #43e97b;\'><p style=\'margin: 8px 0; font-size: 14px; color: #666;\'><strong style=\'color: #333;\'>📌 Meeting: </strong>' + meeting.contact_name + '</p><p style=\'margin: 8px 0; font-size: 14px; color: #666;\'><strong style=\'color: #333;\'>📅 Date: </strong>' + meeting.date + '</p><p style=\'margin: 8px 0; font-size: 14px; color: #666;\'><strong style=\'color: #333;\'>🕐 Time: </strong>' + meeting.time + '</p></div><div style=\'margin-bottom: 20px;\'><label style=\'display: block; margin-bottom: 8px; font-weight: 600; color: #333;\'>📝 Meeting Notes/Comments:</label><textarea id=\'notes_' + meetingId + '\' placeholder=\'Write your meeting notes...\' style=\'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; height: 140px; font-family: Arial; font-size: 14px;\'>' + (meeting.feedback || '') + '</textarea></div><div style=\'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;\'><button class=\'btn btn-success\' onclick=\'saveFeedback(' + meetingId + ')\' style=\'padding: 12px;\'>✓ Save & Complete</button><button class=\'btn btn-secondary\' onclick=\'closeFeedback("' + modalId + '")\' style=\'padding: 12px;\'>✕ Close</button></div></div></div>';
-
-            document.body.insertAdjacentHTML('beforeend', feedbackHTML);
+            document.body.appendChild(feedbackHTML);
         }
 
         function saveFeedback(meetingId) {
