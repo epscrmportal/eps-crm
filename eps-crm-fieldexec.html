@@ -78,6 +78,7 @@
                 <button class="tab-btn" onclick="switchTab('meetings')">Meetings</button>
                 <button class="tab-btn" onclick="switchTab('logActivity')">Log Activity</button>
                 <button class="tab-btn" onclick="switchTab('businessCards')">Business Cards</button>
+                <button class="tab-btn" onclick="switchTab('goals')">Goals</button>
             </div>
 
             <div id="overview" class="tab-content active">
@@ -189,6 +190,57 @@
                     <div id="businessCardsList"></div>
                 </div>
             </div>
+
+            <div id="goals" class="tab-content">
+                <div class="section">
+                    <h2>Monthly Goals & Targets</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #43e97b;">
+                            <h3 style="color: #43e97b; margin-bottom: 15px;">Non-BNI Meetings</h3>
+                            <p style="color: #666; margin-bottom: 10px;">Monthly Target: <strong>20</strong></p>
+                            <div style="background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                <p style="margin: 0; color: #0369a1;">Completed: <span id="nonBniCount">0</span> / 20</p>
+                                <div style="background: white; height: 20px; border-radius: 5px; margin-top: 8px; overflow: hidden;">
+                                    <div id="nonBniBar" style="background: #43e97b; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%;" onclick="addGoalProgress('Non-BNI Meeting')">+ Add Non-BNI Meeting</button>
+                        </div>
+
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #10b981;">
+                            <h3 style="color: #10b981; margin-bottom: 15px;">BNI One-to-One Meetings</h3>
+                            <p style="color: #666; margin-bottom: 5px;">Monthly Target: <strong>15</strong></p>
+                            <p style="color: #666; margin-bottom: 10px;">Weekly Target: <strong>2</strong></p>
+                            <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                <p style="margin: 0; color: #166534;">Completed: <span id="bniOtoOCount">0</span> / 15</p>
+                                <div style="background: white; height: 20px; border-radius: 5px; margin-top: 8px; overflow: hidden;">
+                                    <div id="bniOtoOBar" style="background: #10b981; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%;" onclick="addGoalProgress('BNI One-to-One Meeting')">+ Add BNI 1-to-1</button>
+                        </div>
+
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                            <h3 style="color: #f59e0b; margin-bottom: 15px;">BNI Lead Generation</h3>
+                            <p style="color: #666; margin-bottom: 10px;">Monthly Target: <strong>20</strong></p>
+                            <div style="background: #fef3c7; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                <p style="margin: 0; color: #d97706;">Completed: <span id="bniLeadCount">0</span> / 20</p>
+                                <div style="background: white; height: 20px; border-radius: 5px; margin-top: 8px; overflow: hidden;">
+                                    <div id="bniLeadBar" style="background: #f59e0b; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%;" onclick="addGoalProgress('BNI Lead')">+ Add BNI Lead</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Goal Progress Log</h2>
+                    <div id="goalProgressLog" style="max-height: 400px; overflow-y: auto;">
+                        <p style="color: #999;">No goal progress recorded yet</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -271,6 +323,7 @@
                 await loadMeetings();
                 await loadContacts();
                 await loadBusinessCards();
+                loadGoalProgress();
                 updateMetrics();
                 displayMeetings();
             } catch (error) {
@@ -551,6 +604,80 @@
 
         function openCreateMeetingModal() {
             alert('Create meeting feature');
+        }
+
+        function loadGoalProgress() {
+            const key = 'goalProgress_' + currentUser.email;
+            const stored = localStorage.getItem(key);
+            const progress = stored ? JSON.parse(stored) : { 'Non-BNI Meeting': [], 'BNI One-to-One Meeting': [], 'BNI Lead': [] };
+            
+            const nonBniCount = progress['Non-BNI Meeting'] ? progress['Non-BNI Meeting'].length : 0;
+            const bniOtoOCount = progress['BNI One-to-One Meeting'] ? progress['BNI One-to-One Meeting'].length : 0;
+            const bniLeadCount = progress['BNI Lead'] ? progress['BNI Lead'].length : 0;
+            
+            document.getElementById('nonBniCount').textContent = nonBniCount;
+            document.getElementById('bniOtoOCount').textContent = bniOtoOCount;
+            document.getElementById('bniLeadCount').textContent = bniLeadCount;
+            
+            document.getElementById('nonBniBar').style.width = ((nonBniCount / 20) * 100) + '%';
+            document.getElementById('bniOtoOBar').style.width = ((bniOtoOCount / 15) * 100) + '%';
+            document.getElementById('bniLeadBar').style.width = ((bniLeadCount / 20) * 100) + '%';
+            
+            displayGoalLog(progress);
+        }
+
+        function addGoalProgress(goalType) {
+            const key = 'goalProgress_' + currentUser.email;
+            const stored = localStorage.getItem(key);
+            const progress = stored ? JSON.parse(stored) : { 'Non-BNI Meeting': [], 'BNI One-to-One Meeting': [], 'BNI Lead': [] };
+            
+            if (!progress[goalType]) {
+                progress[goalType] = [];
+            }
+            
+            const entry = {
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString(),
+                type: goalType
+            };
+            
+            progress[goalType].push(entry);
+            localStorage.setItem(key, JSON.stringify(progress));
+            
+            alert('✅ ' + goalType + ' added!');
+            loadGoalProgress();
+        }
+
+        function displayGoalLog(progress) {
+            const allEntries = [];
+            
+            Object.keys(progress).forEach(type => {
+                if (progress[type] && Array.isArray(progress[type])) {
+                    progress[type].forEach(entry => {
+                        allEntries.push({
+                            date: entry.date,
+                            time: entry.time,
+                            type: entry.type
+                        });
+                    });
+                }
+            });
+            
+            allEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (allEntries.length === 0) {
+                document.getElementById('goalProgressLog').innerHTML = '<p style="color: #999;">No goal progress recorded yet</p>';
+                return;
+            }
+            
+            let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #43e97b; color: white;"><th style="padding: 10px; text-align: left;">Date</th><th style="padding: 10px; text-align: left;">Time</th><th style="padding: 10px; text-align: left;">Goal Type</th></tr></thead><tbody>';
+            
+            allEntries.forEach(entry => {
+                html += '<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 10px;">' + entry.date + '</td><td style="padding: 10px;">' + entry.time + '</td><td style="padding: 10px;"><strong>' + entry.type + '</strong></td></tr>';
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('goalProgressLog').innerHTML = html;
         }
 
         window.addEventListener('load', checkAuth);
