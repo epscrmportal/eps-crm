@@ -363,7 +363,7 @@
             let html = '<table><thead><tr><th>Contact</th><th>Date & Time</th><th>Status</th><th>Action</th></tr></thead><tbody>';
             allMeetings.forEach(meeting => {
                 const badgeClass = meeting.status === 'attended' ? 'badge-attended' : 'badge-scheduled';
-                html += '<tr><td><strong>' + meeting.contact_name + '</strong></td><td>' + meeting.date + ' ' + meeting.time + '</td><td><span class="badge ' + badgeClass + '">' + meeting.status.toUpperCase() + '</span></td><td><button class="btn btn-primary" onclick="openMeetingModal(' + meeting.id + ')">👁️ View</button></td></tr>';
+                html += '<tr><td><strong>' + meeting.contact_name + '</strong></td><td>' + meeting.date + ' ' + meeting.time + '</td><td><span class="badge ' + badgeClass + '">' + meeting.status.toUpperCase() + '</span></td><td><button class="btn btn-primary" onclick="openMeetingModal(\'' + meeting.id + '\')">👁️ View</button></td></tr>';
             });
             html += '</tbody></table>';
             container.innerHTML = html;
