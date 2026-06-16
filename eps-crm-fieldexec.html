@@ -565,7 +565,7 @@
                 });
                 if (cardError) throw cardError;
 
-                // 2. Also create as contact for telecallers to see
+                // 2. Also create as contact for telecallers to see (unclaimed)
                 const { error: contactError } = await supabase.from('contacts').insert({
                     user_id: currentUser.id,
                     name: name,
@@ -575,9 +575,7 @@
                     city: '',
                     lead_status: 'New',
                     notes: 'Business Card from ' + currentUser.email + '\n' + 'How Met: ' + howMet + '\n' + 'Lead Potential: ' + leadPotential + '\n' + 'Designation: ' + designation + '\n' + notes,
-                    status: 'active',
-                    created_by: currentUser.id,
-                    assigned_to: currentUser.id
+                    status: 'active'
                 });
                 if (contactError) throw contactError;
 
