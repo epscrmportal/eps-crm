@@ -338,7 +338,7 @@
             allMeetings.forEach(function(meeting) {
                 const badgeClass = meeting.status === 'attended' ? 'badge-attended' : 'badge-scheduled';
                 const statusText = meeting.status === 'attended' ? 'ATTENDED' : 'SCHEDULED';
-                const viewBtn = '<button class="btn btn-primary" onclick="openMeetingModal(\'' + meeting.id + '\')">View</button>';
+                const viewBtn = '<button class="btn btn-primary" onclick="openMeetingModal(' + "'" + meeting.id + "'" + ')">View</button>';
                 html += '<tr><td><strong>' + meeting.contact_name + '</strong></td><td>' + meeting.date + ' ' + meeting.time + '</td><td><span class="badge ' + badgeClass + '">' + statusText + '</span></td><td>' + viewBtn + '</td></tr>';
             });
             html += '</tbody></table>';
