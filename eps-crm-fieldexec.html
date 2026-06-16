@@ -497,19 +497,44 @@
             if (!name || !company) { alert('Fill required fields'); return; }
 
             try {
-                const { error } = await supabase.from('business_cards').insert({
+                const designation = document.getElementById('cardDesignation').value;
+                const email = document.getElementById('cardEmail').value;
+                const phone = document.getElementById('cardPhone').value;
+                const howMet = document.getElementById('cardHowMet').value;
+                const leadPotential = document.getElementById('cardPotential').value;
+                const notes = document.getElementById('cardNotes').value;
+
+                // 1. Save business card
+                const { error: cardError } = await supabase.from('business_cards').insert({
                     field_exec_email: currentUser.email,
                     contact_name: name,
                     company: company,
-                    designation: document.getElementById('cardDesignation').value,
-                    email: document.getElementById('cardEmail').value,
-                    phone: document.getElementById('cardPhone').value,
-                    how_met: document.getElementById('cardHowMet').value,
-                    lead_potential: document.getElementById('cardPotential').value,
-                    notes: document.getElementById('cardNotes').value
+                    designation: designation,
+                    email: email,
+                    phone: phone,
+                    how_met: howMet,
+                    lead_potential: leadPotential,
+                    notes: notes
                 });
-                if (error) throw error;
-                alert('Card saved!');
+                if (cardError) throw cardError;
+
+                // 2. Also create as contact for telecallers to see
+                const { error: contactError } = await supabase.from('contacts').insert({
+                    user_id: currentUser.id,
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    company: company,
+                    city: '',
+                    lead_status: 'New',
+                    notes: 'Business Card from ' + currentUser.email + '\n' + 'How Met: ' + howMet + '\n' + 'Lead Potential: ' + leadPotential + '\n' + 'Designation: ' + designation + '\n' + notes,
+                    status: 'active',
+                    created_by: currentUser.email,
+                    assigned_to: currentUser.email
+                });
+                if (contactError) throw contactError;
+
+                alert('Card saved & added to contacts!');
                 document.getElementById('cardContactName').value = '';
                 document.getElementById('cardCompany').value = '';
                 document.getElementById('cardDesignation').value = '';
