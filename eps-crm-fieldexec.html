@@ -5,60 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS CRM - Field Executive</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        header { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; }
         header h1 { font-size: 1.8em; }
-        .user-info { background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 5px; font-size: 0.9em; }
         .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 400px; }
+        .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #555; margin-bottom: 8px; font-weight: 500; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
-        .form-group input:focus { outline: none; border-color: #43e97b; box-shadow: 0 0 5px rgba(67, 233, 123, 0.3); }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9em; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
         .btn-primary { background: #43e97b; color: white; }
-        .btn-primary:hover { background: #2ab86f; }
         .btn-success { background: #10b981; color: white; }
-        .btn-success:hover { background: #059669; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-warning:hover { background: #d97706; }
-        .btn-secondary { background: white; color: #43e97b; border: 1px solid #43e97b; }
-        .btn-secondary:hover { background: #f0f0f0; }
-        .btn-sm { padding: 5px 10px; font-size: 0.85em; }
+        .btn-secondary { background: #6b7280; color: white; }
         .dashboard { display: none; }
         .dashboard.active { display: block; }
         .tabs { display: flex; gap: 5px; margin-bottom: 25px; border-bottom: 2px solid #ddd; flex-wrap: wrap; }
-        .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999; border-bottom: 3px solid transparent; }
         .tab-btn.active { color: #43e97b; border-bottom-color: #43e97b; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .section h2 { color: #43e97b; margin-bottom: 20px; border-bottom: 2px solid #43e97b; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .metric-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
-        .metric-card h3 { font-size: 0.8em; opacity: 0.9; margin-bottom: 10px; }
         .metric-card .value { font-size: 2em; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { background: #43e97b; color: white; padding: 12px; text-align: left; font-weight: bold; }
         td { padding: 12px; border-bottom: 1px solid #ddd; }
         tr:hover { background: #f5f5f5; }
         .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
-        .badge-scheduled { background: #e0f2fe; color: #0369a1; }
-        .badge-attended { background: #dcfce7; color: #166534; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .alert { padding: 15px; border-radius: 5px; margin-bottom: 15px; }
-        .alert-success { background: #d1fae5; color: #065f46; }
-        .alert-error { background: #fee2e2; color: #7f1d1d; }
-        .meeting-card { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #43e97b; cursor: pointer; transition: 0.3s; }
-        .meeting-card:hover { background: #f0f0f0; transform: translateX(5px); }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
         .modal.active { display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        @media (max-width: 768px) { header { flex-direction: column; } .tabs { flex-direction: column; } }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: 20px; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: Arial; font-size: 14px; resize: vertical; }
     </style>
 </head>
 <body>
@@ -81,11 +64,11 @@
     <div id="dashboardSection" class="dashboard">
         <div class="container">
             <header>
-                <div>
-                    <h1>👔 Field Executive Dashboard</h1>
-                    <p>Welcome, <strong id="userEmail"></strong></p>
-                </div>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>👔 Field Executive Dashboard</h1>
+                        <p>Welcome, <strong id="userEmail"></strong></p>
+                    </div>
                     <button class="btn btn-primary" onclick="logout()">🚪 Logout</button>
                 </div>
             </header>
@@ -98,7 +81,7 @@
             </div>
 
             <div id="overview" class="tab-content active">
-                <div class="grid">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <div class="metric-card">
                         <h3>📅 Total Meetings</h3>
                         <div class="value" id="totalMeetings">0</div>
@@ -111,184 +94,28 @@
                         <h3>⏳ Pending</h3>
                         <div class="value" id="pendingMeetings">0</div>
                     </div>
-                    <div class="metric-card">
-                        <h3>📞 Total Contacts</h3>
-                        <div class="value" id="totalContacts">0</div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>📅 Upcoming Meetings (Next 7 Days)</h2>
-                    <div id="upcomingMeetingsList"></div>
                 </div>
             </div>
 
             <div id="meetings" class="tab-content">
                 <div class="section">
                     <h2>📅 All Meetings</h2>
-                    <div style="margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                        <div>
-                            <label style="margin-right: 10px;">Filter:</label>
-                            <select id="meetingFilter" onchange="filterMeetings()" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px;">
-                                <option value="all">All</option>
-                                <option value="scheduled">Scheduled</option>
-                                <option value="attended">Attended</option>
-                                <option value="pending">Pending</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-primary" onclick="openCreateMeetingModal()">➕ Create New Meeting</button>
-                    </div>
+                    <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="loadAllData()">➕ Create New Meeting</button>
                     <div id="meetingsList"></div>
                 </div>
             </div>
 
             <div id="logActivity" class="tab-content">
                 <div class="section">
-                    <h2>📝 Log Field Activity</h2>
-                    <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <div class="form-group">
-                            <label>Activity Type *</label>
-                            <select id="activityType" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                                <option value="">Select Activity Type</option>
-                                <option value="Meeting">Meeting</option>
-                                <option value="Call">Call</option>
-                                <option value="Site Visit">Site Visit</option>
-                                <option value="Presentation">Presentation</option>
-                                <option value="Negotiation">Negotiation</option>
-                                <option value="Follow-up">Follow-up</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Event Name *</label>
-                            <input type="text" id="activityEventName" placeholder="e.g., BNI Meeting - Mumbai South" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" id="activityLocation" placeholder="Event location" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>Date *</label>
-                            <input type="date" id="activityDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>Duration (Hours)</label>
-                            <input type="number" id="activityDuration" placeholder="e.g., 2" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>Business Cards Collected</label>
-                            <input type="number" id="activityCardsCollected" placeholder="0" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>New Connections</label>
-                            <input type="number" id="activityNewConnections" placeholder="0" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>Potential Leads</label>
-                            <input type="number" id="activityPotentialLeads" placeholder="0" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                        </div>
-                        <div class="form-group">
-                            <label>Activity Notes</label>
-                            <textarea id="activityNotes" placeholder="What happened? Key discussions, opportunities, contacts made..." style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; height: 100px;"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Follow-up Actions Required</label>
-                            <textarea id="activityFollowup" placeholder="Any follow-ups needed? Referrals to get? Meetings to schedule?" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; height: 100px;"></textarea>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="saveActivity()" style="flex: 1;">📤 Log Activity</button>
-                            <button class="btn btn-secondary" onclick="clearActivityForm()" style="flex: 1;">🔄 Clear Form</button>
-                        </div>
-                    </div>
-
-                    <div style="background: #e3f2fd; border-left: 4px solid #43e97b; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                        <h3 style="margin: 0 0 15px 0; color: #43e97b;">📞 Create Meeting from Telecaller Contact</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div class="form-group" style="margin: 0;">
-                                <label>Select Contact *</label>
-                                <select id="selectContactForMeeting" onchange="loadContactDetails()" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                                    <option value="">-- Choose a Contact --</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label>Meeting Date *</label>
-                                <input type="date" id="meetingFromContactDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                            <div class="form-group" style="margin: 0;">
-                                <label>Meeting Time *</label>
-                                <input type="time" id="meetingFromContactTime" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label>Meeting Notes</label>
-                                <input type="text" id="meetingFromContactNotes" placeholder="Meeting notes (optional)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                        </div>
-                        <div id="contactDetailsDisplay" style="margin-top: 15px; padding: 10px; background: white; border-radius: 5px; display: none;">
-                            <p style="margin: 0; color: #666; font-size: 0.9em;">Contact: <strong id="selectedContactInfo"></strong></p>
-                        </div>
-                        <button class="btn btn-success" onclick="createMeetingFromContact()" style="width: 100%; margin-top: 15px;">✅ Create & Schedule Meeting</button>
-                    </div>
+                    <h2>📝 Log Activity</h2>
+                    <p>Activity logging form would go here</p>
                 </div>
             </div>
 
             <div id="businessCards" class="tab-content">
                 <div class="section">
-                    <h2>💼 Add Business Card</h2>
-                    <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div class="form-group">
-                                <label>Contact Name *</label>
-                                <input type="text" id="cardContactName" placeholder="Full name" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                            <div class="form-group">
-                                <label>Company *</label>
-                                <input type="text" id="cardCompany" placeholder="Company name" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div class="form-group">
-                                <label>Designation</label>
-                                <input type="text" id="cardDesignation" placeholder="Job title" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="cardEmail" placeholder="email@company.com" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="tel" id="cardPhone" placeholder="+91 XXXXX XXXXX" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                            <div class="form-group">
-                                <label>How Met?</label>
-                                <input type="text" id="cardHowMet" placeholder="BNI Meeting, Expo, etc." style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Lead Potential</label>
-                            <select id="cardPotential" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                                <option value="Hot - Close Soon">🔥 Hot - Close Soon</option>
-                                <option value="Warm - Follow up Soon">🟠 Warm - Follow up Soon</option>
-                                <option value="Cold - Follow up Later">❄️ Cold - Follow up Later</option>
-                                <option value="Reference Only">📎 Reference Only</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Notes</label>
-                            <textarea id="cardNotes" placeholder="Key details, interests, follow-up plan..." style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; height: 100px;"></textarea>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <button class="btn btn-success" onclick="saveBusinessCard()" style="flex: 1;">💾 Save Business Card</button>
-                            <button class="btn btn-secondary" onclick="clearCardForm()" style="flex: 1;">🔄 Clear Form</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="section">
-                    <h2>💼 All Business Cards</h2>
-                    <div id="businessCardsList"></div>
+                    <h2>💼 Business Cards</h2>
+                    <p>Business cards would go here</p>
                 </div>
             </div>
         </div>
@@ -299,50 +126,9 @@
             <h2 id="modalTitle" style="color: #43e97b; margin-bottom: 20px;">Meeting Details</h2>
             <div id="modalContent"></div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-success" id="feedbackBtn" onclick="openMeetingFeedbackFromModal()" style="flex: 1;">📝 Add Feedback</button>
-                <button class="btn btn-primary" id="attendBtn" onclick="markAttended()" style="flex: 1;">✅ Mark Attended</button>
-                <button class="btn btn-secondary" onclick="closeMeetingModal()" style="flex: 1;">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="createMeetingModal" class="modal">
-        <div class="modal-content">
-            <h2 style="color: #43e97b; margin-bottom: 20px;">➕ Create New Meeting</h2>
-            <div class="form-group">
-                <label>Contact Name:</label>
-                <input type="text" id="createMeetingContact" placeholder="Enter contact name" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-            </div>
-            <div class="form-group">
-                <label>Meeting Date:</label>
-                <input type="date" id="createMeetingDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-            </div>
-            <div class="form-group">
-                <label>Meeting Time:</label>
-                <input type="time" id="createMeetingTime" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-            </div>
-            <div class="form-group">
-                <label>Meeting Type:</label>
-                <select id="createMeetingType" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-                    <option value="">Select Type</option>
-                    <option value="Follow-up">Follow-up</option>
-                    <option value="Presentation">Presentation</option>
-                    <option value="Demo">Demo</option>
-                    <option value="Negotiation">Negotiation</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Location:</label>
-                <input type="text" id="createMeetingLocation" placeholder="Meeting location" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%;">
-            </div>
-            <div class="form-group">
-                <label>Agenda/Notes:</label>
-                <textarea id="createMeetingAgenda" placeholder="Meeting agenda and notes" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; height: 100px;"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-success" onclick="saveNewMeeting()" style="flex: 1;">💾 Save Meeting</button>
-                <button class="btn btn-secondary" onclick="closeCreateMeetingModal()" style="flex: 1;">Cancel</button>
+                <button class="btn btn-success" id="feedbackBtn" style="flex: 1;" onclick="openMeetingFeedbackFromModal()">📝 Add Feedback</button>
+                <button class="btn btn-primary" id="attendBtn" style="flex: 1;" onclick="markAttended()">✅ Mark Attended</button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="closeMeetingModal()">Close</button>
             </div>
         </div>
     </div>
@@ -355,9 +141,6 @@
         let currentUser = null;
         let currentMeeting = null;
         let allMeetings = [];
-        let allContacts = [];
-        let allActivities = [];
-        let allBusinessCards = [];
 
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
@@ -369,24 +152,8 @@
             }
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
+                const { data, error } = await supabase.auth.signInWithPassword({ email: email, password: password });
                 if (error) throw error;
-
-                const { data: profile } = await supabase
-                    .from('user_profiles')
-                    .select('*')
-                    .eq('id', data.user.id)
-                    .single();
-
-                if (profile && profile.role !== 'field_exec') {
-                    alert('Access denied. This page is for Field Executives only.');
-                    await supabase.auth.signOut();
-                    return;
-                }
 
                 currentUser = data.user;
                 localStorage.setItem('eps_crm_user', JSON.stringify(data.user));
@@ -411,7 +178,6 @@
                     return;
                 } catch (e) {
                     localStorage.removeItem('eps_crm_user');
-                    localStorage.removeItem('eps_crm_user_role');
                 }
             }
 
@@ -439,30 +205,11 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
-
-            if (tabName === 'logActivity') {
-                populateContactsDropdown();
-            }
         }
 
         async function loadAllData() {
-            try {
-                await loadMeetings();
-                await loadContacts();
-                await loadActivities();
-                await loadBusinessCards();
-                updateMetrics();
-                displayUpcomingMeetings();
-                displayMeetings();
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
-        }
-
-        async function loadMeetings() {
             try {
                 const { data, error } = await supabase
                     .from('meetings')
@@ -472,87 +219,35 @@
 
                 if (error) throw error;
                 allMeetings = data || [];
+
+                document.getElementById('totalMeetings').textContent = allMeetings.length;
+                document.getElementById('attendedMeetings').textContent = allMeetings.filter(m => m.status === 'attended').length;
+                document.getElementById('pendingMeetings').textContent = allMeetings.filter(m => m.status === 'scheduled').length;
+
+                displayMeetings();
             } catch (error) {
-                console.error('Error loading meetings:', error);
+                console.error('Error loading data:', error);
             }
-        }
-
-        async function loadContacts() {
-            try {
-                const { data, error } = await supabase
-                    .from('contacts')
-                    .select('*');
-
-                if (error) throw error;
-                allContacts = data || [];
-            } catch (error) {
-                console.error('Error loading all contacts:', error);
-            }
-        }
-
-        function updateMetrics() {
-            document.getElementById('totalMeetings').textContent = allMeetings.length;
-            document.getElementById('attendedMeetings').textContent = allMeetings.filter(m => m.status === 'attended').length;
-            document.getElementById('pendingMeetings').textContent = allMeetings.filter(m => m.status === 'scheduled').length;
-            document.getElementById('totalContacts').textContent = allContacts.length;
-        }
-
-        function displayUpcomingMeetings() {
-            const container = document.getElementById('upcomingMeetingsList');
-            const today = new Date().toISOString().substring(0, 10);
-            const upcoming = allMeetings
-                .filter(m => m.date >= today && m.status === 'scheduled')
-                .slice(0, 5);
-
-            if (upcoming.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No upcoming meetings</p>';
-                return;
-            }
-
-            container.innerHTML = upcoming.map(meeting => 
-                '<div class="meeting-card" onclick="openMeetingModal(' + meeting.id + ')" style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">' +
-                '<p style="margin: 0; font-weight: bold; color: #333;">' + meeting.contact_name + '</p>' +
-                '<p style="margin: 5px 0; font-size: 0.9em; color: #666;">' +
-                '📅 ' + meeting.date + ' ' +
-                '⏰ ' + meeting.time +
-                '</p>' +
-                '<p style="margin: 5px 0; font-size: 0.85em; color: #555;">' + (meeting.agenda || 'No notes') + '</p>' +
-                '</div>'
-            ).join('');
         }
 
         function displayMeetings() {
             const container = document.getElementById('meetingsList');
-            const filter = document.getElementById('meetingFilter').value;
-            
-            let filtered = allMeetings;
-            if (filter !== 'all') {
-                filtered = allMeetings.filter(m => m.status === filter);
-            }
 
-            if (filtered.length === 0) {
+            if (allMeetings.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No meetings found</p>';
                 return;
             }
 
             let html = '<table><thead><tr><th>Contact</th><th>Date & Time</th><th>Status</th><th>Action</th></tr></thead><tbody>';
             
-            filtered.forEach(meeting => {
-                const statusClass = meeting.status === 'attended' ? 'success' : meeting.status === 'scheduled' ? 'info' : 'secondary';
-                html += '<tr>' +
-                    '<td><strong>' + meeting.contact_name + '</strong></td>' +
-                    '<td>' + meeting.date + ' ' + meeting.time + '</td>' +
-                    '<td><span class="badge badge-' + statusClass + '">' + meeting.status.toUpperCase() + '</span></td>' +
-                    '<td><button class="btn btn-sm btn-primary" onclick="openMeetingModal(' + meeting.id + ')">👁️ View</button></td>' +
-                    '</tr>';
+            allMeetings.forEach(meeting => {
+                const status = meeting.status === 'attended' ? 'ATTENDED' : 'SCHEDULED';
+                const badgeClass = meeting.status === 'attended' ? 'badge-success' : 'badge-info';
+                html += '<tr><td><strong>' + meeting.contact_name + '</strong></td><td>' + meeting.date + ' ' + meeting.time + '</td><td><span class="badge ' + badgeClass + '">' + status + '</span></td><td><button class="btn btn-primary" onclick="openMeetingModal(' + meeting.id + ')">👁️ View</button></td></tr>';
             });
             
             html += '</tbody></table>';
             container.innerHTML = html;
-        }
-
-        function filterMeetings() {
-            displayMeetings();
         }
 
         function openMeetingModal(meetingId) {
@@ -561,33 +256,17 @@
 
             const contactName = currentMeeting.contact_name || 'Unknown';
             const status = currentMeeting.status || 'scheduled';
-            const statusClass = status === 'attended' ? 'success' : status === 'scheduled' ? 'info' : 'secondary';
+            const badgeClass = status === 'attended' ? 'badge-success' : 'badge-info';
             
-            let html = '<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">' +
-                '<p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">CONTACT</p>' +
-                '<p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #333;">' + contactName + '</p>' +
-                '</div>' +
-                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">' +
-                '<div style="background: #f9f9f9; padding: 12px; border-radius: 8px;">' +
-                '<p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">DATE & TIME</p>' +
-                '<p style="margin: 0; font-size: 1em; font-weight: bold;">' + currentMeeting.date + '</p>' +
-                '<p style="margin: 5px 0 0 0; color: #666;">' + currentMeeting.time + '</p>' +
-                '</div>' +
-                '<div style="background: #f9f9f9; padding: 12px; border-radius: 8px;">' +
-                '<p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">STATUS</p>' +
-                '<p style="margin: 0;"><span class="badge badge-' + statusClass + '">' + status.toUpperCase() + '</span></p>' +
-                '</div>' +
-                '</div>' +
-                '<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">' +
-                '<p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">MEETING NOTES</p>' +
-                '<p style="margin: 0; color: #555;">' + (currentMeeting.agenda || 'No notes') + '</p>' +
-                '</div>';
+            let html = '<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">CONTACT</p><p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #333;">' + contactName + '</p></div>';
+            html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">';
+            html += '<div style="background: #f9f9f9; padding: 12px; border-radius: 8px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">DATE & TIME</p><p style="margin: 0; font-size: 1em; font-weight: bold;">' + currentMeeting.date + '</p><p style="margin: 5px 0 0 0; color: #666;">' + currentMeeting.time + '</p></div>';
+            html += '<div style="background: #f9f9f9; padding: 12px; border-radius: 8px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">STATUS</p><p style="margin: 0;"><span class="badge ' + badgeClass + '">' + status.toUpperCase() + '</span></p></div>';
+            html += '</div>';
+            html += '<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">MEETING NOTES</p><p style="margin: 0; color: #555;">' + (currentMeeting.agenda || 'No notes') + '</p></div>';
 
             if (currentMeeting.feedback) {
-                html += '<div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 15px;">' +
-                '<p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">📝 FEEDBACK</p>' +
-                '<p style="margin: 0; color: #333;">' + currentMeeting.feedback + '</p>' +
-                '</div>';
+                html += '<div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 15px;"><p style="margin: 0 0 8px 0; color: #666; font-size: 0.85em; font-weight: bold;">📝 FEEDBACK</p><p style="margin: 0; color: #333;">' + currentMeeting.feedback + '</p></div>';
             }
 
             document.getElementById('modalTitle').textContent = '📅 Meeting Details - ' + contactName;
@@ -642,434 +321,46 @@
             if (!meeting) return;
 
             currentMeeting = meeting;
-            const modalId = 'meetingFeedbackModal_' + meetingId;
+            const modalId = 'feedbackModal_' + meetingId;
 
-            const modalHtml = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; overflow-y: auto;">' +
-                '<div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin: 20px;">' +
-                '<h2 style="margin-top: 0; color: #43e97b; margin-bottom: 8px;">📝 Meeting Feedback</h2>' +
-                '<div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #43e97b;">' +
-                '<p style="margin: 8px 0; font-size: 14px; color: #666;"><strong style="color: #333;">📌 Meeting Notes: </strong>' + (meeting.contact_name || 'Unknown') + '</p>' +
-                '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">' +
-                '<p style="margin: 8px 0; font-size: 14px; color: #666;"><strong style="color: #333;">📅 Meeting Date: </strong>' + (meeting.date || 'Not specified') + '</p>' +
-                '<p style="margin: 8px 0; font-size: 14px; color: #666;"><strong style="color: #333;">🕐 Meeting Time: </strong>' + (meeting.time || 'Not specified') + '</p>' +
-                '</div></div>' +
-                '<div style="margin-bottom: 20px;">' +
-                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">📝 Meeting Notes/Comments:</label>' +
-                '<textarea id="meetingNotes_' + meetingId + '" placeholder="Write your meeting notes - discussion points, outcomes, next steps, concerns, etc..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; height: 140px; font-family: Arial; font-size: 14px; resize: vertical;">' + (meeting.feedback || '') + '</textarea>' +
-                '</div>' +
-                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">' +
-                '<button class="btn btn-success" onclick="saveMeetingFeedback(' + meetingId + ')" style="padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #10b981; color: white;">✓ Save & Complete</button>' +
-                '<button class="btn btn-secondary" onclick="closeFeedbackModal(\'' + modalId + '\')" style="padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #6b7280; color: white;">✕ Close</button>' +
-                '</div>' +
-                '<button class="btn" onclick="closeFeedbackModal(\'' + modalId + '\')" style="width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; background: #1e40af; color: white;">Close</button>' +
-                '</div></div>';
+            const feedbackHTML = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; overflow-y: auto;"><div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); margin: 20px;"><h2 style="margin-top: 0; color: #43e97b; margin-bottom: 8px;">📝 Meeting Feedback</h2><div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #43e97b;"><p style="margin: 8px 0; font-size: 14px; color: #666;"><strong style="color: #333;">📌 Meeting: </strong>' + (meeting.contact_name || 'Unknown') + '</p><p style="margin: 8px 0; font-size: 14px; color: #666;"><strong style="color: #333;">📅 Date: </strong>' + (meeting.date || 'Not specified') + '</p><p style="margin: 8px 0; font-size: 14px; color: #666;"><strong style="color: #333;">🕐 Time: </strong>' + (meeting.time || 'Not specified') + '</p></div><div style="margin-bottom: 20px;"><label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">📝 Meeting Notes/Comments:</label><textarea id="notes_' + meetingId + '" placeholder="Write your meeting notes..." style="height: 140px;">' + (meeting.feedback || '') + '</textarea></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><button class="btn btn-success" onclick="saveFeedback(' + meetingId + ')" style="padding: 12px;">✓ Save & Complete</button><button class="btn btn-secondary" onclick="closeFeedback(\'' + modalId + '\')" style="padding: 12px;">✕ Close</button></div><button class="btn btn-primary" onclick="closeFeedback(\'' + modalId + '\')" style="width: 100%; margin-top: 10px; padding: 12px;">Close</button></div></div>';
 
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.body.insertAdjacentHTML('beforeend', feedbackHTML);
         }
 
-        function saveMeetingFeedback(meetingId) {
-            const meetingNotes = document.getElementById('meetingNotes_' + meetingId).value;
+        function saveFeedback(meetingId) {
+            const notes = document.getElementById('notes_' + meetingId).value;
             
-            const meeting = allMeetings.find(m => m.id === meetingId);
-            if (!meeting) return;
-
-            if (!meetingNotes.trim()) {
-                alert('❌ Please add meeting notes before saving');
+            if (!notes.trim()) {
+                alert('Please add meeting notes');
                 return;
             }
 
-            meeting.feedback = meetingNotes;
-            meeting.status = 'attended';
-
-            updateMeetingFeedbackInDb(meetingId, {
-                feedback: meetingNotes,
-                status: 'attended',
-                attended_at: new Date().toISOString()
-            });
+            updateFeedbackInDb(meetingId, notes);
         }
 
-        async function updateMeetingFeedbackInDb(meetingId, updates) {
+        async function updateFeedbackInDb(meetingId, feedback) {
             try {
                 const { error } = await supabase
                     .from('meetings')
-                    .update(updates)
+                    .update({ feedback: feedback, status: 'attended', attended_at: new Date().toISOString() })
                     .eq('id', meetingId);
 
                 if (error) throw error;
-                alert('✅ Meeting feedback saved and completed!');
-                closeFeedbackModal('meetingFeedbackModal_' + meetingId);
+                alert('✅ Meeting feedback saved!');
+                closeFeedback('feedbackModal_' + meetingId);
                 loadAllData();
             } catch (error) {
                 alert('Error: ' + error.message);
             }
         }
 
-        function closeFeedbackModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.remove();
-        }
-
-        function openCreateMeetingModal() {
-            document.getElementById('createMeetingContact').value = '';
-            document.getElementById('createMeetingDate').value = '';
-            document.getElementById('createMeetingTime').value = '';
-            document.getElementById('createMeetingType').value = '';
-            document.getElementById('createMeetingLocation').value = '';
-            document.getElementById('createMeetingAgenda').value = '';
-            
-            const today = new Date().toISOString().substring(0, 10);
-            document.getElementById('createMeetingDate').setAttribute('min', today);
-            
-            document.getElementById('createMeetingModal').classList.add('active');
-        }
-
-        function closeCreateMeetingModal() {
-            document.getElementById('createMeetingModal').classList.remove('active');
-        }
-
-        async function saveNewMeeting() {
-            const contactName = document.getElementById('createMeetingContact').value.trim();
-            const date = document.getElementById('createMeetingDate').value;
-            const time = document.getElementById('createMeetingTime').value;
-            const type = document.getElementById('createMeetingType').value;
-            const location = document.getElementById('createMeetingLocation').value;
-            const agenda = document.getElementById('createMeetingAgenda').value;
-
-            if (!contactName || !date || !time) {
-                alert('Please fill in Contact Name, Date, and Time');
-                return;
-            }
-
-            try {
-                const { error } = await supabase
-                    .from('meetings')
-                    .insert({
-                        contact_name: contactName,
-                        date: date,
-                        time: time,
-                        meeting_type: type,
-                        location: location,
-                        agenda: agenda,
-                        assigned_to: currentUser.email,
-                        status: 'scheduled',
-                        created_by: currentUser.email
-                    });
-
-                if (error) throw error;
-
-                alert('✅ Meeting created successfully!');
-                closeCreateMeetingModal();
-                loadAllData();
-            } catch (error) {
-                alert('Error creating meeting: ' + error.message);
-            }
-        }
-
-        async function saveActivity() {
-            const type = document.getElementById('activityType').value;
-            const eventName = document.getElementById('activityEventName').value.trim();
-            const location = document.getElementById('activityLocation').value.trim();
-            const date = document.getElementById('activityDate').value;
-            const duration = document.getElementById('activityDuration').value || 0;
-            const cardsCollected = document.getElementById('activityCardsCollected').value || 0;
-            const newConnections = document.getElementById('activityNewConnections').value || 0;
-            const potentialLeads = document.getElementById('activityPotentialLeads').value || 0;
-            const notes = document.getElementById('activityNotes').value.trim();
-            const followup = document.getElementById('activityFollowup').value.trim();
-
-            if (!type || !eventName || !date) {
-                alert('Please fill in Activity Type, Event Name, and Date');
-                return;
-            }
-
-            try {
-                const { error } = await supabase.from('activities').insert({
-                    field_exec_email: currentUser.email,
-                    activity_type: type,
-                    event_name: eventName,
-                    location: location,
-                    activity_date: date,
-                    duration_hours: parseFloat(duration),
-                    cards_collected: parseInt(cardsCollected),
-                    new_connections: parseInt(newConnections),
-                    potential_leads: parseInt(potentialLeads),
-                    notes: notes,
-                    followup_actions: followup,
-                    created_at: new Date().toISOString()
-                });
-
-                if (error) throw error;
-
-                alert('✅ Activity logged successfully!');
-                clearActivityForm();
-                loadAllData();
-            } catch (error) {
-                alert('Error logging activity: ' + error.message);
-            }
-        }
-
-        function clearActivityForm() {
-            document.getElementById('activityType').value = '';
-            document.getElementById('activityEventName').value = '';
-            document.getElementById('activityLocation').value = '';
-            document.getElementById('activityDate').value = '';
-            document.getElementById('activityDuration').value = '';
-            document.getElementById('activityCardsCollected').value = '';
-            document.getElementById('activityNewConnections').value = '';
-            document.getElementById('activityPotentialLeads').value = '';
-            document.getElementById('activityNotes').value = '';
-            document.getElementById('activityFollowup').value = '';
-        }
-
-        async function saveBusinessCard() {
-            const name = document.getElementById('cardContactName').value.trim();
-            const company = document.getElementById('cardCompany').value.trim();
-            const designation = document.getElementById('cardDesignation').value.trim();
-            const email = document.getElementById('cardEmail').value.trim();
-            const phone = document.getElementById('cardPhone').value.trim();
-            const howMet = document.getElementById('cardHowMet').value.trim();
-            const potential = document.getElementById('cardPotential').value;
-            const cardNotes = document.getElementById('cardNotes').value.trim();
-
-            if (!name || !company) {
-                alert('Please fill in Contact Name and Company');
-                return;
-            }
-
-            try {
-                const { error } = await supabase.from('business_cards').insert({
-                    field_exec_email: currentUser.email,
-                    contact_name: name,
-                    company: company,
-                    designation: designation,
-                    email: email,
-                    phone: phone,
-                    how_met: howMet,
-                    lead_potential: potential,
-                    notes: cardNotes,
-                    created_at: new Date().toISOString()
-                });
-
-                if (error) throw error;
-
-                const contactNotes = 'Business Card from: ' + currentUser.email + '. How met: ' + howMet + '. ' + cardNotes;
-
-                const { error: contactError } = await supabase.from('contacts').insert({
-                    user_id: currentUser.id,
-                    name: name,
-                    company: company,
-                    phone: phone,
-                    email: email,
-                    city: 'Unknown',
-                    lead_status: potential.includes('Hot') ? 'Hot' : potential.includes('Warm') ? 'Warm' : 'Cold',
-                    notes: contactNotes,
-                    status: 'new',
-                    created_by: currentUser.id,
-                    assigned_to: null
-                });
-
-                if (contactError) throw contactError;
-
-                alert('✅ Business card saved and added as new contact for telecallers!');
-                clearCardForm();
-                loadAllData();
-            } catch (error) {
-                alert('Error saving business card: ' + error.message);
-            }
-        }
-
-        function clearCardForm() {
-            document.getElementById('cardContactName').value = '';
-            document.getElementById('cardCompany').value = '';
-            document.getElementById('cardDesignation').value = '';
-            document.getElementById('cardEmail').value = '';
-            document.getElementById('cardPhone').value = '';
-            document.getElementById('cardHowMet').value = '';
-            document.getElementById('cardPotential').value = 'Warm - Follow up Soon';
-            document.getElementById('cardNotes').value = '';
-        }
-
-        async function populateContactsDropdown() {
-            const dropdown = document.getElementById('selectContactForMeeting');
-            if (!dropdown || allContacts.length === 0) return;
-
-            dropdown.innerHTML = '<option value="">-- Choose a Contact --</option>';
-            
-            allContacts.forEach(contact => {
-                const option = document.createElement('option');
-                option.value = contact.id;
-                option.textContent = contact.name + ' - ' + contact.company;
-                option.dataset.email = contact.email || '';
-                option.dataset.phone = contact.phone || '';
-                option.dataset.company = contact.company || '';
-                dropdown.appendChild(option);
-            });
-        }
-
-        function loadContactDetails() {
-            const dropdown = document.getElementById('selectContactForMeeting');
-            const selectedOption = dropdown.options[dropdown.selectedIndex];
-            const detailsDiv = document.getElementById('contactDetailsDisplay');
-            const detailsText = document.getElementById('selectedContactInfo');
-
-            if (selectedOption.value === '') {
-                detailsDiv.style.display = 'none';
-                return;
-            }
-
-            const email = selectedOption.dataset.email;
-            const phone = selectedOption.dataset.phone;
-            
-            let info = selectedOption.textContent;
-            if (email) info += ' | ' + email;
-            if (phone) info += ' | ' + phone;
-            
-            detailsText.textContent = info;
-            detailsDiv.style.display = 'block';
-        }
-
-        async function createMeetingFromContact() {
-            const dropdown = document.getElementById('selectContactForMeeting');
-            const contactId = dropdown.value;
-            const date = document.getElementById('meetingFromContactDate').value;
-            const time = document.getElementById('meetingFromContactTime').value;
-            const notes = document.getElementById('meetingFromContactNotes').value;
-
-            if (!contactId || !date || !time) {
-                alert('Please fill in Contact, Date, and Time');
-                return;
-            }
-
-            const selectedOption = dropdown.options[dropdown.selectedIndex];
-            const contactName = selectedOption.textContent.split(' - ')[0];
-
-            try {
-                const { error } = await supabase.from('meetings').insert({
-                    contact_id: contactId,
-                    contact_name: contactName,
-                    date: date,
-                    time: time,
-                    agenda: notes,
-                    assigned_to: currentUser.email,
-                    status: 'scheduled',
-                    created_by: currentUser.email
-                });
-
-                if (error) throw error;
-
-                alert('✅ Meeting created and scheduled!');
-                document.getElementById('selectContactForMeeting').value = '';
-                document.getElementById('meetingFromContactDate').value = '';
-                document.getElementById('meetingFromContactTime').value = '';
-                document.getElementById('meetingFromContactNotes').value = '';
-                document.getElementById('contactDetailsDisplay').style.display = 'none';
-                loadAllData();
-            } catch (error) {
-                alert('Error creating meeting: ' + error.message);
-            }
-        }
-
-        async function loadActivities() {
-            try {
-                const { data, error } = await supabase
-                    .from('activities')
-                    .select('*')
-                    .eq('field_exec_email', currentUser.email)
-                    .order('activity_date', { ascending: false });
-
-                if (error) throw error;
-                allActivities = data || [];
-                displayActivities();
-            } catch (error) {
-                console.error('Error loading activities:', error);
-            }
-        }
-
-        function displayActivities() {
-            const logActivitySection = document.querySelector('#logActivity .section');
-            if (!logActivitySection) return;
-
-            let html = '<div style="margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"><h3 style="color: #43e97b; margin-bottom: 15px; border-bottom: 2px solid #43e97b; padding-bottom: 10px;">📊 Recent Activities</h3>';
-
-            if (allActivities.length === 0) {
-                html += '<p style="color: #999; text-align: center;">No activities logged yet</p>';
-            } else {
-                html += '<table style="width: 100%;"><thead><tr><th>TYPE</th><th>EVENT</th><th>DATE</th><th>DURATION</th><th>CARDS</th><th>CONNECTIONS</th><th>LEADS</th></tr></thead><tbody>';
-                
-                allActivities.forEach(activity => {
-                    html += '<tr>' +
-                        '<td>' + activity.activity_type + '</td>' +
-                        '<td><strong>' + activity.event_name + '</strong></td>' +
-                        '<td>' + activity.activity_date + '</td>' +
-                        '<td>' + activity.duration_hours + 'h</td>' +
-                        '<td>' + activity.cards_collected + '</td>' +
-                        '<td>' + activity.new_connections + '</td>' +
-                        '<td>' + activity.potential_leads + '</td>' +
-                        '</tr>';
-                });
-                
-                html += '</tbody></table>';
-            }
-
-            html += '</div>';
-
-            let displayContainer = logActivitySection.querySelector('#activitiesDisplay');
-            if (!displayContainer) {
-                displayContainer = document.createElement('div');
-                displayContainer.id = 'activitiesDisplay';
-                logActivitySection.appendChild(displayContainer);
-            }
-            displayContainer.innerHTML = html;
-        }
-
-        async function loadBusinessCards() {
-            try {
-                const { data, error } = await supabase
-                    .from('business_cards')
-                    .select('*')
-                    .eq('field_exec_email', currentUser.email)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                allBusinessCards = data || [];
-                displayBusinessCards();
-            } catch (error) {
-                console.error('Error loading business cards:', error);
-            }
-        }
-
-        function displayBusinessCards() {
-            const container = document.getElementById('businessCardsList');
-            
-            if (allBusinessCards.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No business cards recorded yet</p>';
-                return;
-            }
-
-            let html = '<table><thead><tr><th>NAME</th><th>COMPANY</th><th>DESIGNATION</th><th>CONTACT</th><th>HOW MET</th><th>POTENTIAL</th></tr></thead><tbody>';
-            
-            allBusinessCards.forEach(card => {
-                html += '<tr>' +
-                    '<td>' + card.contact_name + '</td>' +
-                    '<td>' + card.company + '</td>' +
-                    '<td>' + (card.designation || '-') + '</td>' +
-                    '<td>' + (card.email || card.phone || '-') + '</td>' +
-                    '<td>' + (card.how_met || '-') + '</td>' +
-                    '<td><span class="badge badge-' + (card.lead_potential.includes('Hot') ? 'warning' : card.lead_potential.includes('Warm') ? 'info' : 'secondary') + '">' + card.lead_potential + '</span></td>' +
-                    '</tr>';
-            });
-            
-            html += '</tbody></table>';
-            container.innerHTML = html;
+        function closeFeedback(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.remove();
         }
 
         window.addEventListener('load', checkAuth);
-
-        setInterval(() => {
-            if (currentUser) {
-                loadAllData();
-            }
-        }, 30000);
     </script>
 </body>
 </html>
