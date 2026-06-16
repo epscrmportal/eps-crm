@@ -143,20 +143,50 @@
                 <div class="section">
                     <h2>Add Business Card</h2>
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <div class="form-group">
-                            <label>Contact Name</label>
-                            <input type="text" id="cardContactName" placeholder="Full name">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>Contact Name *</label>
+                                <input type="text" id="cardContactName" placeholder="Full name">
+                            </div>
+                            <div class="form-group">
+                                <label>Company *</label>
+                                <input type="text" id="cardCompany" placeholder="Company name">
+                            </div>
+                            <div class="form-group">
+                                <label>Designation</label>
+                                <input type="text" id="cardDesignation" placeholder="Job title">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="cardEmail" placeholder="email@company.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="cardPhone" placeholder="+91 XXXXX XXXXX">
+                            </div>
+                            <div class="form-group">
+                                <label>How Met?</label>
+                                <input type="text" id="cardHowMet" placeholder="BNI Meeting, Expo, etc.">
+                            </div>
+                            <div class="form-group">
+                                <label>Lead Potential</label>
+                                <select id="cardPotential">
+                                    <option value="Hot - Close Soon">Hot - Close Soon</option>
+                                    <option value="Warm - Follow up Soon">Warm - Follow up Soon</option>
+                                    <option value="Cold - Follow up Later">Cold - Follow up Later</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>Company</label>
-                            <input type="text" id="cardCompany" placeholder="Company name">
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="cardEmail" placeholder="email@company.com">
+                            <label>Notes</label>
+                            <textarea id="cardNotes" placeholder="Key details, interests, follow-up plan..."></textarea>
                         </div>
                         <button class="btn btn-primary" onclick="saveBusinessCard()" style="width: 100%; margin-top: 10px;">Save Card</button>
                     </div>
+                </div>
+                <div class="section">
+                    <h2>All Business Cards</h2>
+                    <div id="businessCardsList"></div>
                 </div>
             </div>
         </div>
@@ -240,11 +270,37 @@
             try {
                 await loadMeetings();
                 await loadContacts();
+                await loadBusinessCards();
                 updateMetrics();
                 displayMeetings();
             } catch (error) {
                 console.error('Error:', error);
             }
+        }
+
+        async function loadBusinessCards() {
+            try {
+                const { data, error } = await supabase.from('business_cards').select('*').eq('field_exec_email', currentUser.email).order('created_at', { ascending: false });
+                if (error) throw error;
+                displayBusinessCards(data || []);
+            } catch (error) {
+                console.error('Error loading cards:', error);
+            }
+        }
+
+        function displayBusinessCards(cards) {
+            const container = document.getElementById('businessCardsList');
+            if (cards.length === 0) {
+                container.innerHTML = '<p>No business cards recorded yet</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>NAME</th><th>COMPANY</th><th>DESIGNATION</th><th>CONTACT</th><th>HOW MET</th><th>POTENTIAL</th></tr></thead><tbody>';
+            cards.forEach(card => {
+                html += '<tr><td>' + card.contact_name + '</td><td>' + card.company + '</td><td>' + (card.designation || '-') + '</td><td>' + (card.email || card.phone || '-') + '</td><td>' + (card.how_met || '-') + '</td><td>' + (card.lead_potential || '-') + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
         }
 
         async function loadMeetings() {
@@ -445,13 +501,24 @@
                     field_exec_email: currentUser.email,
                     contact_name: name,
                     company: company,
-                    email: document.getElementById('cardEmail').value
+                    designation: document.getElementById('cardDesignation').value,
+                    email: document.getElementById('cardEmail').value,
+                    phone: document.getElementById('cardPhone').value,
+                    how_met: document.getElementById('cardHowMet').value,
+                    lead_potential: document.getElementById('cardPotential').value,
+                    notes: document.getElementById('cardNotes').value
                 });
                 if (error) throw error;
                 alert('Card saved!');
                 document.getElementById('cardContactName').value = '';
                 document.getElementById('cardCompany').value = '';
+                document.getElementById('cardDesignation').value = '';
                 document.getElementById('cardEmail').value = '';
+                document.getElementById('cardPhone').value = '';
+                document.getElementById('cardHowMet').value = '';
+                document.getElementById('cardPotential').value = 'Hot - Close Soon';
+                document.getElementById('cardNotes').value = '';
+                loadBusinessCards();
             } catch (error) {
                 alert('Error: ' + error.message);
             }
