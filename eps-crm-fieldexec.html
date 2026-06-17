@@ -522,9 +522,9 @@
                 return;
             }
 
-            let html = '<table><thead><tr><th>NAME</th><th>COMPANY</th><th>DESIGNATION</th><th>CONTACT</th><th>HOW MET</th><th>POTENTIAL</th></tr></thead><tbody>';
+            let html = '<table><thead><tr><th>NAME</th><th>COMPANY</th><th>DESIGNATION</th><th>EMAIL</th><th>PHONE</th><th>HOW MET</th><th>POTENTIAL</th></tr></thead><tbody>';
             cards.forEach(card => {
-                html += '<tr><td>' + card.contact_name + '</td><td>' + card.company + '</td><td>' + (card.designation || '-') + '</td><td>' + (card.email || card.phone || '-') + '</td><td>' + (card.how_met || '-') + '</td><td>' + (card.lead_potential || '-') + '</td></tr>';
+                html += '<tr><td>' + (card.contact_name || '-') + '</td><td>' + (card.company || '-') + '</td><td>' + (card.designation || '-') + '</td><td>' + (card.email || '-') + '</td><td>' + (card.phone || '-') + '</td><td>' + (card.how_met || '-') + '</td><td>' + (card.lead_potential || '-') + '</td></tr>';
             });
             html += '</tbody></table>';
             container.innerHTML = html;
