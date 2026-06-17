@@ -749,7 +749,8 @@
                     city: '',
                     lead_status: 'New',
                     notes: 'Business Card from ' + currentUser.email + '\n' + 'How Met: ' + howMet + '\n' + 'Lead Potential: ' + leadPotential + '\n' + 'Designation: ' + designation + '\n' + notes,
-                    status: 'active'
+                    status: 'active',
+                    created_by: currentUser.id
                 });
                 if (contactError) throw contactError;
 
