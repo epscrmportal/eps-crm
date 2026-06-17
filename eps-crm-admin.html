@@ -1253,14 +1253,19 @@
             window.calculateIncentives = async function() {
                 try {
                     const currentMonth = new Date().toISOString().substring(0, 7); // 2026-06
-                    const confirmed = confirm('This will calculate incentives for month: ' + currentMonth + '\n\nContinue?');
+                    const confirmed = confirm('This will calculate incentives for month: ' + currentMonth + '\n\nFor: Telecaller & Field Executive only\n\nContinue?');
                     
                     if (!confirmed) return;
 
                     const incentivesToCreate = [];
 
-                    // For each employee
+                    // For each employee - ONLY Telecaller and Field Executive
                     for (const emp of window.allEmployees) {
+                        // Skip if not Telecaller or Field Executive
+                        if (emp.role !== 'Telecaller' && emp.role !== 'Field Executive') {
+                            continue;
+                        }
+
                         // Get performance data for this month
                         const monthPerf = (window.employeePerformance || []).filter(p => {
                             const perfMonth = p.date.substring(0, 7);
@@ -1322,7 +1327,7 @@
                         if (res.error) throw res.error;
                         
                         window.loadIncentives();
-                        alert('✅ Calculated ' + incentivesToCreate.length + ' employee incentives for ' + currentMonth);
+                        alert('✅ Calculated ' + incentivesToCreate.length + ' employee incentives for ' + currentMonth + '\n\n(Telecaller & Field Executive only)');
                     } else {
                         alert('ℹ️ All employees already have incentives calculated for ' + currentMonth);
                     }
@@ -1361,7 +1366,7 @@
 
             window.generateTestIncentives = async function() {
                 try {
-                    const confirmed = confirm('This will create sample incentive records for testing.\n\nContinue?');
+                    const confirmed = confirm('This will create sample incentive records for testing.\n\n(Telecaller & Field Executive only)\n\nContinue?');
                     if (!confirmed) return;
 
                     const currentMonth = new Date().toISOString().substring(0, 7);
@@ -1374,7 +1379,7 @@
                     if (res.error) throw res.error;
 
                     window.loadIncentives();
-                    alert('✅ Test incentive data created!\n\nNow you can see:\n- Monthly Salary\n- Earned Incentive\n- Total Earning\n- Mark as Paid functionality');
+                    alert('✅ Test incentive data created!\n\n(Telecaller & Field Executive only)\n\nNow you can see:\n- Monthly Salary\n- Achievement %\n- Earned Incentive\n- Total Earning\n- Mark as Paid functionality');
                 } catch (error) {
                     alert('Error: ' + error.message);
                     console.error(error);
@@ -1393,6 +1398,12 @@
 
                 window.allIncentives.forEach(inc => {
                     const emp = window.allEmployees.find(e => e.id === inc.employee_id);
+                    
+                    // Only show Telecaller and Field Executive
+                    if (!emp || (emp.role !== 'Telecaller' && emp.role !== 'Field Executive')) {
+                        return;
+                    }
+                    
                     const salary = inc.salary || (emp ? emp.salary : 0);
                     const incentive = inc.incentive_earned || 0;
                     const total = salary + incentive;
