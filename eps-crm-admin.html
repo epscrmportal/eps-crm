@@ -278,6 +278,8 @@
 
             window.loadAllData = async function() {
                 try {
+                    console.log('Loading data from Supabase...');
+                    
                     // Load from Supabase
                     const [contactsRes, meetingsRes, callsRes] = await Promise.all([
                         window.supabaseClient.from('contacts').select('*').limit(500),
@@ -285,47 +287,71 @@
                         window.supabaseClient.from('calls').select('*').limit(500)
                     ]);
 
+                    if (contactsRes.error) {
+                        console.error('Contacts error:', contactsRes.error);
+                        alert('Error loading contacts: ' + contactsRes.error.message);
+                        return;
+                    }
+                    if (meetingsRes.error) {
+                        console.error('Meetings error:', meetingsRes.error);
+                        alert('Error loading meetings: ' + meetingsRes.error.message);
+                        return;
+                    }
+                    if (callsRes.error) {
+                        console.error('Calls error:', callsRes.error);
+                        alert('Error loading calls: ' + callsRes.error.message);
+                        return;
+                    }
+
                     window.allData.contacts = contactsRes.data || [];
                     window.allData.meetings = meetingsRes.data || [];
                     window.allData.calls = callsRes.data || [];
 
-                    // Load from localStorage (Telecaller module)
-                    const localContacts = JSON.parse(localStorage.getItem('eps_crm_contacts') || '[]');
-                    const localCalls = JSON.parse(localStorage.getItem('eps_crm_calls') || '[]');
-                    const localReminders = JSON.parse(localStorage.getItem('eps_crm_reminders') || '[]');
-                    
-                    // Load from localStorage (Field Exec module)
-                    const localMeetings = JSON.parse(localStorage.getItem('eps_crm_fieldExecMeetings') || '[]');
-                    const localBusinessCards = JSON.parse(localStorage.getItem('eps_crm_businessCards') || '[]');
-                    const localActivities = JSON.parse(localStorage.getItem('eps_crm_activities') || '[]');
-                    
-                    // Load from localStorage (Orders)
-                    const localOrders = JSON.parse(localStorage.getItem('eps_crm_orders') || '[]');
-
-                    // Merge with Supabase data
-                    if (localContacts.length > 0) {
-                        window.allData.contacts = [...window.allData.contacts, ...localContacts.filter(lc => !window.allData.contacts.find(sc => sc.id === lc.id))];
-                    }
-                    if (localCalls.length > 0) {
-                        window.allData.calls = [...window.allData.calls, ...localCalls.filter(lc => !window.allData.calls.find(sc => sc.id === lc.id))];
-                    }
-                    if (localMeetings.length > 0) {
-                        window.allData.meetings = [...window.allData.meetings, ...localMeetings.filter(lm => !window.allData.meetings.find(sm => sm.id === lm.id))];
-                    }
-                    
-                    window.allData.orders = localOrders || [];
-                    window.allData.reminders = localReminders || [];
-                    window.allData.activities = localActivities || [];
-                    window.allData.businessCards = localBusinessCards || [];
+                    console.log('Data loaded:', {
+                        contacts: window.allData.contacts.length,
+                        meetings: window.allData.meetings.length,
+                        calls: window.allData.calls.length
+                    });
 
                     updateTeamReports();
                     updateOrdersReports();
                     updatePerformance();
+                    
+                    // Subscribe to real-time updates
+                    subscribeToRealTimeUpdates();
                 } catch (error) {
                     console.error('Error loading data:', error);
-                    // Fallback to localStorage only
-                    loadFromLocalStorageOnly();
+                    alert('Error: ' + error.message);
                 }
+            };
+
+            window.subscribeToRealTimeUpdates = function() {
+                // Subscribe to contacts changes
+                window.supabaseClient
+                    .channel('public:contacts')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, (payload) => {
+                        console.log('Contacts update:', payload);
+                        window.loadAllData();
+                    })
+                    .subscribe();
+
+                // Subscribe to meetings changes
+                window.supabaseClient
+                    .channel('public:meetings')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings' }, (payload) => {
+                        console.log('Meetings update:', payload);
+                        window.loadAllData();
+                    })
+                    .subscribe();
+
+                // Subscribe to calls changes
+                window.supabaseClient
+                    .channel('public:calls')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, (payload) => {
+                        console.log('Calls update:', payload);
+                        window.loadAllData();
+                    })
+                    .subscribe();
             };
 
             window.loadFromLocalStorageOnly = function() {
