@@ -52,6 +52,13 @@
         .status-success { background: #d1fae5; color: #065f46; }
         .status-warning { background: #fef3c7; color: #92400e; }
         .status-danger { background: #fee2e2; color: #991b1b; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); }
+        .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); }
+        .modal-content h2 { color: #f093fb; margin-bottom: 20px; }
+        .close { color: #999; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: #000; }
+        .btn-info { background: #3b82f6; color: white; }
+        .btn-info:hover { background: #2563eb; }
         @media (max-width: 768px) { header { flex-direction: column; } .chart-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -389,8 +396,10 @@
                 <div id="incentivesTab" class="tab-content">
                     <h2 class="section-title">💰 Employee Incentives & Bonuses</h2>
 
-                    <div style="margin-bottom: 20px;">
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="calculateIncentives()">🔄 Calculate Monthly Incentives</button>
+                        <button class="btn btn-primary" onclick="generateTestIncentives()">📝 Generate Test Data</button>
+                        <button class="btn btn-primary" onclick="openBonusSettingsModal()">⚙️ Bonus Settings</button>
                     </div>
 
                     <table>
@@ -398,17 +407,53 @@
                             <tr>
                                 <th>Employee</th>
                                 <th>Month</th>
-                                <th>Base Bonus</th>
-                                <th>Performance Incentive</th>
+                                <th>Monthly Salary</th>
+                                <th>Target</th>
+                                <th>Achievement %</th>
+                                <th>Incentive Earned</th>
                                 <th>Total Earning</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="incentivesTableBody">
-                            <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
+                            <tr><td colspan="9" style="text-align: center;">Loading...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Edit Incentive Modal -->
+                <div id="editIncentiveModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeEditIncentiveModal()">&times;</span>
+                        <h2>✏️ Edit Employee Incentive</h2>
+                        
+                        <p><strong>Employee:</strong> <span id="editEmpName"></span></p>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input type="radio" name="bonusType" value="fixed" checked onchange="toggleBonusType('fixed')"> 
+                                <strong>Fixed Amount (₹)</strong>
+                            </label>
+                            <div id="fixedAmountDiv" style="margin-left: 20px; margin-bottom: 15px;">
+                                <input type="number" id="fixedAmount" placeholder="Enter amount (e.g., 5000)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input type="radio" name="bonusType" value="percentage" onchange="toggleBonusType('percentage')"> 
+                                <strong>Percentage of Salary (%)</strong>
+                            </label>
+                            <div id="percentageDiv" style="margin-left: 20px; margin-bottom: 15px; display: none;">
+                                <input type="number" id="percentageAmount" placeholder="Enter percentage (e.g., 20)" min="0" max="100" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <small style="display: block; margin-top: 5px; color: #666;">Based on salary: <span id="salaryDisplay">₹0</span> = <span id="percentageResult">₹0</span></small>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn btn-secondary" onclick="closeEditIncentiveModal()">Cancel</button>
+                            <button class="btn btn-success" onclick="saveEditedIncentive()">Save Changes</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Employees Tab -->
@@ -1246,13 +1291,13 @@
                         // Calculate performance incentive based on tiers
                         let performanceIncentive = 0;
                         if (avgAchievement >= 100) {
-                            performanceIncentive = baseBonus * 2.5; // 250% of base = highest
+                            performanceIncentive = baseSalary * 0.25; // 25% of salary
                         } else if (avgAchievement >= 90) {
-                            performanceIncentive = baseBonus * 2;   // 200% of base
+                            performanceIncentive = baseSalary * 0.20;   // 20% of salary
                         } else if (avgAchievement >= 75) {
-                            performanceIncentive = baseBonus * 1.5; // 150% of base
+                            performanceIncentive = baseSalary * 0.15; // 15% of salary
                         } else if (avgAchievement >= 60) {
-                            performanceIncentive = baseBonus * 1;   // 100% of base
+                            performanceIncentive = baseSalary * 0.10;   // 10% of salary
                         } else {
                             performanceIncentive = 0; // Below 60% = no incentive
                         }
@@ -1264,7 +1309,7 @@
                             incentivesToCreate.push({
                                 employee_id: emp.id,
                                 month: currentMonth,
-                                bonus_amount: baseBonus,
+                                salary: baseSalary,
                                 incentive_earned: performanceIncentive,
                                 status: 'pending'
                             });
@@ -1292,8 +1337,47 @@
                     const res = await window.supabaseClient.from('employee_incentives').select('*').order('created_at', { ascending: false });
                     window.allIncentives = res.data || [];
                     updateIncentivesDisplay();
+                    
+                    // Subscribe to real-time updates
+                    subscribeToIncentivesUpdates();
                 } catch (error) {
                     console.error('Error loading incentives:', error);
+                }
+            };
+
+            window.subscribeToIncentivesUpdates = function() {
+                try {
+                    window.supabaseClient
+                        .channel('public:employee_incentives')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'employee_incentives' }, (payload) => {
+                            console.log('Incentives updated:', payload);
+                            window.loadIncentives();
+                        })
+                        .subscribe();
+                } catch (error) {
+                    console.log('Subscription error (non-critical):', error);
+                }
+            };
+
+            window.generateTestIncentives = async function() {
+                try {
+                    const confirmed = confirm('This will create sample incentive records for testing.\n\nContinue?');
+                    if (!confirmed) return;
+
+                    const currentMonth = new Date().toISOString().substring(0, 7);
+                    const testData = [
+                        { employee_id: '66f1a952-e621-460d-a7f8-fb8de8d52d9d', month: currentMonth, salary: 30000, incentive_earned: 7500, status: 'pending' },
+                        { employee_id: '49e8f436-bc7f-44f9-a88a-2f3cf482d585', month: currentMonth, salary: 35000, incentive_earned: 5250, status: 'pending' }
+                    ];
+
+                    const res = await window.supabaseClient.from('employee_incentives').insert(testData);
+                    if (res.error) throw res.error;
+
+                    window.loadIncentives();
+                    alert('✅ Test incentive data created!\n\nNow you can see:\n- Monthly Salary\n- Earned Incentive\n- Total Earning\n- Mark as Paid functionality');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                    console.error(error);
                 }
             };
 
@@ -1303,16 +1387,57 @@
                 tbody.innerHTML = '';
                 
                 if (window.allIncentives.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No incentive data yet</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No incentive data yet</td></tr>';
                     return;
                 }
 
                 window.allIncentives.forEach(inc => {
                     const emp = window.allEmployees.find(e => e.id === inc.employee_id);
+                    const salary = inc.salary || (emp ? emp.salary : 0);
+                    const incentive = inc.incentive_earned || 0;
+                    const total = salary + incentive;
+                    
+                    // Calculate achievement %
+                    let target = 'N/A';
+                    let achievementPercent = 0;
+                    let achievementBadge = '<span class="status-badge status-warning">No Data</span>';
+                    
+                    if (emp) {
+                        // Get monthly performance data
+                        const monthPerf = (window.employeePerformance || []).filter(p => {
+                            const perfMonth = p.date.substring(0, 7);
+                            return perfMonth === inc.month && p.employee_id === emp.id;
+                        });
+                        
+                        const totalCalls = monthPerf.reduce((sum, p) => sum + (p.calls || 0), 0);
+                        const totalMeetings = monthPerf.reduce((sum, p) => sum + (p.meetings || 0), 0);
+                        
+                        // Determine targets based on role
+                        let callTarget = 1080, meetingTarget = 48; // Telecaller
+                        if (emp.role === 'Field Executive') {
+                            callTarget = 0;
+                            meetingTarget = 20;
+                        }
+                        
+                        // Calculate achievement
+                        const callAchievement = callTarget > 0 ? (totalCalls / callTarget) * 100 : 100;
+                        const meetingAchievement = meetingTarget > 0 ? (totalMeetings / meetingTarget) * 100 : 100;
+                        achievementPercent = Math.round((callAchievement + meetingAchievement) / 2);
+                        
+                        target = callTarget + ' calls / ' + meetingTarget + ' meetings';
+                        
+                        if (achievementPercent >= 100) {
+                            achievementBadge = '<span class="status-badge status-success">✅ ' + achievementPercent + '%</span>';
+                        } else if (achievementPercent >= 75) {
+                            achievementBadge = '<span class="status-badge status-warning">⚠️ ' + achievementPercent + '%</span>';
+                        } else {
+                            achievementBadge = '<span class="status-badge status-danger">❌ ' + achievementPercent + '%</span>';
+                        }
+                    }
+                    
                     const row = tbody.insertRow();
-                    const total = (inc.bonus_amount || 0) + (inc.incentive_earned || 0);
                     const statusClass = inc.status === 'paid' ? 'status-success' : 'status-warning';
-                    row.innerHTML = '<td>' + (emp ? emp.name : 'Unknown') + '</td><td>' + (inc.month || 'N/A') + '</td><td>₹' + (inc.bonus_amount || 0).toFixed(0) + '</td><td>₹' + (inc.incentive_earned || 0).toFixed(0) + '</td><td><strong>₹' + total.toFixed(0) + '</strong></td><td><span class="status-badge ' + statusClass + '">' + (inc.status || 'pending') + '</span></td><td><button class="btn btn-success" style="padding: 5px 10px; font-size: 0.8em;" onclick="markIncentivePaid(\'' + inc.id + '\')">Mark Paid</button></td>';
+                    row.innerHTML = '<td>' + (emp ? emp.name : 'Unknown') + '</td><td>' + (inc.month || 'N/A') + '</td><td>₹' + salary.toFixed(0) + '</td><td>' + target + '</td><td>' + achievementBadge + '</td><td>₹' + incentive.toFixed(0) + '</td><td><strong>₹' + total.toFixed(0) + '</strong></td><td><span class="status-badge ' + statusClass + '">' + (inc.status || 'pending') + '</span></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="openEditIncentiveModal(\'' + inc.id + '\', \'' + (emp ? emp.name : 'Unknown') + '\', ' + incentive + ')">✏️ Edit</button><button class="btn btn-success" style="padding: 5px 10px; font-size: 0.8em;" onclick="markIncentivePaid(\'' + inc.id + '\')">Mark Paid</button></td>';
                 });
             };
 
@@ -1324,6 +1449,83 @@
                     alert('Incentive marked as paid!');
                 } catch (error) {
                     alert('Error: ' + error.message);
+                }
+            };
+
+            // Edit Incentive Functions
+            window.currentEditingIncentiveId = null;
+            window.currentEditingSalary = 0;
+
+            window.openEditIncentiveModal = function(incId, empName, currentIncentive) {
+                window.currentEditingIncentiveId = incId;
+                const inc = window.allIncentives.find(i => i.id === incId);
+                window.currentEditingSalary = inc ? (inc.salary || 0) : 0;
+
+                document.getElementById('editEmpName').textContent = empName;
+                document.getElementById('fixedAmount').value = currentIncentive;
+                document.getElementById('percentageAmount').value = '';
+                document.getElementById('salaryDisplay').textContent = '₹' + window.currentEditingSalary.toFixed(0);
+                document.getElementById('editIncentiveModal').style.display = 'block';
+            };
+
+            window.closeEditIncentiveModal = function() {
+                document.getElementById('editIncentiveModal').style.display = 'none';
+                window.currentEditingIncentiveId = null;
+            };
+
+            window.toggleBonusType = function(type) {
+                const fixedDiv = document.getElementById('fixedAmountDiv');
+                const percentDiv = document.getElementById('percentageDiv');
+                
+                if (type === 'fixed') {
+                    fixedDiv.style.display = 'block';
+                    percentDiv.style.display = 'none';
+                } else {
+                    fixedDiv.style.display = 'none';
+                    percentDiv.style.display = 'block';
+                    window.updatePercentageResult();
+                }
+            };
+
+            window.updatePercentageResult = function() {
+                const percentage = parseFloat(document.getElementById('percentageAmount').value) || 0;
+                const result = (window.currentEditingSalary * percentage) / 100;
+                document.getElementById('percentageResult').textContent = '₹' + result.toFixed(0);
+            };
+
+            window.saveEditedIncentive = async function() {
+                try {
+                    const bonusType = document.querySelector('input[name="bonusType"]:checked').value;
+                    let newIncentive = 0;
+
+                    if (bonusType === 'fixed') {
+                        newIncentive = parseFloat(document.getElementById('fixedAmount').value);
+                        if (isNaN(newIncentive) || newIncentive < 0) {
+                            alert('Please enter a valid amount');
+                            return;
+                        }
+                    } else {
+                        const percentage = parseFloat(document.getElementById('percentageAmount').value);
+                        if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+                            alert('Please enter a valid percentage (0-100)');
+                            return;
+                        }
+                        newIncentive = (window.currentEditingSalary * percentage) / 100;
+                    }
+
+                    const res = await window.supabaseClient
+                        .from('employee_incentives')
+                        .update({ incentive_earned: newIncentive })
+                        .eq('id', window.currentEditingIncentiveId);
+
+                    if (res.error) throw res.error;
+
+                    window.closeEditIncentiveModal();
+                    window.loadIncentives();
+                    alert('✅ Incentive updated successfully!');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                    console.error(error);
                 }
             };
             window.allEmployees = [];
@@ -1459,6 +1661,13 @@
             };
 
             window.addEventListener('load', window.checkAuth);
+
+            // Add event listener for percentage input
+            document.addEventListener('input', function(e) {
+                if (e.target.id === 'percentageAmount') {
+                    window.updatePercentageResult();
+                }
+            });
 
             const passInput = document.getElementById('loginPassword');
             if (passInput) {
