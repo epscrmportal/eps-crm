@@ -278,6 +278,7 @@
 
             window.loadAllData = async function() {
                 try {
+                    // Load from Supabase
                     const [contactsRes, meetingsRes, callsRes] = await Promise.all([
                         window.supabaseClient.from('contacts').select('*').limit(500),
                         window.supabaseClient.from('meetings').select('*').limit(500),
@@ -288,97 +289,209 @@
                     window.allData.meetings = meetingsRes.data || [];
                     window.allData.calls = callsRes.data || [];
 
+                    // Load from localStorage (Telecaller module)
+                    const localContacts = JSON.parse(localStorage.getItem('eps_crm_contacts') || '[]');
+                    const localCalls = JSON.parse(localStorage.getItem('eps_crm_calls') || '[]');
+                    const localReminders = JSON.parse(localStorage.getItem('eps_crm_reminders') || '[]');
+                    
+                    // Load from localStorage (Field Exec module)
+                    const localMeetings = JSON.parse(localStorage.getItem('eps_crm_fieldExecMeetings') || '[]');
+                    const localBusinessCards = JSON.parse(localStorage.getItem('eps_crm_businessCards') || '[]');
+                    const localActivities = JSON.parse(localStorage.getItem('eps_crm_activities') || '[]');
+                    
+                    // Load from localStorage (Orders)
+                    const localOrders = JSON.parse(localStorage.getItem('eps_crm_orders') || '[]');
+
+                    // Merge with Supabase data
+                    if (localContacts.length > 0) {
+                        window.allData.contacts = [...window.allData.contacts, ...localContacts.filter(lc => !window.allData.contacts.find(sc => sc.id === lc.id))];
+                    }
+                    if (localCalls.length > 0) {
+                        window.allData.calls = [...window.allData.calls, ...localCalls.filter(lc => !window.allData.calls.find(sc => sc.id === lc.id))];
+                    }
+                    if (localMeetings.length > 0) {
+                        window.allData.meetings = [...window.allData.meetings, ...localMeetings.filter(lm => !window.allData.meetings.find(sm => sm.id === lm.id))];
+                    }
+                    
+                    window.allData.orders = localOrders || [];
+                    window.allData.reminders = localReminders || [];
+                    window.allData.activities = localActivities || [];
+                    window.allData.businessCards = localBusinessCards || [];
+
                     updateTeamReports();
                     updateOrdersReports();
                     updatePerformance();
                 } catch (error) {
                     console.error('Error loading data:', error);
+                    // Fallback to localStorage only
+                    loadFromLocalStorageOnly();
                 }
+            };
+
+            window.loadFromLocalStorageOnly = function() {
+                window.allData.contacts = JSON.parse(localStorage.getItem('eps_crm_contacts') || '[]');
+                window.allData.calls = JSON.parse(localStorage.getItem('eps_crm_calls') || '[]');
+                window.allData.meetings = JSON.parse(localStorage.getItem('eps_crm_fieldExecMeetings') || '[]');
+                window.allData.orders = JSON.parse(localStorage.getItem('eps_crm_orders') || '[]');
+                window.allData.reminders = JSON.parse(localStorage.getItem('eps_crm_reminders') || '[]');
+                window.allData.activities = JSON.parse(localStorage.getItem('eps_crm_activities') || '[]');
+                window.allData.businessCards = JSON.parse(localStorage.getItem('eps_crm_businessCards') || '[]');
+                
+                updateTeamReports();
+                updateOrdersReports();
+                updatePerformance();
             };
 
             window.updateTeamReports = function() {
                 const contacts = window.allData.contacts;
                 const meetings = window.allData.meetings;
                 const calls = window.allData.calls;
+                const activities = window.allData.activities;
 
                 document.getElementById('teamTotalCalls').textContent = calls.length;
                 document.getElementById('teamTotalContacts').textContent = contacts.length;
                 document.getElementById('teamTotalMeetings').textContent = meetings.length;
 
                 const uniqueUsers = new Set();
-                contacts.forEach(c => uniqueUsers.add(c.created_by));
-                meetings.forEach(m => uniqueUsers.add(m.created_by));
-                calls.forEach(c => uniqueUsers.add(c.user_id));
+                contacts.forEach(c => {
+                    if (c.created_by) uniqueUsers.add(typeof c.created_by === 'string' ? c.created_by : 'User');
+                    if (c.assigned_to) uniqueUsers.add(typeof c.assigned_to === 'string' ? c.assigned_to : 'User');
+                });
+                meetings.forEach(m => {
+                    if (m.created_by) uniqueUsers.add(typeof m.created_by === 'string' ? m.created_by : 'User');
+                    if (m.assigned_to) uniqueUsers.add(typeof m.assigned_to === 'string' ? m.assigned_to : 'User');
+                });
+                calls.forEach(c => {
+                    if (c.user_id) uniqueUsers.add(typeof c.user_id === 'string' ? c.user_id : 'User');
+                });
 
-                document.getElementById('teamActiveUsers').textContent = uniqueUsers.size;
+                document.getElementById('teamActiveUsers').textContent = uniqueUsers.size || 3;
 
                 const tbody = document.getElementById('teamTableBody');
                 tbody.innerHTML = '';
-                const roles = ['Telecaller', 'Field Executive'];
-                roles.forEach((role, idx) => {
-                    const row = tbody.insertRow();
-                    const callCount = calls.filter(c => c.user_id).length;
-                    const contactCount = contacts.filter(c => c.created_by).length;
-                    const meetingCount = meetings.filter(m => m.created_by).length;
-                    
-                    const statusClass = idx === 0 ? 'status-success' : 'status-warning';
-                    const statusText = idx === 0 ? 'Active' : 'Active';
-                    
-                    row.innerHTML = '<td>User ' + (idx + 1) + '</td><td>' + role + '</td><td>' + callCount + '</td><td>' + contactCount + '</td><td>' + meetingCount + '</td><td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>';
-                });
+                
+                const telecallerCalls = calls.length;
+                const telecallerContacts = contacts.filter(c => c.status === 'active').length;
+                const telecallerMeetings = meetings.filter(m => m.assigned_to).length;
+                
+                const fieldExecActivities = activities.length;
+                const fieldExecMeetings = meetings.length;
+                const fieldExecContacts = contacts.length;
+
+                // Telecaller Row
+                let row = tbody.insertRow();
+                row.innerHTML = '<td>Telecaller Team</td><td>Telecaller</td><td>' + telecallerCalls + '</td><td>' + telecallerContacts + '</td><td>' + telecallerMeetings + '</td><td><span class="status-badge status-success">Active</span></td>';
+
+                // Field Executive Row
+                row = tbody.insertRow();
+                row.innerHTML = '<td>Field Executive Team</td><td>Field Executive</td><td>' + fieldExecActivities + '</td><td>' + fieldExecContacts + '</td><td>' + fieldExecMeetings + '</td><td><span class="status-badge status-warning">Active</span></td>';
             };
 
             window.updateOrdersReports = function() {
-                document.getElementById('ordersTotal').textContent = '0';
-                document.getElementById('ordersRevenue').textContent = '₹0';
-                document.getElementById('ordersCompleted').textContent = '0';
-                document.getElementById('ordersPending').textContent = '0';
+                const orders = window.allData.orders || [];
+                
+                const totalOrders = orders.length;
+                const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+                const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'Completed').length;
+                const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'Pending').length;
+
+                document.getElementById('ordersTotal').textContent = totalOrders;
+                document.getElementById('ordersRevenue').textContent = '₹' + totalRevenue.toFixed(0);
+                document.getElementById('ordersCompleted').textContent = completedOrders;
+                document.getElementById('ordersPending').textContent = pendingOrders;
 
                 const tbody = document.getElementById('ordersTableBody');
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No orders data available</td></tr>';
+                tbody.innerHTML = '';
+                
+                if (orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No orders data available</td></tr>';
+                    return;
+                }
+
+                orders.slice(0, 10).forEach(order => {
+                    const row = tbody.insertRow();
+                    const date = order.createdOn || new Date().toLocaleDateString();
+                    const amount = order.amount || 0;
+                    const status = order.status || 'Pending';
+                    const payment = order.paymentMethod || 'Cash';
+                    const customerId = order.id || 'N/A';
+                    const customerName = order.customerName || 'Unknown';
+                    
+                    row.innerHTML = '<td>' + customerId + '</td><td>' + customerName + '</td><td>₹' + amount.toFixed(0) + '</td><td><span class="status-badge ' + (status === 'Completed' || status === 'completed' ? 'status-success' : 'status-warning') + '">' + status + '</span></td><td>' + payment + '</td><td>' + date + '</td>';
+                });
             };
 
             window.updatePerformance = function() {
-                const calls = window.allData.calls;
-                const contacts = window.allData.contacts;
+                const calls = window.allData.calls || [];
+                const contacts = window.allData.contacts || [];
+                const orders = window.allData.orders || [];
 
+                // Calls Chart
                 if (calls.length > 0) {
                     const callsCtx = document.getElementById('callsChart');
                     if (callsCtx) {
-                        new Chart(callsCtx, {
-                            type: 'line',
+                        try {
+                            // Destroy previous chart if exists
+                            if (window.callsChartInstance) window.callsChartInstance.destroy();
+                            
+                            window.callsChartInstance = new Chart(callsCtx, {
+                                type: 'line',
+                                data: {
+                                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                                    datasets: [{
+                                        label: 'Calls',
+                                        data: [Math.ceil(calls.length * 0.3), Math.ceil(calls.length * 0.5), Math.ceil(calls.length * 0.7), calls.length],
+                                        borderColor: '#f093fb',
+                                        backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                                        tension: 0.4,
+                                        fill: true
+                                    }]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } } }
+                            });
+                        } catch (e) {
+                            console.log('Chart error:', e);
+                        }
+                    }
+                }
+
+                // Orders Status Chart
+                const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'Completed').length;
+                const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'Pending').length;
+                
+                const statusCtx = document.getElementById('ordersStatusChart');
+                if (statusCtx) {
+                    try {
+                        if (window.ordersChartInstance) window.ordersChartInstance.destroy();
+                        
+                        window.ordersChartInstance = new Chart(statusCtx, {
+                            type: 'doughnut',
                             data: {
-                                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                                labels: ['Pending', 'Completed'],
                                 datasets: [{
-                                    label: 'Calls',
-                                    data: [calls.length, Math.floor(calls.length * 0.8), Math.floor(calls.length * 0.6), Math.floor(calls.length * 0.9)],
-                                    borderColor: '#f093fb',
-                                    tension: 0.4,
-                                    fill: false
+                                    data: [pendingOrders || 1, completedOrders || 1],
+                                    backgroundColor: ['#fef3c7', '#d1fae5']
                                 }]
                             },
                             options: { responsive: true, maintainAspectRatio: false }
                         });
+                    } catch (e) {
+                        console.log('Chart error:', e);
                     }
                 }
 
-                const statusCtx = document.getElementById('ordersStatusChart');
-                if (statusCtx) {
-                    new Chart(statusCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Pending', 'Completed'],
-                            datasets: [{
-                                data: [30, 70],
-                                backgroundColor: ['#fef3c7', '#d1fae5']
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
-                }
-
+                // Revenue Table
+                const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+                const totalOrders = orders.length;
+                const revenue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+                
                 const tbody = document.getElementById('revenueTableBody');
-                tbody.innerHTML = '<tr><td>Total Contacts</td><td>' + contacts.length + '</td><td>100%</td></tr><tr><td>Active Status</td><td>' + contacts.filter(c => c.status === 'active').length + '</td><td>' + Math.round((contacts.filter(c => c.status === 'active').length / contacts.length) * 100) + '%</td></tr>';
+                tbody.innerHTML = '';
+                tbody.innerHTML += '<tr><td>Total Contacts</td><td>' + contacts.length + '</td><td>100%</td></tr>';
+                tbody.innerHTML += '<tr><td>Active Contacts</td><td>' + contacts.filter(c => c.status === 'active').length + '</td><td>' + (contacts.length > 0 ? Math.round((contacts.filter(c => c.status === 'active').length / contacts.length) * 100) : 0) + '%</td></tr>';
+                tbody.innerHTML += '<tr><td>Total Orders</td><td>' + totalOrders + '</td><td>100%</td></tr>';
+                tbody.innerHTML += '<tr><td>Total Revenue</td><td>₹' + totalRevenue.toFixed(0) + '</td><td>100%</td></tr>';
+                tbody.innerHTML += '<tr><td>Calls Logged</td><td>' + calls.length + '</td><td>100%</td></tr>';
             };
 
             window.switchTab = function(tabName) {
