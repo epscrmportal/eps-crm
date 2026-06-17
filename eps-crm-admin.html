@@ -100,6 +100,7 @@
                     <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
                     <button class="tab-btn" onclick="switchTab('incentives')">💰 Incentives</button>
                     <button class="tab-btn" onclick="switchTab('employees')">👥 Employees</button>
+                    <button class="tab-btn" onclick="switchTab('vendorRegistration')">🤝 Vendor Registration</button>
                 </div>
 
                 <!-- Team Reports Tab -->
@@ -456,6 +457,184 @@
                     </div>
                 </div>
 
+                <!-- Vendor Registration Tab -->
+                <div id="vendorRegistrationTab" class="tab-content">
+                    <h2 class="section-title">🤝 Vendor Registration Form</h2>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="switchVendorView('form')">📝 New Vendor</button>
+                        <button class="btn btn-primary" onclick="switchVendorView('list')">📋 View All Vendors</button>
+                    </div>
+
+                    <!-- Vendor Form View -->
+                    <div id="vendorFormView">
+                        <div class="section" style="max-width: 800px;">
+                            <h3 style="color: #f093fb; margin-bottom: 20px;">Vendor Registration Form</h3>
+
+                            <!-- Section 1: Basic Info -->
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Basic Information</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Name of Firm/Company *</label>
+                                    <input type="text" id="vendorName" placeholder="Enter firm name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Organization Status *</label>
+                                    <select id="orgStatus" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Select</option>
+                                        <option value="Proprietorship">Proprietorship</option>
+                                        <option value="Private Limited">Private Limited</option>
+                                        <option value="Public Limited">Public Limited</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Year of Establishment</label>
+                                    <input type="number" id="yearEstablished" placeholder="YYYY" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Nature of Business *</label>
+                                    <select id="natureOfBusiness" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Select</option>
+                                        <option value="Manufacturing">Manufacturing</option>
+                                        <option value="Trading">Trading</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Section 2: Contact Info -->
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Contact Details</h4>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                                <div>
+                                    <label>Address 1 *</label>
+                                    <input type="text" id="address1" placeholder="Street address" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Address 2</label>
+                                    <input type="text" id="address2" placeholder="City, State, PIN" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                                <div>
+                                    <label>Contact Person *</label>
+                                    <input type="text" id="contactPerson" placeholder="Name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Designation</label>
+                                    <input type="text" id="contactDesignation" placeholder="e.g., Manager, Director" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Phone No *</label>
+                                    <input type="tel" id="phoneNo" placeholder="10-digit mobile" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Email ID *</label>
+                                    <input type="email" id="emailId" placeholder="vendor@company.com" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Registration Details -->
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Registration Details</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>TIN / CST No</label>
+                                    <input type="text" id="tinNo" placeholder="TIN / CST Number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>PAN No *</label>
+                                    <input type="text" id="panNo" placeholder="PAN Number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Aadhar No</label>
+                                    <input type="text" id="aadharNo" placeholder="Aadhar Number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>GST Reg No</label>
+                                    <input type="text" id="gstRegNo" placeholder="GST Registration Number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <!-- Section 4: Bank Details -->
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Bank Details (RTGS)</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Beneficiary Name *</label>
+                                    <input type="text" id="beneficiaryName" placeholder="Account holder name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Bank Name *</label>
+                                    <input type="text" id="bankName" placeholder="Bank name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Bank Address</label>
+                                    <input type="text" id="bankAddress" placeholder="Branch address" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Account No *</label>
+                                    <input type="text" id="accountNo" placeholder="Account number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>IFSC Code *</label>
+                                    <input type="text" id="ifscCode" placeholder="IFSC Code" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>MICR Code</label>
+                                    <input type="text" id="micrCode" placeholder="MICR Code" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Branch Code</label>
+                                    <input type="text" id="branchCode" placeholder="Branch code" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <!-- Section 5: Form Completion -->
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Form Completion Details</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Name of Person *</label>
+                                    <input type="text" id="formCompletedBy" placeholder="Your name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Designation</label>
+                                    <input type="text" id="formDesignation" placeholder="Your designation" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Date *</label>
+                                    <input type="date" id="formDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="submitVendorForm()">✅ Submit Vendor</button>
+                                <button class="btn btn-secondary" onclick="resetVendorForm()">🔄 Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vendor List View -->
+                    <div id="vendorListView" style="display: none;">
+                        <h3 style="color: #f093fb; margin-bottom: 20px;">Registered Vendors</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Vendor Name</th>
+                                    <th>Contact</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Registration Code</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vendorTableBody">
+                                <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Employees Tab -->
                 <div id="employeesTab" class="tab-content">
                     <h2 class="section-title">👥 Employee Management</h2>
@@ -579,6 +758,7 @@
             window.allEmployees = [];
             window.allIncentives = [];
             window.employeePerformance = [];
+            window.allVendors = [];
 
             window.login = async function() {
                 const email = document.getElementById('loginEmail').value;
@@ -607,6 +787,7 @@
                     document.getElementById('userEmail').textContent = window.currentUser.email;
                     await window.loadAllData();
                     window.loadEmployees();
+                    window.loadVendors();
                 } catch (error) {
                     alert('Error: ' + error.message);
                 }
@@ -1540,6 +1721,150 @@
                 }
             };
             window.allEmployees = [];
+
+            // Vendor Registration Functions
+            window.switchVendorView = function(view) {
+                const formView = document.getElementById('vendorFormView');
+                const listView = document.getElementById('vendorListView');
+                
+                if (view === 'form') {
+                    formView.style.display = 'block';
+                    listView.style.display = 'none';
+                    resetVendorForm();
+                } else {
+                    formView.style.display = 'none';
+                    listView.style.display = 'block';
+                    window.loadVendors();
+                }
+            };
+
+            window.submitVendorForm = async function() {
+                try {
+                    const vendorName = document.getElementById('vendorName').value.trim();
+                    const phoneNo = document.getElementById('phoneNo').value.trim();
+                    const emailId = document.getElementById('emailId').value.trim();
+                    const contactPerson = document.getElementById('contactPerson').value.trim();
+                    const panNo = document.getElementById('panNo').value.trim();
+                    const beneficiaryName = document.getElementById('beneficiaryName').value.trim();
+                    const bankName = document.getElementById('bankName').value.trim();
+                    const accountNo = document.getElementById('accountNo').value.trim();
+                    const ifscCode = document.getElementById('ifscCode').value.trim();
+                    const formCompletedBy = document.getElementById('formCompletedBy').value.trim();
+                    const formDate = document.getElementById('formDate').value;
+
+                    if (!vendorName || !phoneNo || !emailId || !contactPerson || !panNo || !beneficiaryName || !bankName || !accountNo || !ifscCode || !formCompletedBy || !formDate) {
+                        alert('❌ Please fill all required fields (marked with *)');
+                        return;
+                    }
+
+                    const vendorData = {
+                        vendor_name: vendorName,
+                        organization_status: document.getElementById('orgStatus').value,
+                        year_established: parseInt(document.getElementById('yearEstablished').value) || null,
+                        nature_of_business: document.getElementById('natureOfBusiness').value,
+                        address_1: document.getElementById('address1').value.trim(),
+                        address_2: document.getElementById('address2').value.trim(),
+                        contact_person: contactPerson,
+                        contact_designation: document.getElementById('contactDesignation').value.trim(),
+                        phone: phoneNo,
+                        email: emailId,
+                        tin_no: document.getElementById('tinNo').value.trim(),
+                        pan_no: panNo,
+                        aadhar_no: document.getElementById('aadharNo').value.trim(),
+                        gst_reg_no: document.getElementById('gstRegNo').value.trim(),
+                        beneficiary_name: beneficiaryName,
+                        bank_name: bankName,
+                        bank_address: document.getElementById('bankAddress').value.trim(),
+                        account_no: accountNo,
+                        ifsc_code: ifscCode,
+                        micr_code: document.getElementById('micrCode').value.trim(),
+                        branch_code: document.getElementById('branchCode').value.trim(),
+                        form_completed_by: formCompletedBy,
+                        form_designation: document.getElementById('formDesignation').value.trim(),
+                        form_date: formDate,
+                        vendor_registered: false
+                    };
+
+                    const res = await window.supabaseClient.from('vendor_registrations').insert([vendorData]);
+                    if (res.error) throw res.error;
+                    alert('✅ Vendor registered successfully!\n\nVendor: ' + vendorName);
+                    window.resetVendorForm();
+                    window.switchVendorView('list');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                    console.error(error);
+                }
+            };
+
+            window.resetVendorForm = function() {
+                document.getElementById('vendorName').value = '';
+                document.getElementById('orgStatus').value = '';
+                document.getElementById('yearEstablished').value = '';
+                document.getElementById('natureOfBusiness').value = '';
+                document.getElementById('address1').value = '';
+                document.getElementById('address2').value = '';
+                document.getElementById('contactPerson').value = '';
+                document.getElementById('contactDesignation').value = '';
+                document.getElementById('phoneNo').value = '';
+                document.getElementById('emailId').value = '';
+                document.getElementById('tinNo').value = '';
+                document.getElementById('panNo').value = '';
+                document.getElementById('aadharNo').value = '';
+                document.getElementById('gstRegNo').value = '';
+                document.getElementById('beneficiaryName').value = '';
+                document.getElementById('bankName').value = '';
+                document.getElementById('bankAddress').value = '';
+                document.getElementById('accountNo').value = '';
+                document.getElementById('ifscCode').value = '';
+                document.getElementById('micrCode').value = '';
+                document.getElementById('branchCode').value = '';
+                document.getElementById('formCompletedBy').value = '';
+                document.getElementById('formDesignation').value = '';
+                document.getElementById('formDate').value = '';
+            };
+
+            window.loadVendors = async function() {
+                try {
+                    const res = await window.supabaseClient.from('vendor_registrations').select('*').order('created_at', { ascending: false });
+                    window.allVendors = res.data || [];
+                    updateVendorsList();
+                } catch (error) {
+                    console.error('Error loading vendors:', error);
+                }
+            };
+
+            window.updateVendorsList = function() {
+                const tbody = document.getElementById('vendorTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (window.allVendors.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No vendors registered yet</td></tr>';
+                    return;
+                }
+
+                window.allVendors.forEach(vendor => {
+                    const row = tbody.insertRow();
+                    const statusClass = vendor.vendor_registered ? 'status-success' : 'status-warning';
+                    const statusText = vendor.vendor_registered ? '✅ Registered' : '⏳ Pending';
+                    row.innerHTML = '<td>' + vendor.vendor_name + '</td><td>' + vendor.contact_person + '</td><td>' + vendor.phone + '</td><td>' + vendor.email + '</td><td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td><td>' + (vendor.registration_code || 'N/A') + '</td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em;" onclick="approveVendor(\'' + vendor.id + '\')">✏️ Approve</button></td>';
+                });
+            };
+
+            window.approveVendor = async function(vendorId) {
+                try {
+                    const code = 'VND' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const res = await window.supabaseClient
+                        .from('vendor_registrations')
+                        .update({ vendor_registered: true, registration_code: code, approved_at: new Date().toISOString() })
+                        .eq('id', vendorId);
+                    if (res.error) throw res.error;
+                    window.loadVendors();
+                    alert('✅ Vendor approved! Registration Code: ' + code);
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
 
             window.loadEmployees = async function() {
                 try {
