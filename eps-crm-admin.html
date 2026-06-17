@@ -101,6 +101,7 @@
                     <button class="tab-btn" onclick="switchTab('incentives')">💰 Incentives</button>
                     <button class="tab-btn" onclick="switchTab('employees')">👥 Employees</button>
                     <button class="tab-btn" onclick="switchTab('vendorRegistration')">🤝 Vendor Registration</button>
+                    <button class="tab-btn" onclick="switchTab('clientContracts')">📄 Client Contracts</button>
                 </div>
 
                 <!-- Team Reports Tab -->
@@ -693,6 +694,126 @@
                     </div>
                 </div>
 
+                <!-- Client Contracts Tab -->
+                <div id="clientContractsTab" class="tab-content">
+                    <h2 class="section-title">📄 Client Contracts Management</h2>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="switchContractView('form')">📝 Add Contract</button>
+                        <button class="btn btn-primary" onclick="switchContractView('list')">📋 View All Contracts</button>
+                        <button class="btn btn-primary" onclick="filterContractsByStatus('active')">✅ Active Only</button>
+                        <button class="btn btn-primary" onclick="filterContractsByStatus('expired')">❌ Expired</button>
+                        <button class="btn btn-primary" onclick="filterContractsByStatus('all')">📊 All</button>
+                    </div>
+
+                    <!-- Contract Form View -->
+                    <div id="contractFormView">
+                        <div class="section" style="max-width: 800px;">
+                            <h3 style="color: #f093fb; margin-bottom: 20px;">Add New Client Contract</h3>
+
+                            <h4 style="color: #666; margin-bottom: 10px;">Client Information</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Client Name *</label>
+                                    <input type="text" id="clientName" placeholder="Client name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Company Name</label>
+                                    <input type="text" id="companyName" placeholder="Company name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Contact Person</label>
+                                    <input type="text" id="contractContactPerson" placeholder="Contact person" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Email</label>
+                                    <input type="email" id="clientEmail" placeholder="Email address" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Phone</label>
+                                    <input type="tel" id="clientPhone" placeholder="Phone number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Contract Details</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Contract Type</label>
+                                    <select id="contractType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Select Type</option>
+                                        <option value="Service Agreement">Service Agreement</option>
+                                        <option value="Supply Agreement">Supply Agreement</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Partnership">Partnership</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Contract Value (₹)</label>
+                                    <input type="number" id="contractValue" placeholder="Contract value" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Start Date *</label>
+                                    <input type="date" id="contractStartDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>End Date *</label>
+                                    <input type="date" id="contractEndDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <label>Contract Terms / Description</label>
+                                <textarea id="contractTerms" placeholder="Key terms, conditions, or notes" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 100px; font-family: Arial;"></textarea>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <label>Upload Contract File (PDF/DOC)</label>
+                                <input type="file" id="contractFile" accept=".pdf,.doc,.docx,.txt" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <small style="display: block; margin-top: 5px; color: #666;">Supported: PDF, DOC, DOCX, TXT (Max 10MB)</small>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <label>Renewal Reminder Days</label>
+                                <input type="number" id="renewalReminderDays" value="30" min="1" max="365" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <small style="display: block; margin-top: 5px; color: #666;">Send reminder this many days before contract ends</small>
+                            </div>
+
+                            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="submitContractForm()">✅ Add Contract</button>
+                                <button class="btn btn-secondary" onclick="resetContractForm()">🔄 Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contracts List View -->
+                    <div id="contractListView" style="display: none;">
+                        <h3 style="color: #f093fb; margin-bottom: 20px;">📋 All Client Contracts</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="contractSearchBox" placeholder="Search by client name, company..." onkeyup="searchContracts()" style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Client Name</th>
+                                    <th>Company</th>
+                                    <th>Contact</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Days Left</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contractTableBody">
+                                <tr><td colspan="8" style="text-align: center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Employees Tab -->
                 <div id="employeesTab" class="tab-content">
                     <h2 class="section-title">👥 Employee Management</h2>
@@ -817,6 +938,8 @@
             window.allIncentives = [];
             window.employeePerformance = [];
             window.allVendors = [];
+            window.allContracts = [];
+            window.filteredContracts = [];
 
             window.login = async function() {
                 const email = document.getElementById('loginEmail').value;
@@ -846,6 +969,7 @@
                     await window.loadAllData();
                     window.loadEmployees();
                     window.loadVendors();
+                    window.loadContracts();
                 } catch (error) {
                     alert('Error: ' + error.message);
                 }
@@ -1779,6 +1903,186 @@
                 }
             };
             window.allEmployees = [];
+
+            // Contract Management Functions
+            window.switchContractView = function(view) {
+                const formView = document.getElementById('contractFormView');
+                const listView = document.getElementById('contractListView');
+                
+                if (view === 'form') {
+                    formView.style.display = 'block';
+                    listView.style.display = 'none';
+                    resetContractForm();
+                } else {
+                    formView.style.display = 'none';
+                    listView.style.display = 'block';
+                    window.loadContracts();
+                }
+            };
+
+            window.submitContractForm = async function() {
+                try {
+                    const clientName = document.getElementById('clientName').value.trim();
+                    const startDate = document.getElementById('contractStartDate').value;
+                    const endDate = document.getElementById('contractEndDate').value;
+
+                    if (!clientName || !startDate || !endDate) {
+                        alert('❌ Please fill all required fields (marked with *)');
+                        return;
+                    }
+
+                    if (new Date(endDate) <= new Date(startDate)) {
+                        alert('❌ End date must be after start date');
+                        return;
+                    }
+
+                    const contractData = {
+                        client_name: clientName,
+                        company_name: document.getElementById('companyName').value.trim(),
+                        contact_person: document.getElementById('contractContactPerson').value.trim(),
+                        client_email: document.getElementById('clientEmail').value.trim(),
+                        client_phone: document.getElementById('clientPhone').value.trim(),
+                        contract_type: document.getElementById('contractType').value,
+                        contract_value: parseFloat(document.getElementById('contractValue').value) || 0,
+                        contract_start_date: startDate,
+                        contract_end_date: endDate,
+                        contract_terms: document.getElementById('contractTerms').value.trim(),
+                        renewal_reminder_days: parseInt(document.getElementById('renewalReminderDays').value) || 30,
+                        created_by: window.currentUser.email
+                    };
+
+                    const res = await window.supabaseClient.from('client_contracts').insert([contractData]);
+                    if (res.error) throw res.error;
+
+                    alert('✅ Contract added successfully!\n\nClient: ' + clientName);
+                    window.resetContractForm();
+                    window.switchContractView('list');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                    console.error(error);
+                }
+            };
+
+            window.resetContractForm = function() {
+                document.getElementById('clientName').value = '';
+                document.getElementById('companyName').value = '';
+                document.getElementById('contractContactPerson').value = '';
+                document.getElementById('clientEmail').value = '';
+                document.getElementById('clientPhone').value = '';
+                document.getElementById('contractType').value = '';
+                document.getElementById('contractValue').value = '';
+                document.getElementById('contractStartDate').value = '';
+                document.getElementById('contractEndDate').value = '';
+                document.getElementById('contractTerms').value = '';
+                document.getElementById('contractFile').value = '';
+                document.getElementById('renewalReminderDays').value = '30';
+            };
+
+            window.loadContracts = async function() {
+                try {
+                    const res = await window.supabaseClient.from('client_contracts').select('*').order('contract_end_date', { ascending: true });
+                    window.allContracts = res.data || [];
+                    window.filteredContracts = window.allContracts;
+                    updateContractsList();
+                } catch (error) {
+                    console.error('Error loading contracts:', error);
+                }
+            };
+
+            window.updateContractsList = function() {
+                const tbody = document.getElementById('contractTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (window.filteredContracts.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No contracts found</td></tr>';
+                    return;
+                }
+
+                window.filteredContracts.forEach(contract => {
+                    const row = tbody.insertRow();
+                    const startDate = new Date(contract.contract_start_date);
+                    const endDate = new Date(contract.contract_end_date);
+                    const today = new Date();
+                    const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    let status = '✅ Active';
+                    let statusClass = 'status-success';
+                    
+                    if (daysLeft < 0) {
+                        status = '❌ Expired';
+                        statusClass = 'status-danger';
+                    } else if (daysLeft <= 30) {
+                        status = '⚠️ Expiring Soon';
+                        statusClass = 'status-warning';
+                    }
+
+                    row.innerHTML = '<td><strong>' + contract.client_name + '</strong></td><td>' + (contract.company_name || 'N/A') + '</td><td>' + (contract.contact_person || 'N/A') + '</td><td>' + contract.contract_start_date + '</td><td>' + contract.contract_end_date + '</td><td><span class="status-badge ' + statusClass + '">' + status + '</span></td><td><strong>' + (daysLeft > 0 ? daysLeft + ' days' : 'Expired') + '</strong></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="viewContractDetails(\'' + contract.id + '\')">👁️ View</button><button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em; background: #ef4444;" onclick="deleteContract(\'' + contract.id + '\')">🗑️ Delete</button></td>';
+                });
+            };
+
+            window.viewContractDetails = function(contractId) {
+                const contract = window.allContracts.find(c => c.id === contractId);
+                if (!contract) {
+                    alert('Contract not found');
+                    return;
+                }
+
+                alert('📄 Contract Details\n\n' + 
+                      'Client: ' + contract.client_name + '\n' +
+                      'Company: ' + (contract.company_name || 'N/A') + '\n' +
+                      'Contact: ' + (contract.contact_person || 'N/A') + '\n' +
+                      'Email: ' + (contract.client_email || 'N/A') + '\n' +
+                      'Phone: ' + (contract.client_phone || 'N/A') + '\n\n' +
+                      'Type: ' + (contract.contract_type || 'N/A') + '\n' +
+                      'Value: ₹' + (contract.contract_value || 0) + '\n' +
+                      'Start: ' + contract.contract_start_date + '\n' +
+                      'End: ' + contract.contract_end_date + '\n\n' +
+                      'Terms: ' + (contract.contract_terms || 'N/A'));
+            };
+
+            window.deleteContract = async function(contractId) {
+                const confirmed = confirm('Are you sure you want to delete this contract?\n\nThis action cannot be undone.');
+                if (!confirmed) return;
+
+                try {
+                    const res = await window.supabaseClient.from('client_contracts').delete().eq('id', contractId);
+                    if (res.error) throw res.error;
+                    window.loadContracts();
+                    alert('✅ Contract deleted successfully!');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
+
+            window.searchContracts = function() {
+                const searchTerm = document.getElementById('contractSearchBox').value.toLowerCase();
+                window.filteredContracts = window.allContracts.filter(c => 
+                    c.client_name.toLowerCase().includes(searchTerm) || 
+                    (c.company_name && c.company_name.toLowerCase().includes(searchTerm)) ||
+                    (c.client_email && c.client_email.toLowerCase().includes(searchTerm))
+                );
+                window.updateContractsList();
+            };
+
+            window.filterContractsByStatus = function(status) {
+                if (status === 'all') {
+                    window.filteredContracts = window.allContracts;
+                } else {
+                    const today = new Date();
+                    window.filteredContracts = window.allContracts.filter(c => {
+                        const endDate = new Date(c.contract_end_date);
+                        const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                        
+                        if (status === 'active') {
+                            return daysLeft > 30;
+                        } else if (status === 'expired') {
+                            return daysLeft < 0;
+                        }
+                    });
+                }
+                window.updateContractsList();
+            };
 
             // Vendor Registration Functions
             window.switchVendorView = function(view) {
