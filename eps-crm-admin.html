@@ -531,6 +531,9 @@
             window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             window.currentUser = null;
             window.allData = { contacts: [], meetings: [], calls: [], orders: [] };
+            window.allEmployees = [];
+            window.allIncentives = [];
+            window.employeePerformance = [];
 
             window.login = async function() {
                 const email = document.getElementById('loginEmail').value;
@@ -595,10 +598,11 @@
                     console.log('Loading data from Supabase...');
                     
                     // Load from Supabase
-                    const [contactsRes, meetingsRes, callsRes] = await Promise.all([
+                    const [contactsRes, meetingsRes, callsRes, perfRes] = await Promise.all([
                         window.supabaseClient.from('contacts').select('*').limit(500),
                         window.supabaseClient.from('meetings').select('*').limit(500),
-                        window.supabaseClient.from('calls').select('*').limit(500)
+                        window.supabaseClient.from('calls').select('*').limit(500),
+                        window.supabaseClient.from('employee_performance').select('*').limit(500)
                     ]);
 
                     if (contactsRes.error) {
@@ -620,6 +624,7 @@
                     window.allData.contacts = contactsRes.data || [];
                     window.allData.meetings = meetingsRes.data || [];
                     window.allData.calls = callsRes.data || [];
+                    window.employeePerformance = perfRes.data || [];
 
                     console.log('Raw data loaded:');
                     console.log('Contacts sample:', window.allData.contacts[0]);
@@ -1202,12 +1207,83 @@
 
             window.calculateIncentives = async function() {
                 try {
-                    const month = new Date().toISOString().substring(0, 7);
-                    alert('Calculating incentives for ' + month + '...\nThis will create incentive records for all employees.');
-                    // In a real scenario, this would calculate based on performance and save to Supabase
-                    window.loadIncentives();
+                    const currentMonth = new Date().toISOString().substring(0, 7); // 2026-06
+                    const confirmed = confirm('This will calculate incentives for month: ' + currentMonth + '\n\nContinue?');
+                    
+                    if (!confirmed) return;
+
+                    const incentivesToCreate = [];
+
+                    // For each employee
+                    for (const emp of window.allEmployees) {
+                        // Get performance data for this month
+                        const monthPerf = (window.employeePerformance || []).filter(p => {
+                            const perfMonth = p.date.substring(0, 7);
+                            return perfMonth === currentMonth && p.employee_id === emp.id;
+                        });
+
+                        // Calculate total calls, meetings, orders
+                        const totalCalls = monthPerf.reduce((sum, p) => sum + (p.calls || 0), 0);
+                        const totalMeetings = monthPerf.reduce((sum, p) => sum + (p.meetings || 0), 0);
+                        const totalOrders = monthPerf.reduce((sum, p) => sum + (p.orders || 0), 0);
+
+                        // Determine role-based targets
+                        let callTarget = 1080, meetingTarget = 48; // Telecaller
+                        if (emp.role === 'Field Executive') {
+                            callTarget = 0;
+                            meetingTarget = 20;
+                        }
+
+                        // Calculate achievement %
+                        const callAchievement = callTarget > 0 ? (totalCalls / callTarget) * 100 : 100;
+                        const meetingAchievement = meetingTarget > 0 ? (totalMeetings / meetingTarget) * 100 : 100;
+                        const avgAchievement = (callAchievement + meetingAchievement) / 2;
+
+                        // Calculate base bonus (monthly salary × 10%)
+                        const baseSalary = emp.salary || 30000;
+                        const baseBonus = (baseSalary / 100) * 10;
+
+                        // Calculate performance incentive based on tiers
+                        let performanceIncentive = 0;
+                        if (avgAchievement >= 100) {
+                            performanceIncentive = baseBonus * 2.5; // 250% of base = highest
+                        } else if (avgAchievement >= 90) {
+                            performanceIncentive = baseBonus * 2;   // 200% of base
+                        } else if (avgAchievement >= 75) {
+                            performanceIncentive = baseBonus * 1.5; // 150% of base
+                        } else if (avgAchievement >= 60) {
+                            performanceIncentive = baseBonus * 1;   // 100% of base
+                        } else {
+                            performanceIncentive = 0; // Below 60% = no incentive
+                        }
+
+                        // Check if incentive already exists for this month
+                        const existing = window.allIncentives.find(i => i.employee_id === emp.id && i.month === currentMonth);
+                        
+                        if (!existing) {
+                            incentivesToCreate.push({
+                                employee_id: emp.id,
+                                month: currentMonth,
+                                bonus_amount: baseBonus,
+                                incentive_earned: performanceIncentive,
+                                status: 'pending'
+                            });
+                        }
+                    }
+
+                    // Save to Supabase
+                    if (incentivesToCreate.length > 0) {
+                        const res = await window.supabaseClient.from('employee_incentives').insert(incentivesToCreate);
+                        if (res.error) throw res.error;
+                        
+                        window.loadIncentives();
+                        alert('✅ Calculated ' + incentivesToCreate.length + ' employee incentives for ' + currentMonth);
+                    } else {
+                        alert('ℹ️ All employees already have incentives calculated for ' + currentMonth);
+                    }
                 } catch (error) {
                     alert('Error: ' + error.message);
+                    console.error(error);
                 }
             };
 
