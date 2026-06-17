@@ -307,6 +307,11 @@
                     window.allData.meetings = meetingsRes.data || [];
                     window.allData.calls = callsRes.data || [];
 
+                    console.log('Raw data loaded:');
+                    console.log('Contacts sample:', window.allData.contacts[0]);
+                    console.log('Meetings sample:', window.allData.meetings[0]);
+                    console.log('Calls sample:', window.allData.calls[0]);
+                    
                     console.log('Data loaded:', {
                         contacts: window.allData.contacts.length,
                         meetings: window.allData.meetings.length,
@@ -372,7 +377,6 @@
                 const contacts = window.allData.contacts || [];
                 const meetings = window.allData.meetings || [];
                 const calls = window.allData.calls || [];
-                const activities = window.allData.activities || [];
 
                 if (!document.getElementById('teamTotalCalls')) return;
 
@@ -380,40 +384,84 @@
                 document.getElementById('teamTotalContacts').textContent = contacts.length;
                 document.getElementById('teamTotalMeetings').textContent = meetings.length;
 
+                // Collect unique users by role
+                const telecallers = new Map(); // userId -> {name, calls, contacts}
+                const fieldExecs = new Map();  // userId -> {name, meetings, contacts}
+
+                // Process calls - these are by telecallers
+                calls.forEach(c => {
+                    const userId = c.user_id;
+                    if (!telecallers.has(userId)) {
+                        telecallers.set(userId, { name: userId, calls: 0, contacts: 0, meetings: 0 });
+                    }
+                    const user = telecallers.get(userId);
+                    user.calls += 1;
+                });
+
+                // Process contacts - check created_by to determine role
+                contacts.forEach(c => {
+                    if (c.created_by) {
+                        const createdBy = typeof c.created_by === 'object' ? c.created_by.id : c.created_by;
+                        
+                        // Try to determine if this is a telecaller or field exec based on who claimed it
+                        if (c.claimed_by) {
+                            const claimedBy = typeof c.claimed_by === 'object' ? c.claimed_by.id : c.claimed_by;
+                            if (!telecallers.has(claimedBy)) {
+                                telecallers.set(claimedBy, { name: claimedBy, calls: 0, contacts: 0, meetings: 0 });
+                            }
+                            telecallers.get(claimedBy).contacts += 1;
+                        } else {
+                            if (!telecallers.has(createdBy)) {
+                                telecallers.set(createdBy, { name: createdBy, calls: 0, contacts: 0, meetings: 0 });
+                            }
+                            telecallers.get(createdBy).contacts += 1;
+                        }
+                    }
+                });
+
+                // Process meetings - these are by field execs
+                meetings.forEach(m => {
+                    if (m.created_by) {
+                        const userId = typeof m.created_by === 'object' ? m.created_by.id : m.created_by;
+                        if (!fieldExecs.has(userId)) {
+                            fieldExecs.set(userId, { name: userId, calls: 0, contacts: 0, meetings: 0 });
+                        }
+                        fieldExecs.get(userId).meetings += 1;
+                    }
+                });
+
                 const uniqueUsers = new Set();
-                (contacts || []).forEach(c => {
-                    if (c.created_by) uniqueUsers.add(typeof c.created_by === 'string' ? c.created_by : 'User');
-                    if (c.assigned_to) uniqueUsers.add(typeof c.assigned_to === 'string' ? c.assigned_to : 'User');
-                });
-                (meetings || []).forEach(m => {
-                    if (m.created_by) uniqueUsers.add(typeof m.created_by === 'string' ? m.created_by : 'User');
-                    if (m.assigned_to) uniqueUsers.add(typeof m.assigned_to === 'string' ? m.assigned_to : 'User');
-                });
-                (calls || []).forEach(c => {
-                    if (c.user_id) uniqueUsers.add(typeof c.user_id === 'string' ? c.user_id : 'User');
-                });
+                telecallers.forEach((v, k) => uniqueUsers.add(k));
+                fieldExecs.forEach((v, k) => uniqueUsers.add(k));
 
                 document.getElementById('teamActiveUsers').textContent = uniqueUsers.size || 1;
 
                 const tbody = document.getElementById('teamTableBody');
                 if (!tbody) return;
                 tbody.innerHTML = '';
-                
-                const telecallerCalls = calls.length;
-                const telecallerContacts = (contacts || []).filter(c => c.status === 'active').length;
-                const telecallerMeetings = (meetings || []).filter(m => m.assigned_to).length;
-                
-                const fieldExecActivities = activities.length;
-                const fieldExecMeetings = meetings.length;
-                const fieldExecContacts = contacts.length;
 
-                // Telecaller Row
-                let row = tbody.insertRow();
-                row.innerHTML = '<td>Telecaller Team</td><td>Telecaller</td><td>' + telecallerCalls + '</td><td>' + telecallerContacts + '</td><td>' + telecallerMeetings + '</td><td><span class="status-badge status-success">Active</span></td>';
+                // Display Telecaller users
+                if (telecallers.size > 0) {
+                    telecallers.forEach((user, userId) => {
+                        const row = tbody.insertRow();
+                        const displayName = user.name.replace('00000000-0000-0000-0000-000000000000', 'Unknown');
+                        row.innerHTML = '<td>' + displayName + '</td><td>Telecaller</td><td>' + user.calls + '</td><td>' + user.contacts + '</td><td>' + user.meetings + '</td><td><span class="status-badge status-success">Active</span></td>';
+                    });
+                }
 
-                // Field Executive Row
-                row = tbody.insertRow();
-                row.innerHTML = '<td>Field Executive Team</td><td>Field Executive</td><td>' + fieldExecActivities + '</td><td>' + fieldExecContacts + '</td><td>' + fieldExecMeetings + '</td><td><span class="status-badge status-warning">Active</span></td>';
+                // Display Field Executive users
+                if (fieldExecs.size > 0) {
+                    fieldExecs.forEach((user, userId) => {
+                        const row = tbody.insertRow();
+                        const displayName = user.name.replace('00000000-0000-0000-0000-000000000000', 'Unknown');
+                        row.innerHTML = '<td>' + displayName + '</td><td>Field Executive</td><td>' + user.calls + '</td><td>' + user.contacts + '</td><td>' + user.meetings + '</td><td><span class="status-badge status-warning">Active</span></td>';
+                    });
+                }
+
+                // If no users found, show placeholder
+                if (telecallers.size === 0 && fieldExecs.size === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No team data available yet</td></tr>';
+                }
             };
 
             window.updateOrdersReports = function() {
