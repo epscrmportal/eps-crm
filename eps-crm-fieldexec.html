@@ -78,6 +78,7 @@
                 <button class="tab-btn" onclick="switchTab('meetings')">Meetings</button>
                 <button class="tab-btn" onclick="switchTab('logActivity')">Log Activity</button>
                 <button class="tab-btn" onclick="switchTab('businessCards')">Business Cards</button>
+                <button class="tab-btn" onclick="switchTab('clientReg')">Client Registration</button>
                 <button class="tab-btn" onclick="switchTab('goals')">Goals</button>
             </div>
 
@@ -188,6 +189,171 @@
                 <div class="section">
                     <h2>All Business Cards</h2>
                     <div id="businessCardsList"></div>
+                </div>
+            </div>
+
+            <div id="clientReg" class="tab-content">
+                <div class="section">
+                    <h2>📋 Client Registration Form</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Fill and submit client registration details after deal closure</p>
+
+                    <form id="clientRegForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <!-- Section 1: Company Details -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">1. Company Details</h3>
+                        </div>
+
+                        <div>
+                            <label>Firm/Company Name *</label>
+                            <input type="text" id="firmName" placeholder="Enter company name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Registered Address *</label>
+                            <input type="text" id="regAddress" placeholder="Enter registered address" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Pickup Address</label>
+                            <input type="text" id="pickupAddress" placeholder="Enter pickup address" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Section 2: Organization Status -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">2. Organization Status</h3>
+                        </div>
+
+                        <div>
+                            <label>Status *</label>
+                            <select id="orgStatus" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <option value="">Select status</option>
+                                <option value="Proprietorship">Proprietorship</option>
+                                <option value="Partnership">Partnership</option>
+                                <option value="Private Limited">Private Limited</option>
+                                <option value="Public Limited">Public Limited</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>If Other, Please Specify</label>
+                            <input type="text" id="orgOther" placeholder="Specify organization type" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Section 3: Business Nature -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">3. Nature of Business</h3>
+                        </div>
+
+                        <div>
+                            <label>Business Type *</label>
+                            <select id="businessType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <option value="">Select type</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Trading">Trading</option>
+                                <option value="Services">Services</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>If Other, Please Specify</label>
+                            <input type="text" id="businessOther" placeholder="Specify business type" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Year of Establishment</label>
+                            <input type="number" id="yearEstablished" placeholder="YYYY" min="1900" max="2099" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Section 4: Management Contact -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">4. Management Contact Details</h3>
+                        </div>
+
+                        <div>
+                            <label>Proprietor/Director Name *</label>
+                            <input type="text" id="directorName" placeholder="Enter name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Director Contact Number *</label>
+                            <input type="tel" id="directorPhone" placeholder="Enter phone" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Section 5: Accounts Contact -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">5. Accounts Team Contact</h3>
+                        </div>
+
+                        <div>
+                            <label>Accounts Person Name</label>
+                            <input type="text" id="accountsName" placeholder="Enter name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Accounts Contact Number</label>
+                            <input type="tel" id="accountsPhone" placeholder="Enter phone" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Accounts Email</label>
+                            <input type="email" id="accountsEmail" placeholder="Enter email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Section 6: Registration Details -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">6. Registration Details</h3>
+                        </div>
+
+                        <div>
+                            <label>PAN No</label>
+                            <input type="text" id="panNo" placeholder="Enter PAN" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>GST No</label>
+                            <input type="text" id="gstNo" placeholder="Enter GST" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>MSME Certificate</label>
+                            <input type="text" id="msmeNo" placeholder="Enter MSME No" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Section 7: Billing Information -->
+                        <div style="grid-column: 1 / -1; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                            <h3 style="margin-top: 0; color: #4facfe;">7. Billing Information</h3>
+                        </div>
+
+                        <div>
+                            <label>Billing Name *</label>
+                            <input type="text" id="billingName" placeholder="Enter name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Billing Address *</label>
+                            <input type="text" id="billingAddress" placeholder="Enter address" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div>
+                            <label>Billing Email *</label>
+                            <input type="email" id="billingEmail" placeholder="Enter email" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <!-- Submit -->
+                        <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
+                            <button type="button" class="btn btn-primary" onclick="submitClientReg()" style="flex: 1; padding: 12px;">📤 Submit Registration</button>
+                            <button type="reset" class="btn btn-secondary" style="flex: 1; padding: 12px;">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section" style="margin-top: 30px;">
+                    <h2>📋 Submitted Registrations</h2>
+                    <div id="submittedRegsList" style="overflow-x: auto;">
+                        <p style="color: #999;">No registrations submitted yet</p>
+                    </div>
                 </div>
             </div>
 
@@ -324,6 +490,7 @@
                 await loadContacts();
                 await loadBusinessCards();
                 loadGoalProgress();
+                loadSubmittedRegistrations();
                 updateMetrics();
                 displayMeetings();
             } catch (error) {
@@ -670,6 +837,95 @@
             
             html += '</tbody></table>';
             document.getElementById('goalProgressLog').innerHTML = html;
+        }
+
+        async function submitClientReg() {
+            const firmName = document.getElementById('firmName').value;
+            const billingName = document.getElementById('billingName').value;
+            const directorName = document.getElementById('directorName').value;
+            
+            if (!firmName || !billingName || !directorName) {
+                alert('Please fill all required fields (marked with *)');
+                return;
+            }
+
+            try {
+                const regData = {
+                    field_exec_email: currentUser.email,
+                    firm_name: firmName,
+                    registered_address: document.getElementById('regAddress').value,
+                    pickup_address: document.getElementById('pickupAddress').value,
+                    org_status: document.getElementById('orgStatus').value,
+                    org_other: document.getElementById('orgOther').value,
+                    business_type: document.getElementById('businessType').value,
+                    business_other: document.getElementById('businessOther').value,
+                    year_established: document.getElementById('yearEstablished').value,
+                    director_name: directorName,
+                    director_phone: document.getElementById('directorPhone').value,
+                    accounts_name: document.getElementById('accountsName').value,
+                    accounts_phone: document.getElementById('accountsPhone').value,
+                    accounts_email: document.getElementById('accountsEmail').value,
+                    pan_no: document.getElementById('panNo').value,
+                    gst_no: document.getElementById('gstNo').value,
+                    msme_no: document.getElementById('msmeNo').value,
+                    billing_name: billingName,
+                    billing_address: document.getElementById('billingAddress').value,
+                    billing_email: document.getElementById('billingEmail').value,
+                    submitted_date: new Date().toISOString()
+                };
+
+                const { data, error } = await supabase
+                    .from('client_registrations')
+                    .insert(regData)
+                    .select();
+
+                if (error) {
+                    alert('Error: ' + error.message);
+                } else {
+                    alert('✅ Client registration submitted successfully!');
+                    document.getElementById('clientRegForm').reset();
+                    loadSubmittedRegistrations();
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function loadSubmittedRegistrations() {
+            try {
+                const { data: regs, error } = await supabase
+                    .from('client_registrations')
+                    .select('*')
+                    .eq('field_exec_email', currentUser.email)
+                    .order('submitted_date', { ascending: false });
+
+                if (error) {
+                    console.error('Error loading registrations:', error);
+                    return;
+                }
+
+                displaySubmittedRegistrations(regs || []);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displaySubmittedRegistrations(regs) {
+            const container = document.getElementById('submittedRegsList');
+            
+            if (regs.length === 0) {
+                container.innerHTML = '<p style="color: #999;">No registrations submitted yet</p>';
+                return;
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #4facfe; color: white;"><th style="padding: 12px; text-align: left;">Company Name</th><th style="padding: 12px; text-align: left;">Director</th><th style="padding: 12px; text-align: left;">GST No</th><th style="padding: 12px; text-align: left;">Date</th></tr></thead><tbody>';
+
+            regs.forEach(reg => {
+                html += '<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 12px;"><strong>' + reg.firm_name + '</strong></td><td style="padding: 12px;">' + reg.director_name + '</td><td style="padding: 12px;">' + (reg.gst_no || 'N/A') + '</td><td style="padding: 12px;">' + new Date(reg.submitted_date).toLocaleDateString() + '</td></tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
         }
 
         window.addEventListener('load', checkAuth);
