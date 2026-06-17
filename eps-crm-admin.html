@@ -90,6 +90,7 @@
                     <button class="tab-btn" onclick="switchTab('goalsTargets')">🎯 Goals & Targets</button>
                     <button class="tab-btn" onclick="switchTab('ordersReports')">📦 Orders Reports</button>
                     <button class="tab-btn" onclick="switchTab('performance')">📊 Performance</button>
+                    <button class="tab-btn" onclick="switchTab('employees')">👥 Employees</button>
                 </div>
 
                 <!-- Team Reports Tab -->
@@ -343,6 +344,116 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Employees Tab -->
+                <div id="employeesTab" class="tab-content">
+                    <h2 class="section-title">👥 Employee Management</h2>
+                    
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="openAddEmployeeModal()">➕ Add New Employee</button>
+                        <button class="btn btn-primary" onclick="exportEmployeesToExcel()">📊 Export Excel</button>
+                        <button class="btn btn-primary" onclick="exportEmployeesToPDF()">📄 Export PDF</button>
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <div class="metric-card">
+                            <h3>Total Employees</h3>
+                            <div class="value" id="totalEmployees">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Active</h3>
+                            <div class="value" id="activeEmployeesCount">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Inactive</h3>
+                            <div class="value" id="inactiveEmployeesCount">0</div>
+                        </div>
+                    </div>
+
+                    <h3 style="color: #f093fb; margin-bottom: 15px;">Employee Directory</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Joining Date</th>
+                                <th>Status</th>
+                                <th>Performance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <tr><td colspan="8" style="text-align: center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Modal -->
+        <div id="employeeModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 id="modalTitle" style="color: #f093fb;">Add New Employee</h2>
+                    <span onclick="closeEmployeeModal()" style="font-size: 2em; cursor: pointer; color: #999;">&times;</span>
+                </div>
+                <form id="employeeForm" onsubmit="saveEmployee(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="grid-column: 1 / -1;">
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Full Name *</label>
+                        <input type="text" id="empName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Email *</label>
+                        <input type="email" id="empEmail" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Phone</label>
+                        <input type="tel" id="empPhone" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Role *</label>
+                        <select id="empRole" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <option value="">Select Role</option>
+                            <option value="Telecaller">Telecaller</option>
+                            <option value="Field Executive">Field Executive</option>
+                            <option value="Orders">Orders</option>
+                            <option value="Collections">Collections</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Department</label>
+                        <select id="empDepartment" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <option value="">Select</option>
+                            <option value="Telecalling">Telecalling</option>
+                            <option value="Field Sales">Field Sales</option>
+                            <option value="Orders">Orders</option>
+                            <option value="Collections">Collections</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Joining Date</label>
+                        <input type="date" id="empJoiningDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Employment Type</label>
+                        <select id="empEmploymentType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #555; margin-bottom: 5px; display: block;">Salary</label>
+                        <input type="number" id="empSalary" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn btn-danger" onclick="closeEmployeeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -381,6 +492,7 @@
                     document.getElementById('dashboardSection').classList.add('active');
                     document.getElementById('userEmail').textContent = window.currentUser.email;
                     await window.loadAllData();
+                    window.loadEmployees();
                 } catch (error) {
                     alert('Error: ' + error.message);
                 }
@@ -405,6 +517,7 @@
                     document.getElementById('dashboardSection').classList.add('active');
                     document.getElementById('userEmail').textContent = window.currentUser.email;
                     await window.loadAllData();
+                    window.loadEmployees();
                 } catch (error) {
                     console.error('Auth check error:', error);
                     document.getElementById('loginSection').style.display = 'flex';
@@ -941,6 +1054,139 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Monthly Report');
                 XLSX.writeFile(wb, 'Monthly_Report_' + new Date().toLocaleDateString() + '.xlsx');
+            };
+
+            // Employee Management Functions
+            window.allEmployees = [];
+
+            window.loadEmployees = async function() {
+                try {
+                    const res = await window.supabaseClient.from('employees').select('*').order('created_at', { ascending: false });
+                    window.allEmployees = res.data || [];
+                    updateEmployeesDisplay();
+                } catch (error) {
+                    console.error('Error loading employees:', error);
+                }
+            };
+
+            window.updateEmployeesDisplay = function() {
+                const total = window.allEmployees.length;
+                const active = window.allEmployees.filter(e => e.status === 'active').length;
+                const inactive = total - active;
+
+                document.getElementById('totalEmployees').textContent = total;
+                document.getElementById('activeEmployeesCount').textContent = active;
+                document.getElementById('inactiveEmployeesCount').textContent = inactive;
+
+                const tbody = document.getElementById('employeesTableBody');
+                tbody.innerHTML = '';
+                window.allEmployees.forEach(emp => {
+                    const row = tbody.insertRow();
+                    const statusClass = emp.status === 'active' ? 'status-active' : 'status-inactive';
+                    const joiningDate = emp.joining_date ? emp.joining_date.split('T')[0] : 'N/A';
+                    row.innerHTML = '<td>' + emp.name + '</td><td>' + emp.email + '</td><td>' + (emp.role || 'N/A') + '</td><td>' + (emp.department || 'N/A') + '</td><td>' + joiningDate + '</td><td><span class="status-badge ' + statusClass + '">' + emp.status + '</span></td><td>' + (emp.performance_score || 0) + '%</td><td><button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8em;" onclick="editEmployee(\'' + emp.id + '\')">Edit</button> <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em;" onclick="deleteEmployee(\'' + emp.id + '\')">Delete</button></td>';
+                });
+            };
+
+            window.openAddEmployeeModal = function() {
+                document.getElementById('modalTitle').textContent = 'Add New Employee';
+                document.getElementById('employeeForm').reset();
+                document.getElementById('employeeForm').dataset.mode = 'add';
+                document.getElementById('employeeModal').style.display = 'flex';
+            };
+
+            window.closeEmployeeModal = function() {
+                document.getElementById('employeeModal').style.display = 'none';
+            };
+
+            window.saveEmployee = async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('empName').value;
+                const email = document.getElementById('empEmail').value;
+                const phone = document.getElementById('empPhone').value;
+                const role = document.getElementById('empRole').value;
+                const department = document.getElementById('empDepartment').value;
+                const joiningDate = document.getElementById('empJoiningDate').value;
+                const employmentType = document.getElementById('empEmploymentType').value;
+                const salary = parseFloat(document.getElementById('empSalary').value) || 0;
+
+                try {
+                    const payload = { name, email, phone, role, department, joining_date: joiningDate, employment_type: employmentType, salary, status: 'active' };
+                    
+                    if (document.getElementById('employeeForm').dataset.mode === 'add') {
+                        const res = await window.supabaseClient.from('employees').insert([payload]);
+                        if (res.error) throw res.error;
+                    } else {
+                        const empId = document.getElementById('employeeForm').dataset.empId;
+                        const res = await window.supabaseClient.from('employees').update(payload).eq('id', empId);
+                        if (res.error) throw res.error;
+                    }
+
+                    window.loadEmployees();
+                    window.closeEmployeeModal();
+                    alert('Employee saved successfully!');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
+
+            window.editEmployee = async function(empId) {
+                const emp = window.allEmployees.find(e => e.id === empId);
+                if (emp) {
+                    document.getElementById('modalTitle').textContent = 'Edit Employee';
+                    document.getElementById('empName').value = emp.name;
+                    document.getElementById('empEmail').value = emp.email;
+                    document.getElementById('empPhone').value = emp.phone || '';
+                    document.getElementById('empRole').value = emp.role || '';
+                    document.getElementById('empDepartment').value = emp.department || '';
+                    document.getElementById('empJoiningDate').value = emp.joining_date || '';
+                    document.getElementById('empEmploymentType').value = emp.employment_type || 'Full-time';
+                    document.getElementById('empSalary').value = emp.salary || '';
+                    document.getElementById('employeeForm').dataset.mode = 'edit';
+                    document.getElementById('employeeForm').dataset.empId = empId;
+                    document.getElementById('employeeModal').style.display = 'flex';
+                }
+            };
+
+            window.deleteEmployee = async function(empId) {
+                if (confirm('Are you sure you want to delete this employee?')) {
+                    try {
+                        const res = await window.supabaseClient.from('employees').delete().eq('id', empId);
+                        if (res.error) throw res.error;
+                        window.loadEmployees();
+                        alert('Employee deleted!');
+                    } catch (error) {
+                        alert('Error: ' + error.message);
+                    }
+                }
+            };
+
+            window.exportEmployeesToExcel = function() {
+                const data = [['Name', 'Email', 'Phone', 'Role', 'Department', 'Joining Date', 'Employment Type', 'Salary']];
+                window.allEmployees.forEach(emp => {
+                    data.push([emp.name, emp.email, emp.phone || '', emp.role || '', emp.department || '', emp.joining_date || '', emp.employment_type || '', emp.salary || '']);
+                });
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Employees');
+                XLSX.writeFile(wb, 'Employees_' + new Date().toLocaleDateString() + '.xlsx');
+            };
+
+            window.exportEmployeesToPDF = function() {
+                const table = document.getElementById('employeesTableBody').parentElement.parentElement;
+                const opt = {
+                    margin: 10,
+                    filename: 'Employees_' + new Date().toLocaleDateString() + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
+                };
+                html2pdf().set(opt).from(table).save();
+            };
+
+            // Load employees after auth
+            window.loadEmployeesAfterAuth = function() {
+                window.loadEmployees();
             };
 
             window.addEventListener('load', window.checkAuth);
