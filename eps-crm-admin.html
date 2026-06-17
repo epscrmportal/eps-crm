@@ -369,36 +369,39 @@
             };
 
             window.updateTeamReports = function() {
-                const contacts = window.allData.contacts;
-                const meetings = window.allData.meetings;
-                const calls = window.allData.calls;
-                const activities = window.allData.activities;
+                const contacts = window.allData.contacts || [];
+                const meetings = window.allData.meetings || [];
+                const calls = window.allData.calls || [];
+                const activities = window.allData.activities || [];
+
+                if (!document.getElementById('teamTotalCalls')) return;
 
                 document.getElementById('teamTotalCalls').textContent = calls.length;
                 document.getElementById('teamTotalContacts').textContent = contacts.length;
                 document.getElementById('teamTotalMeetings').textContent = meetings.length;
 
                 const uniqueUsers = new Set();
-                contacts.forEach(c => {
+                (contacts || []).forEach(c => {
                     if (c.created_by) uniqueUsers.add(typeof c.created_by === 'string' ? c.created_by : 'User');
                     if (c.assigned_to) uniqueUsers.add(typeof c.assigned_to === 'string' ? c.assigned_to : 'User');
                 });
-                meetings.forEach(m => {
+                (meetings || []).forEach(m => {
                     if (m.created_by) uniqueUsers.add(typeof m.created_by === 'string' ? m.created_by : 'User');
                     if (m.assigned_to) uniqueUsers.add(typeof m.assigned_to === 'string' ? m.assigned_to : 'User');
                 });
-                calls.forEach(c => {
+                (calls || []).forEach(c => {
                     if (c.user_id) uniqueUsers.add(typeof c.user_id === 'string' ? c.user_id : 'User');
                 });
 
-                document.getElementById('teamActiveUsers').textContent = uniqueUsers.size || 3;
+                document.getElementById('teamActiveUsers').textContent = uniqueUsers.size || 1;
 
                 const tbody = document.getElementById('teamTableBody');
+                if (!tbody) return;
                 tbody.innerHTML = '';
                 
                 const telecallerCalls = calls.length;
-                const telecallerContacts = contacts.filter(c => c.status === 'active').length;
-                const telecallerMeetings = meetings.filter(m => m.assigned_to).length;
+                const telecallerContacts = (contacts || []).filter(c => c.status === 'active').length;
+                const telecallerMeetings = (meetings || []).filter(m => m.assigned_to).length;
                 
                 const fieldExecActivities = activities.length;
                 const fieldExecMeetings = meetings.length;
@@ -416,6 +419,8 @@
             window.updateOrdersReports = function() {
                 const orders = window.allData.orders || [];
                 
+                if (!document.getElementById('ordersTotal')) return;
+
                 const totalOrders = orders.length;
                 const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
                 const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'Completed').length;
@@ -427,6 +432,7 @@
                 document.getElementById('ordersPending').textContent = pendingOrders;
 
                 const tbody = document.getElementById('ordersTableBody');
+                if (!tbody) return;
                 tbody.innerHTML = '';
                 
                 if (orders.length === 0) {
@@ -451,6 +457,8 @@
                 const calls = window.allData.calls || [];
                 const contacts = window.allData.contacts || [];
                 const orders = window.allData.orders || [];
+
+                if (!document.getElementById('callsChart')) return;
 
                 // Calls Chart
                 if (calls.length > 0) {
@@ -482,8 +490,8 @@
                 }
 
                 // Orders Status Chart
-                const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'Completed').length;
-                const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'Pending').length;
+                const completedOrders = (orders || []).filter(o => o.status === 'completed' || o.status === 'Completed').length;
+                const pendingOrders = (orders || []).filter(o => o.status === 'pending' || o.status === 'Pending').length;
                 
                 const statusCtx = document.getElementById('ordersStatusChart');
                 if (statusCtx) {
@@ -507,14 +515,15 @@
                 }
 
                 // Revenue Table
-                const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+                const totalRevenue = (orders || []).reduce((sum, o) => sum + (o.amount || 0), 0);
                 const totalOrders = orders.length;
                 const revenue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
                 
                 const tbody = document.getElementById('revenueTableBody');
+                if (!tbody) return;
                 tbody.innerHTML = '';
                 tbody.innerHTML += '<tr><td>Total Contacts</td><td>' + contacts.length + '</td><td>100%</td></tr>';
-                tbody.innerHTML += '<tr><td>Active Contacts</td><td>' + contacts.filter(c => c.status === 'active').length + '</td><td>' + (contacts.length > 0 ? Math.round((contacts.filter(c => c.status === 'active').length / contacts.length) * 100) : 0) + '%</td></tr>';
+                tbody.innerHTML += '<tr><td>Active Contacts</td><td>' + (contacts || []).filter(c => c.status === 'active').length + '</td><td>' + (contacts.length > 0 ? Math.round(((contacts || []).filter(c => c.status === 'active').length / contacts.length) * 100) : 0) + '%</td></tr>';
                 tbody.innerHTML += '<tr><td>Total Orders</td><td>' + totalOrders + '</td><td>100%</td></tr>';
                 tbody.innerHTML += '<tr><td>Total Revenue</td><td>₹' + totalRevenue.toFixed(0) + '</td><td>100%</td></tr>';
                 tbody.innerHTML += '<tr><td>Calls Logged</td><td>' + calls.length + '</td><td>100%</td></tr>';
