@@ -102,6 +102,7 @@
                     <button class="tab-btn" onclick="switchTab('employees')">👥 Employees</button>
                     <button class="tab-btn" onclick="switchTab('vendorRegistration')">🤝 Vendor Registration</button>
                     <button class="tab-btn" onclick="switchTab('clientContracts')">📄 Client Contracts</button>
+                    <button class="tab-btn" onclick="switchTab('vehicleManagement')">🚗 Vehicle Management</button>
                 </div>
 
                 <!-- Team Reports Tab -->
@@ -814,6 +815,172 @@
                     </div>
                 </div>
 
+                <!-- Vehicle Management Tab -->
+                <div id="vehicleManagementTab" class="tab-content">
+                    <h2 class="section-title">🚗 Vehicle Management</h2>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="switchVehicleView('form')">📝 Add Vehicle</button>
+                        <button class="btn btn-primary" onclick="switchVehicleView('list')">📋 View All Vehicles</button>
+                        <button class="btn btn-primary" onclick="filterVehiclesByStatus('active')">✅ Active</button>
+                        <button class="btn btn-primary" onclick="filterVehiclesByStatus('inactive')">⏸️ Inactive</button>
+                        <button class="btn btn-primary" onclick="showServiceAlerts()">⚠️ Service Alerts</button>
+                    </div>
+
+                    <!-- Vehicle Form View -->
+                    <div id="vehicleFormView">
+                        <div class="section" style="max-width: 900px;">
+                            <h3 style="color: #f093fb; margin-bottom: 20px;">Add New Vehicle</h3>
+
+                            <h4 style="color: #666; margin-bottom: 10px;">Vehicle Information</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Registration Number *</label>
+                                    <input type="text" id="regNumber" placeholder="e.g., MH02AB1234" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Vehicle Type *</label>
+                                    <select id="vehicleType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="">Select Type</option>
+                                        <option value="Car">Car</option>
+                                        <option value="Truck">Truck</option>
+                                        <option value="Bike">Bike</option>
+                                        <option value="Auto">Auto</option>
+                                        <option value="Bus">Bus</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Manufacturer *</label>
+                                    <input type="text" id="manufacturer" placeholder="e.g., Maruti, Hyundai, Tata" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Model</label>
+                                    <input type="text" id="vehicleModel" placeholder="e.g., Swift, City, Fortuner" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Engine Number</label>
+                                    <input type="text" id="engineNumber" placeholder="Engine number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Chassis Number</label>
+                                    <input type="text" id="chassisNumber" placeholder="Chassis number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Owner Name</label>
+                                    <input type="text" id="ownerName" placeholder="Vehicle owner" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Purchase Date</label>
+                                    <input type="date" id="purchaseDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Documents & Certifications</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>PUC Certificate Expiry Date</label>
+                                    <input type="date" id="pucExpiryDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Insurance Policy No</label>
+                                    <input type="text" id="insurancePolicy" placeholder="Insurance policy number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Insurance Expiry Date</label>
+                                    <input type="date" id="insuranceExpiry" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>RC Number</label>
+                                    <input type="text" id="rcNumber" placeholder="RC number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Tax Invoice Date</label>
+                                    <input type="date" id="taxInvoiceDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Tax Expiry Date</label>
+                                    <input type="date" id="taxExpiryDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Permit Number</label>
+                                    <input type="text" id="permitNumber" placeholder="Permit number" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Permit Expiry Date</label>
+                                    <input type="date" id="permitExpiryDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Service Tracking</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label>Last Service Date</label>
+                                    <input type="date" id="lastServiceDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Last Service Type</label>
+                                    <input type="text" id="lastServiceType" placeholder="e.g., Oil Change, General Service" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Last Service KM</label>
+                                    <input type="number" id="lastServiceKm" placeholder="Kilometers at service" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Service Interval (Days)</label>
+                                    <input type="number" id="serviceIntervalDays" value="90" min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Service Interval (KM)</label>
+                                    <input type="number" id="serviceIntervalKm" value="5000" min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                                <div>
+                                    <label>Next Service Date</label>
+                                    <input type="date" id="nextServiceDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <label>Service Notes</label>
+                                <textarea id="vehicleNotes" placeholder="Additional notes about the vehicle or services" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 80px; font-family: Arial;"></textarea>
+                            </div>
+
+                            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="submitVehicleForm()">✅ Add Vehicle</button>
+                                <button class="btn btn-secondary" onclick="resetVehicleForm()">🔄 Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle List View -->
+                    <div id="vehicleListView" style="display: none;">
+                        <h3 style="color: #f093fb; margin-bottom: 20px;">📋 All Vehicles</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="vehicleSearchBox" placeholder="Search by registration or model..." onkeyup="searchVehicles()" style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Registration</th>
+                                    <th>Type</th>
+                                    <th>Model</th>
+                                    <th>Owner</th>
+                                    <th>Last Service</th>
+                                    <th>Next Service</th>
+                                    <th>Documents Status</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vehicleTableBody">
+                                <tr><td colspan="9" style="text-align: center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Employees Tab -->
                 <div id="employeesTab" class="tab-content">
                     <h2 class="section-title">👥 Employee Management</h2>
@@ -940,6 +1107,8 @@
             window.allVendors = [];
             window.allContracts = [];
             window.filteredContracts = [];
+            window.allVehicles = [];
+            window.filteredVehicles = [];
 
             window.login = async function() {
                 const email = document.getElementById('loginEmail').value;
