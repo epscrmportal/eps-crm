@@ -735,7 +735,13 @@
                 const { error: cardError } = await supabase.from('business_cards').insert({
                     field_exec_email: currentUser.email,
                     contact_name: name,
-                    company: company
+                    company: company,
+                    designation: designation,
+                    email: email,
+                    phone: phone,
+                    how_met: howMet,
+                    lead_potential: leadPotential,
+                    notes: notes
                 });
                 if (cardError) throw cardError;
 
