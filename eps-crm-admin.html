@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS CRM - Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,14 +20,12 @@
         .btn-primary:hover { background: #d97706; }
         .btn-secondary { background: white; color: #f093fb; }
         .btn-secondary:hover { background: #f0f0f0; }
-        .btn-sm { padding: 5px 10px; font-size: 0.85em; }
-        .btn-danger { background: #ef4444; color: white; }
         .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 400px; }
         .login-box h2 { color: #f093fb; margin-bottom: 30px; text-align: center; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #555; margin-bottom: 8px; font-weight: 500; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
         .form-group input:focus { outline: none; border-color: #f093fb; box-shadow: 0 0 5px rgba(240, 147, 251, 0.3); }
         .dashboard { display: none; }
         .dashboard.active { display: block; }
@@ -48,9 +47,6 @@
         body.dark-mode td { border-bottom-color: #444; }
         tr:hover { background: #f5f5f5; }
         body.dark-mode tr:hover { background: #333; }
-        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .chart-container { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        body.dark-mode .chart-container { background: #2a2a2a; }
         @media (max-width: 768px) { header { flex-direction: column; } table { font-size: 0.85em; } th, td { padding: 8px; } }
     </style>
 </head>
@@ -60,14 +56,13 @@
             <h2>📊 Admin Module</h2>
             <div class="form-group">
                 <label>Email:</label>
-                <input type="email" id="loginEmail" placeholder="admin@eps.com">
+                <input type="email" id="loginEmail" placeholder="dilip@epsworldwide.in">
             </div>
             <div class="form-group">
                 <label>Password:</label>
-                <input type="password" id="loginPassword" placeholder="admin123">
+                <input type="password" id="loginPassword" placeholder="Dilip@123">
             </div>
             <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="login()">Login</button>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="goBack()">Back to Dashboard</button>
         </div>
     </div>
 
@@ -75,7 +70,7 @@
         <div class="container">
             <header>
                 <div>
-                    <h1>📊 Admin Dashboard - Full System Access</h1>
+                    <h1>📊 Admin Dashboard</h1>
                     <p>Welcome, <strong id="userEmail"></strong></p>
                 </div>
                 <div class="header-actions">
@@ -84,183 +79,87 @@
                 </div>
             </header>
 
-            <!-- Overall Metrics -->
             <div class="grid" id="metricsGrid">
                 <div class="metric-card">
                     <h3>Total Contacts</h3>
                     <div class="value" id="totalContacts">0</div>
                 </div>
                 <div class="metric-card">
-                    <h3>Total Orders</h3>
-                    <div class="value" id="totalOrders">0</div>
-                </div>
-                <div class="metric-card">
-                    <h3>Total Collections</h3>
-                    <div class="value" id="totalCollections">0</div>
-                </div>
-                <div class="metric-card">
-                    <h3>Total Revenue</h3>
-                    <div class="value" id="totalRevenue">₹0</div>
-                </div>
-                <div class="metric-card">
-                    <h3>Total Calls Logged</h3>
-                    <div class="value" id="totalCalls">0</div>
-                </div>
-                <div class="metric-card">
                     <h3>Total Meetings</h3>
                     <div class="value" id="totalMeetings">0</div>
                 </div>
+                <div class="metric-card">
+                    <h3>Total Calls</h3>
+                    <div class="value" id="totalCalls">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Active Users</h3>
+                    <div class="value" id="activeUsers">5</div>
+                </div>
             </div>
 
-            <!-- Navigation Tabs -->
             <div class="section">
                 <div class="tabs">
-                    <button class="tab-button active" onclick="switchTab('overview')">📈 Overview</button>
-                    <button class="tab-button" onclick="switchTab('telecaller')">📞 Telecaller</button>
-                    <button class="tab-button" onclick="switchTab('fieldexec')">👔 Field Exec</button>
-                    <button class="tab-button" onclick="switchTab('orders')">📦 Orders</button>
-                    <button class="tab-button" onclick="switchTab('collections')">💰 Collections</button>
+                    <button class="tab-button active" onclick="switchTab('contacts')">📞 Contacts</button>
+                    <button class="tab-button" onclick="switchTab('meetings')">📅 Meetings</button>
+                    <button class="tab-button" onclick="switchTab('calls')">📱 Calls</button>
                 </div>
 
-                <!-- Overview Tab -->
-                <div id="overviewTab" class="tab-content active">
-                    <h2 class="section-title">📈 System Overview</h2>
-                    <div class="chart-grid">
-                        <div class="chart-container">
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">Revenue Distribution</h3>
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">Order Status</h3>
-                            <canvas id="orderStatusChart"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">Call Outcomes</h3>
-                            <canvas id="callOutcomesChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Telecaller Tab -->
-                <div id="telecallerTab" class="tab-content">
-                    <h2 class="section-title">📞 Telecaller Data</h2>
-                    <h3>Contacts</h3>
+                <div id="contactsTab" class="tab-content active">
+                    <h2 class="section-title">All Contacts</h2>
                     <div style="overflow-x: auto;">
                         <table id="contactsTable">
                             <thead>
                                 <tr>
                                     <th>Name</th>
                                     <th>Phone</th>
+                                    <th>Email</th>
                                     <th>Company</th>
                                     <th>Status</th>
-                                    <th>City</th>
                                 </tr>
                             </thead>
                             <tbody id="contactsTableBody">
-                                <tr><td colspan="5" style="text-align: center;">No contacts</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3 style="margin-top: 30px;">Call Logs</h3>
-                    <div style="overflow-x: auto;">
-                        <table id="callsTable">
-                            <thead>
-                                <tr>
-                                    <th>Contact</th>
-                                    <th>Duration</th>
-                                    <th>Outcome</th>
-                                    <th>Date</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="callsTableBody">
-                                <tr><td colspan="5" style="text-align: center;">No calls</td></tr>
+                                <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Field Exec Tab -->
-                <div id="fieldexecTab" class="tab-content">
-                    <h2 class="section-title">👔 Field Executive Data</h2>
-                    <h3>Meetings</h3>
+                <div id="meetingsTab" class="tab-content">
+                    <h2 class="section-title">All Meetings</h2>
                     <div style="overflow-x: auto;">
                         <table id="meetingsTable">
                             <thead>
                                 <tr>
+                                    <th>Contact</th>
                                     <th>Date</th>
                                     <th>Time</th>
-                                    <th>Contact</th>
                                     <th>Location</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody id="meetingsTableBody">
-                                <tr><td colspan="5" style="text-align: center;">No meetings</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3 style="margin-top: 30px;">Business Cards</h3>
-                    <div style="overflow-x: auto;">
-                        <table id="cardsTable">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Company</th>
-                                    <th>Designation</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cardsTableBody">
-                                <tr><td colspan="5" style="text-align: center;">No cards</td></tr>
+                                <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Orders Tab -->
-                <div id="ordersTab" class="tab-content">
-                    <h2 class="section-title">📦 Orders Data</h2>
+                <div id="callsTab" class="tab-content">
+                    <h2 class="section-title">All Calls</h2>
                     <div style="overflow-x: auto;">
-                        <table id="ordersTable">
+                        <table id="callsTable">
                             <thead>
                                 <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Route</th>
-                                    <th>Amount</th>
+                                    <th>Contact</th>
+                                    <th>Duration (min)</th>
                                     <th>Status</th>
-                                    <th>Payment</th>
+                                    <th>Interested</th>
                                     <th>Date</th>
                                 </tr>
                             </thead>
-                            <tbody id="ordersTableBody">
-                                <tr><td colspan="7" style="text-align: center;">No orders</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Collections Tab -->
-                <div id="collectionsTab" class="tab-content">
-                    <h2 class="section-title">💰 Collections Data</h2>
-                    <div style="overflow-x: auto;">
-                        <table id="collectionsTable">
-                            <thead>
-                                <tr>
-                                    <th>Booking ID</th>
-                                    <th>Date</th>
-                                    <th>Customer</th>
-                                    <th>Amount</th>
-                                    <th>Mode</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="collectionsTableBody">
-                                <tr><td colspan="6" style="text-align: center;">No collections</td></tr>
+                            <tbody id="callsTableBody">
+                                <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -270,225 +169,160 @@
     </div>
 
     <script>
-        // Load all data from all modules
-        function loadAllData() {
-            window.contacts = JSON.parse(localStorage.getItem('eps_crm_contacts') || '[]');
-            window.calls = JSON.parse(localStorage.getItem('eps_crm_calls') || '[]');
-            window.meetings = JSON.parse(localStorage.getItem('eps_crm_fieldExecMeetings') || '[]');
-            window.cards = JSON.parse(localStorage.getItem('eps_crm_businessCards') || '[]');
-            window.orders = JSON.parse(localStorage.getItem('eps_crm_orders') || '[]');
-            window.collections = JSON.parse(localStorage.getItem('eps_crm_collections') || '[]');
-        }
+        (function() {
+            const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTc2MjU4ODAsImV4cCI6MjAxMzIwMTg4MH0.h65WSAQnbio1n_nlmHZNKQ_U27itQKz1HKL7UZg62vg';
+            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window.currentUser = null;
 
-        function updateMetrics() {
-            const totalOrdersRevenue = window.orders.reduce((sum, o) => sum + o.amount, 0);
-            const totalCollectionsAmount = window.collections.reduce((sum, c) => sum + c.amount, 0);
+            window.login = async function() {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
 
-            document.getElementById('totalContacts').textContent = window.contacts.length;
-            document.getElementById('totalOrders').textContent = window.orders.length;
-            document.getElementById('totalCollections').textContent = window.collections.length;
-            document.getElementById('totalRevenue').textContent = '₹' + (totalOrdersRevenue + totalCollectionsAmount).toFixed(2);
-            document.getElementById('totalCalls').textContent = window.calls.length;
-            document.getElementById('totalMeetings').textContent = window.meetings.length;
-        }
+                if (!email || !password) {
+                    alert('Please enter email and password');
+                    return;
+                }
 
-        function displayTelecallerData() {
-            let tbody = document.getElementById('contactsTableBody');
-            if (window.contacts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No contacts</td></tr>';
-            } else {
-                tbody.innerHTML = '';
-                window.contacts.forEach(c => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = '<td>' + c.name + '</td><td>' + c.phone + '</td><td>' + (c.company || 'N/A') + '</td><td>' + c.status + '</td><td>' + (c.city || 'N/A') + '</td>';
-                });
-            }
-
-            tbody = document.getElementById('callsTableBody');
-            if (window.calls.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No calls</td></tr>';
-            } else {
-                tbody.innerHTML = '';
-                window.calls.forEach(c => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = '<td>' + c.contactName + '</td><td>' + c.duration + ' min</td><td>' + c.outcome + '</td><td>' + c.createdOn + '</td><td>' + (c.notes || 'N/A') + '</td>';
-                });
-            }
-        }
-
-        function displayFieldExecData() {
-            let tbody = document.getElementById('meetingsTableBody');
-            if (window.meetings.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No meetings</td></tr>';
-            } else {
-                tbody.innerHTML = '';
-                window.meetings.forEach(m => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = '<td>' + m.date + '</td><td>' + m.time + '</td><td>' + m.contact + '</td><td>' + m.location + '</td><td>' + m.status + '</td>';
-                });
-            }
-
-            tbody = document.getElementById('cardsTableBody');
-            if (window.cards.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No cards</td></tr>';
-            } else {
-                tbody.innerHTML = '';
-                window.cards.forEach(c => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = '<td>' + c.name + '</td><td>' + c.company + '</td><td>' + c.designation + '</td><td>' + c.phone + '</td><td>' + c.email + '</td>';
-                });
-            }
-        }
-
-        function displayOrdersData() {
-            const tbody = document.getElementById('ordersTableBody');
-            if (window.orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No orders</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            window.orders.forEach(o => {
-                const row = tbody.insertRow();
-                row.innerHTML = '<td>' + o.id + '</td><td>' + o.customerName + '</td><td>' + o.origin + ' → ' + o.destination + '</td><td style="text-align: right;">₹' + o.amount.toFixed(2) + '</td><td>' + o.status + '</td><td>' + o.paymentMethod + '</td><td>' + o.createdOn + '</td>';
-            });
-        }
-
-        function displayCollectionsData() {
-            const tbody = document.getElementById('collectionsTableBody');
-            if (window.collections.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No collections</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            window.collections.forEach(c => {
-                const row = tbody.insertRow();
-                row.innerHTML = '<td>' + c.id + '</td><td>' + c.date + '</td><td>' + (c.customer || 'N/A') + '</td><td style="text-align: right;">₹' + c.amount.toFixed(2) + '</td><td>' + c.mode + '</td><td>' + c.status + '</td>';
-            });
-        }
-
-        function createCharts() {
-            // Revenue Chart
-            const orderRevenue = window.orders.reduce((sum, o) => sum + o.amount, 0);
-            const collectionRevenue = window.collections.reduce((sum, c) => sum + c.amount, 0);
-
-            const revenueCtx = document.getElementById('revenueChart');
-            if (revenueCtx) {
-                new Chart(revenueCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Orders', 'Collections'],
-                        datasets: [{
-                            data: [orderRevenue, collectionRevenue],
-                            backgroundColor: ['#f093fb', '#f5576c']
-                        }]
+                try {
+                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+                    
+                    if (error) {
+                        alert('Login failed: ' + error.message);
+                        return;
                     }
-                });
-            }
 
-            // Order Status Chart
-            const statuses = {};
-            window.orders.forEach(o => {
-                statuses[o.status] = (statuses[o.status] || 0) + 1;
-            });
+                    window.currentUser = {
+                        id: data.user.id,
+                        email: data.user.email
+                    };
 
-            const statusCtx = document.getElementById('orderStatusChart');
-            if (statusCtx) {
-                new Chart(statusCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: Object.keys(statuses),
-                        datasets: [{
-                            data: Object.values(statuses),
-                            backgroundColor: ['#f59e0b', '#10b981']
-                        }]
-                    },
-                    options: { responsive: true, plugins: { legend: { display: false } } }
-                });
-            }
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.add('active');
+                    document.getElementById('userEmail').textContent = window.currentUser.email;
+                    await window.loadAllData();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
 
-            // Call Outcomes Chart
-            const outcomes = {};
-            window.calls.forEach(c => {
-                outcomes[c.outcome] = (outcomes[c.outcome] || 0) + 1;
-            });
-
-            const outcomeCtx = document.getElementById('callOutcomesChart');
-            if (outcomeCtx) {
-                new Chart(outcomeCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(outcomes),
-                        datasets: [{
-                            data: Object.values(outcomes),
-                            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6']
-                        }]
+            window.checkAuth = async function() {
+                try {
+                    const { data, error } = await window.supabaseClient.auth.getSession();
+                    
+                    if (error || !data.session) {
+                        document.getElementById('loginSection').style.display = 'flex';
+                        document.getElementById('dashboardSection').classList.remove('active');
+                        return;
                     }
+
+                    window.currentUser = {
+                        id: data.session.user.id,
+                        email: data.session.user.email
+                    };
+
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.add('active');
+                    document.getElementById('userEmail').textContent = window.currentUser.email;
+                    await window.loadAllData();
+                } catch (error) {
+                    console.error('Auth check error:', error);
+                    document.getElementById('loginSection').style.display = 'flex';
+                }
+            };
+
+            window.loadAllData = async function() {
+                try {
+                    const [contactsRes, meetingsRes, callsRes] = await Promise.all([
+                        window.supabaseClient.from('contacts').select('*'),
+                        window.supabaseClient.from('meetings').select('*'),
+                        window.supabaseClient.from('calls').select('*')
+                    ]);
+
+                    if (contactsRes.data) window.displayContacts(contactsRes.data);
+                    if (meetingsRes.data) window.displayMeetings(meetingsRes.data);
+                    if (callsRes.data) window.displayCalls(callsRes.data);
+
+                    window.updateMetrics(contactsRes.data || [], meetingsRes.data || [], callsRes.data || []);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                }
+            };
+
+            window.displayContacts = function(contacts) {
+                const tbody = document.getElementById('contactsTableBody');
+                if (contacts.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No contacts</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                contacts.forEach(c => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = '<td>' + (c.name || 'N/A') + '</td><td>' + (c.phone || 'N/A') + '</td><td>' + (c.email || 'N/A') + '</td><td>' + (c.company || 'N/A') + '</td><td>' + (c.status || 'N/A') + '</td>';
                 });
-            }
-        }
+            };
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName + 'Tab').classList.add('active');
-            event.target.classList.add('active');
+            window.displayMeetings = function(meetings) {
+                const tbody = document.getElementById('meetingsTableBody');
+                if (meetings.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No meetings</td></tr>';
+                    return;
+                }
 
-            if (tabName === 'overview') createCharts();
-        }
+                tbody.innerHTML = '';
+                meetings.forEach(m => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = '<td>' + (m.contact_name || 'N/A') + '</td><td>' + (m.date || 'N/A') + '</td><td>' + (m.time || 'N/A') + '</td><td>' + (m.location || 'N/A') + '</td><td>' + (m.status || 'N/A') + '</td>';
+                });
+            };
 
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('eps_crm_darkMode', document.body.classList.contains('dark-mode'));
-        }
+            window.displayCalls = function(calls) {
+                const tbody = document.getElementById('callsTableBody');
+                if (calls.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No calls</td></tr>';
+                    return;
+                }
 
-        function login() {
-            if (document.getElementById('loginEmail').value === 'admin@eps.com' && document.getElementById('loginPassword').value === 'admin123') {
-                localStorage.setItem('eps_crm_currentUser', JSON.stringify({ email: 'admin@eps.com', module: 'admin' }));
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('dashboardSection').classList.add('active');
-                document.getElementById('userEmail').textContent = 'admin@eps.com';
-                loadAllData();
-                updateMetrics();
-                displayTelecallerData();
-                displayFieldExecData();
-                displayOrdersData();
-                displayCollectionsData();
-                createCharts();
-            } else {
-                alert('❌ Invalid credentials');
-            }
-        }
+                tbody.innerHTML = '';
+                calls.forEach(c => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = '<td>' + (c.contact_id || 'N/A') + '</td><td>' + (c.duration_minutes || '0') + '</td><td>' + (c.call_status || 'N/A') + '</td><td>' + (c.interested ? 'Yes' : 'No') + '</td><td>' + (c.created_at ? new Date(c.created_at).toLocaleDateString() : 'N/A') + '</td>';
+                });
+            };
 
-        function logout() {
-            localStorage.removeItem('eps_crm_currentUser');
-            location.href = 'eps-crm-dashboard.html';
-        }
+            window.updateMetrics = function(contacts, meetings, calls) {
+                document.getElementById('totalContacts').textContent = contacts.length;
+                document.getElementById('totalMeetings').textContent = meetings.length;
+                document.getElementById('totalCalls').textContent = calls.length;
+            };
 
-        function goBack() {
-            location.href = 'eps-crm-dashboard.html';
-        }
+            window.switchTab = function(tabName) {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(tabName + 'Tab').classList.add('active');
+                event.target.classList.add('active');
+            };
 
-        window.addEventListener('load', function() {
-            const user = JSON.parse(localStorage.getItem('eps_crm_currentUser') || 'null');
-            if (user && user.module === 'admin') {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('dashboardSection').classList.add('active');
-                document.getElementById('userEmail').textContent = user.email;
-                loadAllData();
-                updateMetrics();
-                displayTelecallerData();
-                displayFieldExecData();
-                displayOrdersData();
-                displayCollectionsData();
-                createCharts();
-            }
-        });
+            window.toggleDarkMode = function() {
+                document.body.classList.toggle('dark-mode');
+                localStorage.setItem('eps_crm_darkMode', document.body.classList.contains('dark-mode'));
+            };
 
-        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') login();
-        });
+            window.logout = async function() {
+                await window.supabaseClient.auth.signOut();
+                window.currentUser = null;
+                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('dashboardSection').classList.remove('active');
+                location.reload();
+            };
+
+            window.addEventListener('load', window.checkAuth);
+
+            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') window.login();
+            });
+        })();
     </script>
 </body>
 </html>
