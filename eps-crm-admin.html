@@ -395,70 +395,62 @@
                 document.getElementById('teamTotalContacts').textContent = contacts.length;
                 document.getElementById('teamTotalMeetings').textContent = meetings.length;
 
-                // Collect unique users by role
-                const telecallers = new Map(); // email -> {name, calls, contacts}
-                const fieldExecs = new Map();  // email -> {name, meetings, contacts}
+                // Collect unique users by role - each user appears only ONCE
+                const allUsers = new Map(); // email -> {role, calls, contacts, meetings}
 
                 // Process calls - these are by telecallers
                 calls.forEach(c => {
                     const email = window.getEmailFromUUID(c.user_id);
-                    if (!telecallers.has(email)) {
-                        telecallers.set(email, { name: email, calls: 0, contacts: 0, meetings: 0 });
+                    if (!allUsers.has(email)) {
+                        allUsers.set(email, { role: 'Telecaller', calls: 0, contacts: 0, meetings: 0 });
                     }
-                    const user = telecallers.get(email);
+                    const user = allUsers.get(email);
                     user.calls += 1;
+                    if (user.role === 'Telecaller' || !user.role) user.role = 'Telecaller';
                 });
 
-                // Process contacts - check user_id (telecaller who owns it)
+                // Process contacts - owned by telecallers
                 contacts.forEach(c => {
                     if (c.user_id) {
                         const email = window.getEmailFromUUID(c.user_id);
-                        if (!telecallers.has(email)) {
-                            telecallers.set(email, { name: email, calls: 0, contacts: 0, meetings: 0 });
+                        if (!allUsers.has(email)) {
+                            allUsers.set(email, { role: 'Telecaller', calls: 0, contacts: 0, meetings: 0 });
                         }
-                        telecallers.get(email).contacts += 1;
+                        const user = allUsers.get(email);
+                        user.contacts += 1;
+                        if (user.role === 'Telecaller' || !user.role) user.role = 'Telecaller';
                     }
                 });
 
-                // Process meetings - these are by field execs
+                // Process meetings - these are by field execs (ONLY if not already a telecaller)
                 meetings.forEach(m => {
                     if (m.assigned_to) {
                         const email = m.assigned_to;
-                        if (!fieldExecs.has(email)) {
-                            fieldExecs.set(email, { name: email, calls: 0, contacts: 0, meetings: 0 });
+                        if (!allUsers.has(email)) {
+                            // Only add if not already classified as telecaller
+                            allUsers.set(email, { role: 'Field Executive', calls: 0, contacts: 0, meetings: 0 });
                         }
-                        fieldExecs.get(email).meetings += 1;
+                        const user = allUsers.get(email);
+                        user.meetings += 1;
+                        // Keep existing role if already a telecaller
+                        if (!user.role) user.role = 'Field Executive';
                     }
                 });
 
-                const uniqueUsers = new Set();
-                telecallers.forEach((v, k) => uniqueUsers.add(k));
-                fieldExecs.forEach((v, k) => uniqueUsers.add(k));
-
-                document.getElementById('teamActiveUsers').textContent = uniqueUsers.size || 1;
+                document.getElementById('teamActiveUsers').textContent = allUsers.size || 1;
 
                 const tbody = document.getElementById('teamTableBody');
                 if (!tbody) return;
                 tbody.innerHTML = '';
 
-                // Display Telecaller users
-                if (telecallers.size > 0) {
-                    telecallers.forEach((user, email) => {
+                // Display all users (each only once)
+                if (allUsers.size > 0) {
+                    allUsers.forEach((user, email) => {
                         const row = tbody.insertRow();
-                        row.innerHTML = '<td>' + email + '</td><td>Telecaller</td><td>' + user.calls + '</td><td>' + user.contacts + '</td><td>' + user.meetings + '</td><td><span class="status-badge status-success">Active</span></td>';
+                        const statusClass = user.role === 'Telecaller' ? 'status-success' : 'status-warning';
+                        row.innerHTML = '<td>' + email + '</td><td>' + user.role + '</td><td>' + user.calls + '</td><td>' + user.contacts + '</td><td>' + user.meetings + '</td><td><span class="status-badge ' + statusClass + '">Active</span></td>';
                     });
-                }
-
-                // Display Field Executive users
-                if (fieldExecs.size > 0) {
-                    fieldExecs.forEach((user, email) => {
-                        const row = tbody.insertRow();
-                        row.innerHTML = '<td>' + email + '</td><td>Field Executive</td><td>' + user.calls + '</td><td>' + user.contacts + '</td><td>' + user.meetings + '</td><td><span class="status-badge status-warning">Active</span></td>';
-                    });
-                }
-
-                // If no users found, show placeholder
-                if (telecallers.size === 0 && fieldExecs.size === 0) {
+                } else {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No team data available yet</td></tr>';
                 }
             };
