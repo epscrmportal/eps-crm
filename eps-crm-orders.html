@@ -539,6 +539,7 @@
             <div id="createFormSection" class="section">
                 <h2 class="section-title">➕ Create New Order</h2>
                 <div class="form-container">
+                    <!-- Order ID & Forwarding Number (Auto) -->
                     <div class="form-row">
                         <div class="form-group">
                             <label>Order ID (Auto):</label>
@@ -550,154 +551,172 @@
                         </div>
                     </div>
 
+                    <!-- Employee Details -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">👤 Employee Details</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Customer Name:</label>
-                            <input type="text" id="customerName" placeholder="Enter customer name" required>
+                            <label>Employee Name *</label>
+                            <input type="text" id="employeeName" placeholder="e.g., Rajesh Kumar" required>
                         </div>
                         <div class="form-group">
-                            <label>Email:</label>
-                            <input type="email" id="customerEmail" placeholder="customer@example.com">
+                            <label>Employee ID</label>
+                            <input type="text" id="employeeId" placeholder="e.g., EMP-001">
                         </div>
                     </div>
 
+                    <!-- Customer Details -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">🛍️ Customer Details</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Phone:</label>
-                            <input type="text" id="customerPhone" placeholder="Enter phone number">
+                            <label>Customer Name *</label>
+                            <input type="text" id="customerName" placeholder="e.g., Priya Singh" required>
                         </div>
                         <div class="form-group">
-                            <label>Origin:</label>
-                            <input type="text" id="origin" placeholder="e.g., Mumbai">
+                            <label>Email *</label>
+                            <input type="email" id="customerEmail" placeholder="customer@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="text" id="customerPhone" placeholder="9876543210" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Alternative Phone</label>
+                            <input type="text" id="alternativePhone" placeholder="9123456789">
                         </div>
                     </div>
 
+                    <!-- Sender Address -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">📍 Sender Address</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Destination:</label>
-                            <input type="text" id="destination" placeholder="e.g., Delhi">
+                            <label>Address *</label>
+                            <input type="text" id="senderAddress" placeholder="Street address" required>
                         </div>
                         <div class="form-group">
-                            <label>Number of Boxes:</label>
-                            <input type="number" id="boxes" placeholder="10" min="1">
+                            <label>Pincode *</label>
+                            <input type="text" id="senderPincode" placeholder="e.g., 400001" required>
                         </div>
                     </div>
 
+                    <!-- Receiver Details -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">📦 Receiver Details</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Weight (kg):</label>
-                            <input type="number" id="weight" placeholder="100" min="0" step="0.1">
+                            <label>Receiver Name *</label>
+                            <input type="text" id="receiverName" placeholder="e.g., John Doe" required>
                         </div>
                         <div class="form-group">
-                            <label>Shipping Method:</label>
-                            <select id="shippingMethod" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <label>Receiver Phone *</label>
+                            <input type="text" id="receiverPhone" placeholder="9876543210" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Receiver Address *</label>
+                            <input type="text" id="receiverAddress" placeholder="Street address" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Receiver Pincode *</label>
+                            <input type="text" id="receiverPincode" placeholder="e.g., 110001" required>
+                        </div>
+                    </div>
+
+                    <!-- Origin & Destination -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">🗺️ Origin & Destination</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Origin City *</label>
+                            <input type="text" id="origin" placeholder="e.g., Mumbai" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Destination City *</label>
+                            <input type="text" id="destination" placeholder="e.g., Delhi" required>
+                        </div>
+                    </div>
+
+                    <!-- Service Type -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">⚙️ Service Type</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Service Type *</label>
+                            <select id="serviceType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <option>Domestic Parcel</option>
+                                <option>International Parcel</option>
+                                <option>Express</option>
+                                <option>Standard</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Method -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">🚚 Shipping Method</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Shipping Method *</label>
+                            <select id="shippingMethod" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <option>Surface</option>
                                 <option>Air</option>
                                 <option>Ground</option>
-                                <option>Surface</option>
                             </select>
                         </div>
                     </div>
 
+                    <!-- Order Details -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">📦 Order Details</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Amount (₹) - Including GST:</label>
-                            <input type="number" id="amount" placeholder="0" min="0" step="0.01" onchange="calculateGST()">
+                            <label>Number of Boxes *</label>
+                            <input type="number" id="boxes" placeholder="e.g., 5" min="1" required>
                         </div>
                         <div class="form-group">
-                            <label>Payment Method:</label>
-                            <select id="paymentMethod" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <label>Total Weight (kg) *</label>
+                            <input type="number" id="weight" placeholder="e.g., 10.5" min="0" step="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dimensions - Length (cm)</label>
+                            <input type="number" id="length" placeholder="e.g., 30" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Dimensions - Width (cm)</label>
+                            <input type="number" id="width" placeholder="e.g., 20" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Dimensions - Height (cm)</label>
+                            <input type="number" id="height" placeholder="e.g., 15" min="0" step="0.1">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Item Description *</label>
+                            <textarea id="itemDescription" placeholder="e.g., Electronics, Books, Clothing" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">💳 Payment Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Order Amount (₹) *</label>
+                            <input type="number" id="amount" placeholder="0" min="0" step="0.01" onchange="calculateGST()" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method *</label>
+                            <select id="paymentMethod" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                                 <option>Cash</option>
+                                <option>Razorpay</option>
+                                <option>Bank Transfer</option>
+                                <option>Cheque</option>
                             </select>
                         </div>
                     </div>
-
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Subtotal (Before GST):</label>
-                            <input type="text" id="subtotal" disabled style="background: #e0e0e0;">
-                        </div>
-                        <div class="form-group">
-                            <label>GST (18%):</label>
-                            <input type="text" id="gstAmount" disabled style="background: #e0e0e0;">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>CGST (9%):</label>
-                            <input type="text" id="cgst" disabled style="background: #e0e0e0;">
-                        </div>
-                        <div class="form-group">
-                            <label>SGST (9%):</label>
-                            <input type="text" id="sgst" disabled style="background: #e0e0e0;">
-                        </div>
-                    </div>
-
-                    <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">📦 Additional Details</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Item Description:</label>
-                            <textarea id="itemDescription" placeholder="What are you shipping?" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Pickup Date:</label>
-                            <input type="date" id="pickupDate">
-                        </div>
-                        <div class="form-group">
-                            <label>Expected Delivery Date:</label>
-                            <input type="date" id="deliveryDate">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Service Type:</label>
-                            <select id="serviceType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                <option>Standard Delivery</option>
-                                <option>Express Delivery</option>
-                                <option>Overnight Delivery</option>
-                                <option>Same Day Delivery</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Insurance:</label>
-                            <select id="insurance" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                <option value="no">No Insurance</option>
-                                <option value="yes">With Insurance</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Special Handling:</label>
-                            <input type="text" id="specialHandling" placeholder="e.g., Fragile, Keep Upright, Cold Chain">
-                        </div>
-                        <div class="form-group">
-                            <label>Reference Number:</label>
-                            <input type="text" id="referenceNumber" placeholder="Your internal reference (optional)">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Remarks/Notes:</label>
-                            <textarea id="remarks" placeholder="Any additional notes or special instructions" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Collected Amount (₹):</label>
-                            <input type="number" id="collectedAmount" placeholder="Amount already collected" min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>Amount Due (₹):</label>
-                            <input type="text" id="amountDue" disabled style="background: #e0e0e0;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Order Notes</label>
+                            <textarea id="orderNotes" placeholder="Special instructions or notes for this order" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;"></textarea>
                         </div>
                     </div>
 
@@ -882,28 +901,31 @@
         }
 
         function resetOrderForm() {
+            document.getElementById('employeeName').value = '';
+            document.getElementById('employeeId').value = '';
             document.getElementById('customerName').value = '';
             document.getElementById('customerEmail').value = '';
             document.getElementById('customerPhone').value = '';
+            document.getElementById('alternativePhone').value = '';
+            document.getElementById('senderAddress').value = '';
+            document.getElementById('senderPincode').value = '';
+            document.getElementById('receiverName').value = '';
+            document.getElementById('receiverPhone').value = '';
+            document.getElementById('receiverAddress').value = '';
+            document.getElementById('receiverPincode').value = '';
             document.getElementById('origin').value = '';
             document.getElementById('destination').value = '';
+            document.getElementById('serviceType').value = 'Domestic Parcel';
+            document.getElementById('shippingMethod').value = 'Surface';
             document.getElementById('boxes').value = '';
             document.getElementById('weight').value = '';
-            document.getElementById('amount').value = '';
-            document.getElementById('subtotal').value = '';
-            document.getElementById('gstAmount').value = '';
-            document.getElementById('cgst').value = '';
-            document.getElementById('sgst').value = '';
+            document.getElementById('length').value = '';
+            document.getElementById('width').value = '';
+            document.getElementById('height').value = '';
             document.getElementById('itemDescription').value = '';
-            document.getElementById('pickupDate').value = '';
-            document.getElementById('deliveryDate').value = '';
-            document.getElementById('serviceType').value = 'Standard Delivery';
-            document.getElementById('insurance').value = 'no';
-            document.getElementById('specialHandling').value = '';
-            document.getElementById('referenceNumber').value = '';
-            document.getElementById('remarks').value = '';
-            document.getElementById('collectedAmount').value = '';
-            document.getElementById('amountDue').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('paymentMethod').value = 'Cash';
+            document.getElementById('orderNotes').value = '';
             generateOrderId();
             generateForwardingNumber();
         }
@@ -946,63 +968,77 @@
         }
 
         function createOrder() {
+            // Get all values
             const orderId = document.getElementById('orderId').value;
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const employeeId = document.getElementById('employeeId').value.trim();
             const customerName = document.getElementById('customerName').value.trim();
             const customerEmail = document.getElementById('customerEmail').value.trim();
             const customerPhone = document.getElementById('customerPhone').value.trim();
+            const alternativePhone = document.getElementById('alternativePhone').value.trim();
+            const senderAddress = document.getElementById('senderAddress').value.trim();
+            const senderPincode = document.getElementById('senderPincode').value.trim();
+            const receiverName = document.getElementById('receiverName').value.trim();
+            const receiverPhone = document.getElementById('receiverPhone').value.trim();
+            const receiverAddress = document.getElementById('receiverAddress').value.trim();
+            const receiverPincode = document.getElementById('receiverPincode').value.trim();
             const origin = document.getElementById('origin').value.trim();
             const destination = document.getElementById('destination').value.trim();
+            const serviceType = document.getElementById('serviceType').value;
+            const shippingMethod = document.getElementById('shippingMethod').value;
             const boxes = parseInt(document.getElementById('boxes').value) || 0;
             const weight = parseFloat(document.getElementById('weight').value) || 0;
-            const shippingMethod = document.getElementById('shippingMethod').value;
+            const length = parseFloat(document.getElementById('length').value) || 0;
+            const width = parseFloat(document.getElementById('width').value) || 0;
+            const height = parseFloat(document.getElementById('height').value) || 0;
+            const itemDescription = document.getElementById('itemDescription').value.trim();
             const amount = parseFloat(document.getElementById('amount').value) || 0;
             const paymentMethod = document.getElementById('paymentMethod').value;
-            const itemDescription = document.getElementById('itemDescription').value.trim();
-            const pickupDate = document.getElementById('pickupDate').value;
-            const deliveryDate = document.getElementById('deliveryDate').value;
-            const serviceType = document.getElementById('serviceType').value;
-            const insurance = document.getElementById('insurance').value;
-            const specialHandling = document.getElementById('specialHandling').value.trim();
-            const referenceNumber = document.getElementById('referenceNumber').value.trim();
-            const remarks = document.getElementById('remarks').value.trim();
-            const collectedAmount = parseFloat(document.getElementById('collectedAmount').value) || 0;
+            const orderNotes = document.getElementById('orderNotes').value.trim();
 
-            if (!customerName || !origin || !destination || !boxes || !amount) {
-                alert('❌ Please fill in all required fields');
+            // Validate required fields
+            if (!employeeName || !customerName || !customerEmail || !customerPhone || !senderAddress || !senderPincode || 
+                !receiverName || !receiverPhone || !receiverAddress || !receiverPincode || !origin || !destination || 
+                !boxes || !weight || !itemDescription || !amount) {
+                alert('❌ Please fill in all required fields (marked with *)');
                 return;
             }
 
             const gst = (amount * 18) / 118;
             const subtotal = amount - gst;
-            const amountDue = amount - collectedAmount;
 
             const order = {
                 id: orderId,
                 forwardingNumber: document.getElementById('forwardingNumber').value,
+                employeeName: employeeName,
+                employeeId: employeeId,
                 customerName: customerName,
                 email: customerEmail,
                 phone: customerPhone,
+                alternativePhone: alternativePhone,
+                senderAddress: senderAddress,
+                senderPincode: senderPincode,
+                receiverName: receiverName,
+                receiverPhone: receiverPhone,
+                receiverAddress: receiverAddress,
+                receiverPincode: receiverPincode,
                 origin: origin,
                 destination: destination,
+                serviceType: serviceType,
+                shippingMethod: shippingMethod,
                 boxes: boxes,
                 weight: weight,
-                shippingMethod: shippingMethod,
+                length: length,
+                width: width,
+                height: height,
+                itemDescription: itemDescription,
                 amount: amount,
                 subtotal: subtotal,
                 gstAmount: gst,
                 cgst: gst / 2,
                 sgst: gst / 2,
                 paymentMethod: paymentMethod,
-                itemDescription: itemDescription,
-                pickupDate: pickupDate,
-                deliveryDate: deliveryDate,
-                serviceType: serviceType,
-                insurance: insurance,
-                specialHandling: specialHandling,
-                referenceNumber: referenceNumber,
-                remarks: remarks,
-                collectedAmount: collectedAmount,
-                amountDue: amountDue,
+                orderNotes: orderNotes,
                 status: 'pending',
                 createdOn: new Date().toLocaleDateString(),
                 createdAt: new Date().toLocaleTimeString()
@@ -1013,21 +1049,9 @@
             displayOrders();
             updateDashboard();
             switchOrdersTab('orders');
-            
-            // Reset form
             resetOrderForm();
-            document.getElementById('amount').value = '';
-            document.getElementById('customerName').value = '';
-            document.getElementById('customerEmail').value = '';
-            document.getElementById('customerPhone').value = '';
-            document.getElementById('origin').value = '';
-            document.getElementById('destination').value = '';
-            document.getElementById('boxes').value = '';
-            document.getElementById('weight').value = '';
 
             alert('✅ Order ' + orderId + ' created successfully!');
-            
-            // Auto-show invoice
             showInvoice(orderId);
         }
 
