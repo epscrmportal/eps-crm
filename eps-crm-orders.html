@@ -6,6 +6,7 @@
     <title>EPS CRM - Orders</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -1113,31 +1114,63 @@
 
         // ===== LOGIN & LOGOUT =====
 
-        function login() {
+        const supabaseUrl = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
-            if (email === 'orders@eps.com' && password === 'orders123') {
+            if (!email || !password) {
+                alert('❌ Please enter email and password');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                if (!data.user) {
+                    alert('❌ Login failed');
+                    return;
+                }
+
+                const userRole = data.user.user_metadata?.role;
+                if (userRole !== 'orders') {
+                    await supabaseClient.auth.signOut();
+                    alert('❌ Access denied. Orders role required.');
+                    return;
+                }
+
                 localStorage.setItem('eps_crm_currentUser', JSON.stringify({
                     email: email,
-                    module: 'orders'
+                    module: 'orders',
+                    id: data.user.id
                 }));
+
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('dashboardSection').classList.add('active');
                 document.getElementById('userEmail').textContent = email;
                 loadInitialData();
-            } else {
-                alert('❌ Invalid credentials');
+
+            } catch (error) {
+                alert('❌ Login failed: ' + error.message);
             }
         }
 
-        function logout() {
+        async function logout() {
+            await supabaseClient.auth.signOut();
             localStorage.removeItem('eps_crm_currentUser');
-            location.href = 'eps-crm-dashboard.html';
+            location.href = 'https://eps-crm.vercel.app';
         }
 
         function goBack() {
-            location.href = 'eps-crm-dashboard.html';
+            location.href = 'https://eps-crm.vercel.app';
         }
 
         function loadInitialData() {
@@ -1151,13 +1184,19 @@
         }
 
         // Initialize
-        window.addEventListener('load', function() {
+        window.addEventListener('load', async function() {
             const user = getCurrentUser();
             if (user && user.module === 'orders') {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('dashboardSection').classList.add('active');
-                document.getElementById('userEmail').textContent = user.email;
-                loadInitialData();
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                
+                if (session && session.user.user_metadata?.role === 'orders') {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.add('active');
+                    document.getElementById('userEmail').textContent = user.email;
+                    loadInitialData();
+                } else {
+                    localStorage.removeItem('eps_crm_currentUser');
+                }
             }
         });
 
