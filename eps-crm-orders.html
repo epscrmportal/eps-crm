@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Razorpay Integration for EPS CRM -->
     <style>
         * {
             margin: 0;
@@ -643,9 +644,9 @@
                             <label>Service Type *</label>
                             <select id="serviceType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                                 <option>Domestic Parcel</option>
+                                <option>Domestic Document</option>
                                 <option>International Parcel</option>
-                                <option>Express</option>
-                                <option>Standard</option>
+                                <option>International Document</option>
                             </select>
                         </div>
                     </div>
@@ -656,9 +657,12 @@
                         <div class="form-group">
                             <label>Shipping Method *</label>
                             <select id="shippingMethod" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                <option>Surface</option>
                                 <option>Air</option>
-                                <option>Ground</option>
+                                <option>Surface</option>
+                                <option>Train</option>
+                                <option>Express</option>
+                                <option>One Day</option>
+                                <option>Within Maharashtra</option>
                             </select>
                         </div>
                     </div>
@@ -708,8 +712,6 @@
                             <select id="paymentMethod" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                                 <option>Cash</option>
                                 <option>Razorpay</option>
-                                <option>Bank Transfer</option>
-                                <option>Cheque</option>
                             </select>
                         </div>
                     </div>
@@ -916,7 +918,7 @@
             document.getElementById('origin').value = '';
             document.getElementById('destination').value = '';
             document.getElementById('serviceType').value = 'Domestic Parcel';
-            document.getElementById('shippingMethod').value = 'Surface';
+            document.getElementById('shippingMethod').value = 'Air';
             document.getElementById('boxes').value = '';
             document.getElementById('weight').value = '';
             document.getElementById('length').value = '';
@@ -1007,7 +1009,7 @@
             const gst = (amount * 18) / 118;
             const subtotal = amount - gst;
 
-            const order = {
+            const orderData = {
                 id: orderId,
                 forwardingNumber: document.getElementById('forwardingNumber').value,
                 employeeName: employeeName,
@@ -1044,15 +1046,65 @@
                 createdAt: new Date().toLocaleTimeString()
             };
 
-            window.orders.push(order);
+            // Check payment method
+            if (paymentMethod === 'Razorpay') {
+                // Open Razorpay payment
+                openRazorpayPayment(amount, orderId, customerEmail, customerPhone, customerName, orderData);
+            } else {
+                // Direct order creation for Cash payment
+                saveOrder(orderData);
+            }
+        }
+
+        function openRazorpayPayment(amount, orderId, customerEmail, customerPhone, customerName, orderData) {
+            const amountInPaisa = amount * 100; // Razorpay requires amount in paise
+
+            const options = {
+                key: 'rzp_live_SlzoWnL8IxdnLU', // Your Razorpay Live Key ID
+                amount: amountInPaisa,
+                currency: 'INR',
+                name: 'EPS CRM',
+                description: 'Order Payment - ' + orderId,
+                order_id: orderId,
+                customer_notif: 1,
+                prefill: {
+                    name: customerName,
+                    email: customerEmail,
+                    contact: customerPhone
+                },
+                notes: {
+                    order_id: orderId,
+                    customer_name: customerName
+                },
+                handler: function (response) {
+                    // Payment successful
+                    orderData.paymentId = response.razorpay_payment_id;
+                    orderData.status = 'paid';
+                    
+                    alert('✅ Payment successful!\nPayment ID: ' + response.razorpay_payment_id);
+                    saveOrder(orderData);
+                },
+                modal: {
+                    ondismiss: function() {
+                        alert('❌ Payment cancelled');
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        function saveOrder(orderData) {
+            window.orders.push(orderData);
             saveOrdersToStorage();
             displayOrders();
             updateDashboard();
             switchOrdersTab('orders');
             resetOrderForm();
 
-            alert('✅ Order ' + orderId + ' created successfully!');
-            showInvoice(orderId);
+            alert('✅ Order ' + orderData.id + ' created successfully!');
+            showInvoice(orderData.id);
         }
 
         function displayOrders() {
