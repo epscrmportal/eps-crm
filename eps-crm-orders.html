@@ -1114,11 +1114,29 @@
 
         // ===== LOGIN & LOGOUT =====
 
-        const supabaseUrl = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        let supabaseClient = null;
+
+        function initSupabase() {
+            if (typeof supabase !== 'undefined') {
+                const supabaseUrl = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                return true;
+            }
+            return false;
+        }
+
+        // Wait for Supabase to load
+        if (!initSupabase()) {
+            setTimeout(initSupabase, 1000);
+        }
 
         async function login() {
+            if (!supabaseClient) {
+                alert('❌ Supabase not initialized. Please refresh the page.');
+                return;
+            }
+
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
@@ -1164,7 +1182,9 @@
         }
 
         async function logout() {
-            await supabaseClient.auth.signOut();
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
             localStorage.removeItem('eps_crm_currentUser');
             location.href = 'https://eps-crm.vercel.app';
         }
@@ -1185,17 +1205,49 @@
 
         // Initialize
         window.addEventListener('load', async function() {
-            const user = getCurrentUser();
-            if (user && user.module === 'orders') {
+            try {
+                if (!supabaseClient) {
+                    const user = getCurrentUser();
+                    if (user && user.module === 'orders') {
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('dashboardSection').classList.add('active');
+                        document.getElementById('userEmail').textContent = user.email;
+                        loadInitialData();
+                    }
+                    return;
+                }
+
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
                 
                 if (session && session.user.user_metadata?.role === 'orders') {
                     document.getElementById('loginSection').style.display = 'none';
                     document.getElementById('dashboardSection').classList.add('active');
-                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('userEmail').textContent = session.user.email;
+                    
+                    localStorage.setItem('eps_crm_currentUser', JSON.stringify({
+                        email: session.user.email,
+                        module: 'orders',
+                        id: session.user.id
+                    }));
+                    
                     loadInitialData();
                 } else {
-                    localStorage.removeItem('eps_crm_currentUser');
+                    const user = getCurrentUser();
+                    if (user && user.module === 'orders') {
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('dashboardSection').classList.add('active');
+                        document.getElementById('userEmail').textContent = user.email;
+                        loadInitialData();
+                    }
+                }
+            } catch (error) {
+                console.log('Session check error:', error.message);
+                const user = getCurrentUser();
+                if (user && user.module === 'orders') {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.add('active');
+                    document.getElementById('userEmail').textContent = user.email;
+                    loadInitialData();
                 }
             }
         });
