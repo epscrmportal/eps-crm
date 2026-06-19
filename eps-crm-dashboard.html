@@ -81,6 +81,7 @@
                 // Check if email is accounts@epsworldwide.in - route to Salary Dashboard
                 if (email.toLowerCase() === 'accounts@epsworldwide.in') {
                     localStorage.setItem('eps_crm_user', JSON.stringify(data.user));
+                    localStorage.setItem('eps_crm_user_email', email.toLowerCase());
                     localStorage.setItem('eps_crm_user_role', 'accounts');
                     showMsg('Login successful! Redirecting to Salary Dashboard...', 'success');
                     
