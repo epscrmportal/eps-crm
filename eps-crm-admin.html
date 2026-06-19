@@ -103,6 +103,7 @@
                     <button class="tab-btn" onclick="switchTab('vendorRegistration')">🤝 Vendor Registration</button>
                     <button class="tab-btn" onclick="switchTab('clientContracts')">📄 Client Contracts</button>
                     <button class="tab-btn" onclick="switchTab('vehicleManagement')">🚗 Vehicle Management</button>
+                    <button class="tab-btn" onclick="switchTab('auditTrail')">📋 Audit Trail</button>
                 </div>
 
                 <!-- Team Reports Tab -->
@@ -1003,6 +1004,78 @@
                             </thead>
                             <tbody id="vehicleTableBody">
                                 <tr><td colspan="9" style="text-align: center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Audit Trail Tab -->
+                <div id="auditTrailTab" class="tab-content">
+                    <h2 class="section-title">📋 Audit Trail - System Activity Log</h2>
+                    
+                    <!-- Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #8E2A8C; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Total Actions</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #8E2A8C;" id="auditTotalCount">-</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Today's Actions</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #f39c12;" id="auditTodayCount">-</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Active Users</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #27ae60;" id="auditActiveUsers">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div>
+                            <label style="font-size: 12px; font-weight: bold; color: #333;">User Email</label>
+                            <input type="text" id="auditFilterUser" placeholder="Search email..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; margin-top: 5px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; font-weight: bold; color: #333;">Module</label>
+                            <select id="auditFilterModule" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; margin-top: 5px;">
+                                <option value="">All Modules</option>
+                                <option value="Telecaller">Telecaller</option>
+                                <option value="Field Exec">Field Exec</option>
+                                <option value="Orders">Orders</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; font-weight: bold; color: #333;">Action Type</label>
+                            <select id="auditFilterAction" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; margin-top: 5px;">
+                                <option value="">All Actions</option>
+                                <option value="CREATE">Create</option>
+                                <option value="UPDATE">Update</option>
+                                <option value="DELETE">Delete</option>
+                                <option value="LOGIN">Login</option>
+                                <option value="LOGOUT">Logout</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="loadAuditLogs()" style="flex: 1;">🔍 Filter</button>
+                            <button class="btn btn-primary" onclick="exportAuditToCSV()" style="flex: 1; background: #27ae60;">📥 Export</button>
+                        </div>
+                    </div>
+
+                    <!-- Audit Table -->
+                    <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead style="background: #8E2A8C; color: white;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left;">Timestamp</th>
+                                    <th style="padding: 12px; text-align: left;">User</th>
+                                    <th style="padding: 12px; text-align: left;">Module</th>
+                                    <th style="padding: 12px; text-align: left;">Action</th>
+                                    <th style="padding: 12px; text-align: left;">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody">
+                                <tr><td colspan="5" style="padding: 20px; text-align: center; color: #999;">Loading audit logs...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2981,6 +3054,124 @@
                     if (e.key === 'Enter') window.login();
                 });
             }
+
+            // ==========================================
+            // AUDIT TRAIL FUNCTIONS
+            // ==========================================
+            
+            let allAuditLogs = [];
+            
+            async function loadAuditLogs() {
+                try {
+                    const userFilter = document.getElementById('auditFilterUser').value.toLowerCase();
+                    const moduleFilter = document.getElementById('auditFilterModule').value;
+                    const actionFilter = document.getElementById('auditFilterAction').value;
+                    
+                    let query = window.supabaseClient.from('audit_trail').select('*').order('timestamp', { ascending: false });
+                    
+                    const { data, error } = await query;
+                    if (error) throw error;
+                    
+                    allAuditLogs = data || [];
+                    
+                    // Apply filters
+                    let filtered = allAuditLogs.filter(log => {
+                        if (userFilter && !log.user_email.toLowerCase().includes(userFilter)) return false;
+                        if (moduleFilter && log.module !== moduleFilter) return false;
+                        if (actionFilter && log.action !== actionFilter) return false;
+                        return true;
+                    });
+                    
+                    updateAuditStats();
+                    displayAuditLogs(filtered);
+                } catch (error) {
+                    console.error('Error loading audit logs:', error);
+                    document.getElementById('auditTableBody').innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: red;">Error loading logs</td></tr>';
+                }
+            }
+            
+            function updateAuditStats() {
+                const today = new Date().toDateString();
+                const todayLogs = allAuditLogs.filter(log => 
+                    new Date(log.timestamp).toDateString() === today
+                ).length;
+                
+                const uniqueUsers = new Set(allAuditLogs.map(log => log.user_email)).size;
+                
+                document.getElementById('auditTotalCount').textContent = allAuditLogs.length;
+                document.getElementById('auditTodayCount').textContent = todayLogs;
+                document.getElementById('auditActiveUsers').textContent = uniqueUsers;
+            }
+            
+            function displayAuditLogs(logs) {
+                if (logs.length === 0) {
+                    document.getElementById('auditTableBody').innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #999;">No audit logs found</td></tr>';
+                    return;
+                }
+                
+                const actionColors = {
+                    'CREATE': '#27ae60',
+                    'UPDATE': '#3498db',
+                    'DELETE': '#e74c3c',
+                    'LOGIN': '#9b59b6',
+                    'LOGOUT': '#95a5a6',
+                    'VIEW': '#f39c12'
+                };
+                
+                document.getElementById('auditTableBody').innerHTML = logs.map(log => `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 10px;">${new Date(log.timestamp).toLocaleString()}</td>
+                        <td style="padding: 10px;">${log.user_email}</td>
+                        <td style="padding: 10px;"><span style="background: #ecf0f1; padding: 4px 8px; border-radius: 3px; font-size: 11px;">${log.module || 'N/A'}</span></td>
+                        <td style="padding: 10px;">
+                            <span style="background: ${actionColors[log.action] || '#95a5a6'}; color: white; padding: 4px 10px; border-radius: 3px; font-size: 11px; font-weight: bold;">
+                                ${log.action}
+                            </span>
+                        </td>
+                        <td style="padding: 10px;">
+                            <button onclick="showAuditDetails('${btoa(JSON.stringify(log))}')" style="background: #8E2A8C; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px;">View</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            function showAuditDetails(encodedLog) {
+                const log = JSON.parse(atob(encodedLog));
+                const details = JSON.stringify(log.details || {}, null, 2);
+                alert(
+                    'Audit Details:\n\n' +
+                    'User: ' + log.user_email + '\n' +
+                    'Role: ' + (log.user_role || 'N/A') + '\n' +
+                    'Module: ' + (log.module || 'N/A') + '\n' +
+                    'Action: ' + log.action + '\n' +
+                    'Time: ' + new Date(log.timestamp).toLocaleString() + '\n\n' +
+                    'Details:\n' + details
+                );
+            }
+            
+            function exportAuditToCSV() {
+                let csv = 'Timestamp,User Email,Module,Action,Details\n';
+                
+                allAuditLogs.forEach(log => {
+                    const details = JSON.stringify(log.details || {}).replace(/"/g, '""');
+                    csv += `"${new Date(log.timestamp).toLocaleString()}","${log.user_email}","${log.module || 'N/A'}","${log.action}","${details}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            }
+            
+            // Load audit logs when tab switches
+            const originalSwitchTab = window.switchTab;
+            window.switchTab = function(tabName) {
+                originalSwitchTab(tabName);
+                if (tabName === 'auditTrail') {
+                    loadAuditLogs();
+                }
+            };
         })();
     </script>
 </body>
