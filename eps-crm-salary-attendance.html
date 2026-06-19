@@ -72,24 +72,17 @@
             border-left: 4px solid #28a745; 
             margin: 0; 
             font-size: 0.8em;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .table-wrapper {
             overflow: auto;
             max-height: calc(100vh - 320px);
-            position: relative;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.7em;
+            font-size: 0.65em;
         }
 
         thead {
@@ -100,35 +93,28 @@
         }
 
         th {
-            padding: 6px 3px;
+            padding: 4px 2px;
             font-weight: 600;
             color: #333;
             border: 1px solid #ddd;
             text-align: center;
             white-space: nowrap;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            height: 90px;
         }
 
         th.sticky { 
             position: sticky; 
-            z-index: 11; 
-            background: #d9dce0; 
-            writing-mode: horizontal-tb; 
-            height: auto;
-            min-width: 70px;
+            z-index: 12; 
+            background: #d9dce0;
+            min-width: 80px;
         }
 
         th.sticky:nth-child(1) { left: 0; }
-        th.sticky:nth-child(2) { left: 70px; }
-        th.sticky:nth-child(3) { left: 140px; }
-        th.sticky:nth-child(4) { left: 210px; }
-        th.sticky:nth-child(5) { left: 280px; }
-        th.sticky:nth-child(6) { left: 350px; }
+        th.sticky:nth-child(2) { left: 80px; }
+        th.sticky:nth-child(3) { left: 160px; }
+        th.sticky:nth-child(4) { left: 240px; }
 
         td {
-            padding: 4px 2px;
+            padding: 3px 2px;
             border: 1px solid #e9ecef;
             text-align: center;
             color: #555;
@@ -136,25 +122,20 @@
 
         td.sticky {
             position: sticky;
-            z-index: 9;
+            z-index: 11;
             background: white;
             text-align: center;
             font-weight: 500;
-            min-width: 70px;
-            max-width: 70px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            min-width: 80px;
         }
 
         td.sticky:nth-child(1) { left: 0; }
-        td.sticky:nth-child(2) { left: 70px; }
-        td.sticky:nth-child(3) { left: 140px; }
-        td.sticky:nth-child(4) { left: 210px; }
-        td.sticky:nth-child(5) { left: 280px; }
-        td.sticky:nth-child(6) { left: 350px; }
+        td.sticky:nth-child(2) { left: 80px; }
+        td.sticky:nth-child(3) { left: 160px; }
+        td.sticky:nth-child(4) { left: 240px; }
 
         tr:hover { background: #f8f9fa; }
-        tr:hover td.sticky { background: #f0f2f5; }
+        tr:hover td.sticky { background: #e3f2fd; }
 
         input { 
             width: 100%; 
@@ -165,6 +146,18 @@
             text-align: center;
         }
         input:focus { outline: none; border-color: #667eea; background: #f0f8ff; }
+
+        .date-col {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            height: 80px;
+            padding: 2px !important;
+        }
+
+        .day-header {
+            font-weight: 600;
+            font-size: 0.7em;
+        }
 
         .att-P { background: #c8e6c9; color: #1b5e20; font-weight: 600; cursor: pointer; }
         .att-A { background: #ffcdd2; color: #b71c1c; font-weight: 600; cursor: pointer; }
@@ -179,7 +172,6 @@
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
             gap: 10px;
-            border-top: 2px solid #e9ecef;
         }
 
         .stat { 
@@ -191,15 +183,13 @@
         }
         .stat-label { font-size: 0.7em; color: #666; font-weight: 600; }
         .stat-value { font-size: 1.1em; font-weight: bold; color: #333; margin-top: 3px; }
-
-        .month-indicator { font-size: 0.85em; color: #666; margin-left: auto; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>💰 Complete Payroll Dashboard | 23 Employees | All Columns Auto-Calculated</h1>
-            <p>Real Data from Excel | Fixed Salary Components (PF 6.17%, ESIC 0.75%, P.Tax ₹200)</p>
+            <h1>💰 Complete Payroll Dashboard | 23 Employees | Auto-Calculated All Fields</h1>
+            <p>Dates with Day Names | Auto-detect Sundays as WO | Real-time Salary Calculations</p>
         </div>
 
         <div class="controls">
@@ -212,22 +202,21 @@
                 </select>
             </div>
             <div class="control">
-                <label>🔍 Search Name:</label>
-                <input type="text" id="searchBox" placeholder="Type name..." onkeyup="filterTable()">
+                <label>🔍 Search:</label>
+                <input type="text" id="searchBox" placeholder="Name..." onkeyup="filterTable()">
             </div>
             <div class="control">
-                <label>🏢 Filter Branch:</label>
+                <label>🏢 Branch:</label>
                 <select id="branchFilter" onchange="filterTable()">
-                    <option value="">All Branches</option>
+                    <option value="">All</option>
                     <option value="EPS LTD">EPS LTD</option>
                     <option value="OFFICE">OFFICE</option>
                     <option value="CASH">CASH</option>
                 </select>
             </div>
-            <button class="btn" onclick="saveChanges()">💾 Save Changes</button>
-            <button class="btn" onclick="exportToExcel()">📊 Export Excel</button>
+            <button class="btn" onclick="saveChanges()">💾 Save</button>
+            <button class="btn" onclick="exportToExcel()">📊 Export</button>
             <button class="btn" onclick="resetFilters()">🔄 Reset</button>
-            <span class="month-indicator">Month: <strong id="currentMonth">April 2026</strong></span>
         </div>
 
         <div id="messageBox"></div>
@@ -248,29 +237,29 @@
         let changes = {};
 
         const employees = [
-            { sr_no: 1, name: 'Rizwan Patel', branch: 'EPS LTD', base_salary: 16000, increment: 2000, gross_salary: 29000, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 46, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 5000 },
-            { sr_no: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', base_salary: 27500, increment: 2000, gross_salary: 44000, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 131, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 3, name: 'Sopan Sable', branch: 'EPS LTD', base_salary: 15600, increment: 2000, gross_salary: 29100, present_days: 23, weekly_off: 4, ot_days: 0, holidays: 0, absent: 3, leave_pending: 41, adding_leaves: 2, adjusting_leaves: 3, advance: 1500, loan: 0 },
-            { sr_no: 4, name: 'Sonu Prajapati', branch: 'EPS LTD', base_salary: 12500, increment: 1500, gross_salary: 23500, present_days: 24, weekly_off: 4, ot_days: 0, holidays: 0, absent: 2, leave_pending: 33, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 5, name: 'Sudhir Naik', branch: 'EPS LTD', base_salary: 30000, increment: 2000, gross_salary: 41500, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 120, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 6, name: 'Abhishek Masane', branch: 'OFFICE', base_salary: 15500, increment: 2000, gross_salary: 25500, present_days: 25, weekly_off: 4, ot_days: 0, holidays: 1, absent: 0, leave_pending: 35, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 2000 },
-            { sr_no: 7, name: 'Manaswi Bhosle', branch: 'OFFICE', base_salary: 25000, increment: 2000, gross_salary: 26500, present_days: 25, weekly_off: 4, ot_days: 0, holidays: 1, absent: 0, leave_pending: 38, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 8, name: 'Sheetal Parulekar', branch: 'OFFICE', base_salary: 14000, increment: 2000, gross_salary: 29800, present_days: 25, weekly_off: 4, ot_days: 0, holidays: 1, absent: 0, leave_pending: 43, adding_leaves: 2, adjusting_leaves: 0, advance: 500, loan: 0 },
-            { sr_no: 9, name: 'Akbar Khan', branch: 'EPS LTD', base_salary: 12000, increment: 1300, gross_salary: 20000, present_days: 24, weekly_off: 4, ot_days: 0, holidays: 2, absent: 0, leave_pending: 23, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 1000 },
-            { sr_no: 10, name: 'Jayshree Thorse', branch: 'CASH', base_salary: 27500, increment: 2000, gross_salary: 21500, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 50, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 11, name: 'Joy Mathew', branch: 'OFFICE', base_salary: 27500, increment: 2000, gross_salary: 30000, present_days: 24, weekly_off: 4, ot_days: 0, holidays: 0, absent: 2, leave_pending: 60, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 3000 },
-            { sr_no: 12, name: 'Deepikas Satam', branch: 'OFFICE', base_salary: 25000, increment: 2000, gross_salary: 36000, present_days: 25, weekly_off: 4, ot_days: 0, holidays: 1, absent: 0, leave_pending: 75, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 13, name: 'Lavakumar Shetty', branch: 'OFFICE', base_salary: 15600, increment: 2000, gross_salary: 36000, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 65, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 2500 },
-            { sr_no: 14, name: 'Vinayak Bhat', branch: 'OFFICE', base_salary: 15600, increment: 2000, gross_salary: 36000, present_days: 25, weekly_off: 4, ot_days: 0, holidays: 1, absent: 0, leave_pending: 70, adding_leaves: 2, adjusting_leaves: 0, advance: 1000, loan: 0 },
-            { sr_no: 15, name: 'Pankaj Indulkar', branch: 'OFFICE', base_salary: 0, increment: 0, gross_salary: 28500, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 55, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 16, name: 'Prakash Patil', branch: 'EPS LTD', base_salary: 0, increment: 0, gross_salary: 26700, present_days: 20, weekly_off: 4, ot_days: 0, holidays: 0, absent: 6, leave_pending: 40, adding_leaves: 2, adjusting_leaves: 1, advance: 0, loan: 1500 },
-            { sr_no: 17, name: 'Darshana Nandosar', branch: 'OFFICE', base_salary: 0, increment: 0, gross_salary: 22000, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 35, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 18, name: 'Jayprakash Yadav', branch: 'EPS LTD', base_salary: 0, increment: 0, gross_salary: 21700, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 38, adding_leaves: 2, adjusting_leaves: 0, advance: 500, loan: 0 },
-            { sr_no: 19, name: 'Ashok Khade', branch: 'EPS LTD', base_salary: 0, increment: 0, gross_salary: 21200, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 30, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 1000 },
-            { sr_no: 20, name: 'Saeed', branch: 'EPS LTD', base_salary: 0, increment: 0, gross_salary: 21000, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 33, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 },
-            { sr_no: 21, name: 'Anil Kasbekar', branch: 'EPS LTD', base_salary: 0, increment: 0, gross_salary: 19600, present_days: 24, weekly_off: 4, ot_days: 1, holidays: 0, absent: 2, leave_pending: 28, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 500 },
-            { sr_no: 22, name: 'Praful Jogale', branch: 'EPS LTD', base_salary: 0, increment: 0, gross_salary: 26500, present_days: 25, weekly_off: 4, ot_days: 0, holidays: 1, absent: 0, leave_pending: 48, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 2000 },
-            { sr_no: 23, name: 'Anjan Sahu', branch: 'OFFICE', base_salary: 0, increment: 0, gross_salary: 30000, present_days: 26, weekly_off: 4, ot_days: 0, holidays: 0, absent: 0, leave_pending: 60, adding_leaves: 2, adjusting_leaves: 0, advance: 0, loan: 0 }
+            { sr_no: 1, name: 'Rizwan Patel', branch: 'EPS LTD', gross_salary: 29000, leave_pending: 46, advance: 0, loan: 5000 },
+            { sr_no: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', gross_salary: 44000, leave_pending: 131, advance: 0, loan: 0 },
+            { sr_no: 3, name: 'Sopan Sable', branch: 'EPS LTD', gross_salary: 29100, leave_pending: 41, advance: 1500, loan: 0 },
+            { sr_no: 4, name: 'Sonu Prajapati', branch: 'EPS LTD', gross_salary: 23500, leave_pending: 33, advance: 0, loan: 0 },
+            { sr_no: 5, name: 'Sudhir Naik', branch: 'EPS LTD', gross_salary: 41500, leave_pending: 120, advance: 0, loan: 0 },
+            { sr_no: 6, name: 'Abhishek Masane', branch: 'OFFICE', gross_salary: 25500, leave_pending: 35, advance: 0, loan: 2000 },
+            { sr_no: 7, name: 'Manaswi Bhosle', branch: 'OFFICE', gross_salary: 26500, leave_pending: 38, advance: 0, loan: 0 },
+            { sr_no: 8, name: 'Sheetal Parulekar', branch: 'OFFICE', gross_salary: 29800, leave_pending: 43, advance: 500, loan: 0 },
+            { sr_no: 9, name: 'Akbar Khan', branch: 'EPS LTD', gross_salary: 20000, leave_pending: 23, advance: 0, loan: 1000 },
+            { sr_no: 10, name: 'Jayshree Thorse', branch: 'CASH', gross_salary: 21500, leave_pending: 50, advance: 0, loan: 0 },
+            { sr_no: 11, name: 'Joy Mathew', branch: 'OFFICE', gross_salary: 30000, leave_pending: 60, advance: 0, loan: 3000 },
+            { sr_no: 12, name: 'Deepikas Satam', branch: 'OFFICE', gross_salary: 36000, leave_pending: 75, advance: 0, loan: 0 },
+            { sr_no: 13, name: 'Lavakumar Shetty', branch: 'OFFICE', gross_salary: 36000, leave_pending: 65, advance: 0, loan: 2500 },
+            { sr_no: 14, name: 'Vinayak Bhat', branch: 'OFFICE', gross_salary: 36000, leave_pending: 70, advance: 1000, loan: 0 },
+            { sr_no: 15, name: 'Pankaj Indulkar', branch: 'OFFICE', gross_salary: 28500, leave_pending: 55, advance: 0, loan: 0 },
+            { sr_no: 16, name: 'Prakash Patil', branch: 'EPS LTD', gross_salary: 26700, leave_pending: 40, advance: 0, loan: 1500 },
+            { sr_no: 17, name: 'Darshana Nandosar', branch: 'OFFICE', gross_salary: 22000, leave_pending: 35, advance: 0, loan: 0 },
+            { sr_no: 18, name: 'Jayprakash Yadav', branch: 'EPS LTD', gross_salary: 21700, leave_pending: 38, advance: 500, loan: 0 },
+            { sr_no: 19, name: 'Ashok Khade', branch: 'EPS LTD', gross_salary: 21200, leave_pending: 30, advance: 0, loan: 1000 },
+            { sr_no: 20, name: 'Saeed', branch: 'EPS LTD', gross_salary: 21000, leave_pending: 33, advance: 0, loan: 0 },
+            { sr_no: 21, name: 'Anil Kasbekar', branch: 'EPS LTD', gross_salary: 19600, leave_pending: 28, advance: 0, loan: 500 },
+            { sr_no: 22, name: 'Praful Jogale', branch: 'EPS LTD', gross_salary: 26500, leave_pending: 48, advance: 0, loan: 2000 },
+            { sr_no: 23, name: 'Anjan Sahu', branch: 'OFFICE', gross_salary: 30000, leave_pending: 60, advance: 0, loan: 0 }
         ];
 
         window.addEventListener('load', () => { checkAuth(); });
@@ -289,59 +278,109 @@
             return new Date(year, parseInt(monthNum), 0).getDate();
         }
 
-        function calculateSalary(emp, totalDays) {
-            const paidDays = emp.present_days;
-            const deductionDays = totalDays - emp.present_days;
-            const monthlySalary = Math.round((emp.gross_salary / totalDays) * paidDays);
-            const otSalary = emp.ot_days > 0 ? Math.round((emp.gross_salary / totalDays) * emp.ot_days * 2) : 0;
+        function getDayName(date) {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return days[date.getDay()];
+        }
+
+        function calculateAllFields(emp, totalDays) {
+            // Count attended days and Sundays
+            let presentDays = 0, weeklyOff = 0;
+            const attendance = emp.attendance || {};
+            
+            for (let d = 1; d <= totalDays; d++) {
+                const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
+                const dayNum = date.getDay();
+                
+                if (dayNum === 0) {
+                    weeklyOff++;
+                } else {
+                    const status = (attendance[d] || 'P').toUpperCase();
+                    if (status === 'P') presentDays++;
+                }
+            }
+            
+            emp.present_days = presentDays;
+            emp.weekly_off = weeklyOff;
+            emp.total_days = totalDays;
+            emp.month_days = totalDays;
+            
+            // Auto-calculate absent = total - present - weekly off - holidays
+            const holidays = parseInt(emp.holidays) || 0;
+            const absent = totalDays - presentDays - weeklyOff - holidays;
+            emp.absent = Math.max(0, absent);
+            
+            // Half days
+            emp.halfday = parseInt(emp.halfday) || 0;
+            emp.total_halfday = emp.halfday;
+            
+            // Actual present/absent
+            emp.actual_present = presentDays;
+            emp.actual_absent = emp.absent;
+            
+            // Per day calculation
+            emp.per_day_calc = (emp.gross_salary / totalDays).toFixed(2);
+            
+            // Paid days = present + (halfday/2) - OT that's separate
+            const otDays = parseInt(emp.ot_days) || 0;
+            emp.paid_days = presentDays + (emp.halfday / 2);
+            emp.deduction_days = totalDays - emp.paid_days;
+            
+            // Salary calculations
+            const monthlySalary = Math.round((emp.gross_salary / totalDays) * emp.paid_days);
+            const otSalary = otDays > 0 ? Math.round((emp.gross_salary / totalDays) * otDays * 2) : 0;
             const totalEarned = monthlySalary + otSalary;
             
+            emp.monthly_salary = monthlySalary;
+            emp.ot_salary = otSalary;
+            emp.total_earned = totalEarned;
+            
+            // Deductions (fixed components)
             const pf = Math.round((monthlySalary * 6.17) / 100);
             const esic = Math.round((monthlySalary * 0.75) / 100);
             const pTax = 200;
             const incomeTax = monthlySalary > 50000 ? Math.round((monthlySalary * 5) / 100) : 0;
             
-            const totalDeduction = pf + esic + pTax + incomeTax + emp.advance + emp.loan;
-            const netSalary = totalEarned - totalDeduction;
-
-            return {
-                paid_days: paidDays,
-                deduction_days: deductionDays,
-                monthly_salary: monthlySalary,
-                ot_salary: otSalary,
-                total_earned: totalEarned,
-                pf: pf,
-                esic: esic,
-                p_tax: pTax,
-                income_tax: incomeTax,
-                total_deduction: totalDeduction,
-                net_salary: netSalary,
-                balance_salary: 0
-            };
+            emp.pf = pf;
+            emp.esic = esic;
+            emp.p_tax = pTax;
+            emp.income_tax = incomeTax;
+            
+            // Variable deductions
+            emp.advance = parseInt(emp.advance) || 0;
+            emp.loan = parseInt(emp.loan) || 0;
+            
+            emp.total_deduction = pf + esic + pTax + incomeTax + emp.advance + emp.loan;
+            emp.net_salary = totalEarned - emp.total_deduction;
+            
+            // Leaves
+            emp.adding_leaves = 2;
+            emp.leave_available = emp.leave_pending + emp.adding_leaves;
+            emp.leave_adjusted = parseInt(emp.leave_adjusted) || 0;
+            emp.leave_next = emp.leave_available - emp.leave_adjusted;
         }
 
         function loadData() {
             const totalDays = getDaysInMonth(currentMonth);
-            const monthNames = { '2026-04': 'April', '2026-05': 'May', '2026-06': 'June' };
-            document.getElementById('currentMonth').textContent = monthNames[currentMonth] + ' 2026';
             
             allData = employees.map(emp => {
                 const data = { ...emp, attendance: {} };
-                for (let d = 1; d <= totalDays; d++) {
-                    const statuses = ['P', 'P', 'P', 'P', 'WO'];
-                    data.attendance[d] = statuses[Math.floor(Math.random() * statuses.length)];
-                }
-                data.halfday = 0;
-                data.total_halfdays = 0;
-                data.actual_present = data.present_days;
-                data.actual_absent = data.absent;
-                data.total_days = totalDays;
-                data.month_days = totalDays;
-                data.per_day_calc = (data.gross_salary / totalDays).toFixed(2);
-                data.leave_available = data.leave_pending + data.adding_leaves;
-                data.leave_next = data.leave_available - data.adjusting_leaves;
                 
-                Object.assign(data, calculateSalary(data, totalDays));
+                // Initialize attendance
+                for (let d = 1; d <= totalDays; d++) {
+                    const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
+                    data.attendance[d] = date.getDay() === 0 ? 'WO' : 'P';
+                }
+                
+                // Initialize editable fields
+                data.ot_days = 0;
+                data.holidays = 0;
+                data.halfday = 0;
+                data.leave_adjusted = 0;
+                data.salary_done = 'No';
+                data.remarks = '';
+                
+                calculateAllFields(data, totalDays);
                 return data;
             });
 
@@ -351,82 +390,117 @@
 
         function renderTable() {
             const totalDays = getDaysInMonth(currentMonth);
-            const headers = ['Sr', 'Name', 'Branch', 'Base', 'Inc', 'Gross'];
-            for (let d = 1; d <= totalDays; d++) headers.push(d);
-            headers.push('Present', 'Absent', 'Holiday', 'W/O', 'OT', 'Per Day', 'Half', 'Tot Half', 'Act Pres', 'Act Abs', 'Tot Days', 
-                'Lvng Pend', 'Add Lvng', 'Lvng Avl', 'Adj Lvng', 'Lvng Nxt', 'Paid Days', 'Ded Days', 'Monthly Sal', 'OT Sal', 'Tot Earn', 'PF', 'ESIC', 'P.TAX', 'Inc Tax', 'Advance', 'Loan', 'Tot Ded', 'Net Sal', 'Bal Sal');
+            const monthNames = { '2026-04': 'April', '2026-05': 'May', '2026-06': 'June' };
+            
+            // Build header
+            let headerHTML = '<tr>';
+            headerHTML += '<th class="sticky">Sr</th>';
+            headerHTML += '<th class="sticky">Name</th>';
+            headerHTML += '<th class="sticky">Branch</th>';
+            headerHTML += '<th class="sticky">Gross Salary</th>';
+            
+            // Date columns with day names
+            for (let d = 1; d <= totalDays; d++) {
+                const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
+                const dayName = getDayName(date);
+                headerHTML += `<th class="date-col"><div class="day-header">${dayName}</div><div>${d}</div></th>`;
+            }
+            
+            // Rest of columns
+            const colHeaders = ['Month Days', 'Present', 'W/O', 'OT', 'Per Day', 'Holidays', 'Absent', 'Half Day', 'Tot Half', 'Act Pres', 'Act Abs', 'Tot Days', 
+                'Lvng Pend', 'Add Lvng', 'Lvng Avl', 'Adj Lvng', 'Lvng Nxt', 'Paid Days', 'Ded Days', 'Monthly Sal', 'OT Sal', 'Tot Earn', 
+                'PF', 'ESIC', 'P.TAX', 'Inc Tax', 'Advance', 'Loan', 'Tot Ded', 'Net Sal', 'Salary Done', 'Sal Date', 'Through', 'Remarks'];
+            
+            colHeaders.forEach(col => {
+                headerHTML += `<th>${col}</th>`;
+            });
+            headerHTML += '</tr>';
+            
+            document.getElementById('tableHead').innerHTML = headerHTML;
 
-            const thead = document.getElementById('tableHead');
-            const headerRow = document.createElement('tr');
-            headerRow.innerHTML = headers.map((h, i) => 
-                `<th class="${i < 6 ? 'sticky' : ''}">${h}</th>`
-            ).join('');
-            thead.innerHTML = '';
-            thead.appendChild(headerRow);
-
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
-            allData.forEach(emp => {
-                const row = document.createElement('tr');
-                let cells = `<td class="sticky">${emp.sr_no}</td><td class="sticky"><strong>${emp.name}</strong></td><td class="sticky">${emp.branch}</td>
-                    <td><input type="number" value="${emp.base_salary}" onchange="trackChange()"></td>
-                    <td><input type="number" value="${emp.increment}" onchange="trackChange()"></td>
-                    <td><input type="number" value="${emp.gross_salary}" onchange="trackChange()"></td>`;
-
+            // Build rows
+            let rowsHTML = '';
+            allData.forEach((emp, idx) => {
+                let cells = `<td class="sticky">${emp.sr_no}</td>`;
+                cells += `<td class="sticky"><strong>${emp.name}</strong></td>`;
+                cells += `<td class="sticky">${emp.branch}</td>`;
+                cells += `<td class="sticky">₹${emp.gross_salary}</td>`;
+                
+                // Attendance dates
                 for (let d = 1; d <= totalDays; d++) {
                     const val = emp.attendance[d] || 'P';
-                    cells += `<td class="att-${val}"><input type="text" value="${val}" maxlength="2" onclick="cycleAtt(this)"></td>`;
+                    cells += `<td class="att-${val}"><input type="text" value="${val}" maxlength="2" onclick="cycleAtt(this, ${idx}, ${d})" data-emp="${idx}" data-day="${d}"></td>`;
                 }
-
-                cells += `<td><input type="number" value="${emp.present_days}" onchange="trackChange()"></td>
-                    <td><input type="number" value="${emp.absent}" onchange="trackChange()"></td>
-                    <td><input type="number" value="${emp.holidays}" onchange="trackChange()"></td>
-                    <td>${emp.weekly_off}</td>
-                    <td><input type="number" value="${emp.ot_days}" onchange="trackChange()"></td>
-                    <td class="calc">${emp.per_day_calc}</td>
-                    <td><input type="number" value="${emp.halfday}" onchange="trackChange()"></td>
-                    <td>${emp.total_halfdays}</td>
-                    <td>${emp.actual_present}</td>
-                    <td>${emp.actual_absent}</td>
-                    <td>${emp.total_days}</td>
-                    <td><input type="number" value="${emp.leave_pending}" onchange="trackChange()"></td>
-                    <td><input type="number" value="${emp.adding_leaves}" onchange="trackChange()"></td>
-                    <td class="calc">${emp.leave_available}</td>
-                    <td><input type="number" value="${emp.adjusting_leaves}" onchange="trackChange()"></td>
-                    <td class="calc">${emp.leave_next}</td>
-                    <td class="calc">${emp.paid_days}</td>
-                    <td class="calc">${emp.deduction_days}</td>
-                    <td class="calc">₹${emp.monthly_salary}</td>
-                    <td class="calc">₹${emp.ot_salary}</td>
-                    <td class="calc">₹${emp.total_earned}</td>
-                    <td class="calc">₹${emp.pf}</td>
-                    <td class="calc">₹${emp.esic}</td>
-                    <td class="calc">₹${emp.p_tax}</td>
-                    <td class="calc">₹${emp.income_tax}</td>
-                    <td><input type="number" value="${emp.advance}" onchange="trackChange()"></td>
-                    <td><input type="number" value="${emp.loan}" onchange="trackChange()"></td>
-                    <td class="calc">₹${emp.total_deduction}</td>
-                    <td class="calc">₹${emp.net_salary}</td>
-                    <td class="calc">₹${emp.balance_salary}</td>`;
-
-                row.innerHTML = cells;
-                tbody.appendChild(row);
+                
+                // Summary columns
+                cells += `<td class="calc">${emp.month_days}</td>`;
+                cells += `<td class="calc">${emp.present_days}</td>`;
+                cells += `<td class="calc">${emp.weekly_off}</td>`;
+                cells += `<td><input type="number" value="${emp.ot_days}" onchange="updateEmp(${idx}, 'ot_days', this.value)"></td>`;
+                cells += `<td class="calc">${emp.per_day_calc}</td>`;
+                cells += `<td><input type="number" value="${emp.holidays}" onchange="updateEmp(${idx}, 'holidays', this.value)"></td>`;
+                cells += `<td class="calc">${emp.absent}</td>`;
+                cells += `<td><input type="number" value="${emp.halfday}" onchange="updateEmp(${idx}, 'halfday', this.value)"></td>`;
+                cells += `<td class="calc">${emp.total_halfday}</td>`;
+                cells += `<td class="calc">${emp.actual_present}</td>`;
+                cells += `<td class="calc">${emp.actual_absent}</td>`;
+                cells += `<td class="calc">${emp.total_days}</td>`;
+                cells += `<td class="calc">${emp.leave_pending}</td>`;
+                cells += `<td class="calc">${emp.adding_leaves}</td>`;
+                cells += `<td class="calc">${emp.leave_available}</td>`;
+                cells += `<td><input type="number" value="${emp.leave_adjusted}" onchange="updateEmp(${idx}, 'leave_adjusted', this.value)"></td>`;
+                cells += `<td class="calc">${emp.leave_next}</td>`;
+                cells += `<td class="calc">${emp.paid_days.toFixed(0)}</td>`;
+                cells += `<td class="calc">${emp.deduction_days.toFixed(0)}</td>`;
+                cells += `<td class="calc">₹${emp.monthly_salary}</td>`;
+                cells += `<td class="calc">₹${emp.ot_salary}</td>`;
+                cells += `<td class="calc">₹${emp.total_earned}</td>`;
+                cells += `<td class="calc">₹${emp.pf}</td>`;
+                cells += `<td class="calc">₹${emp.esic}</td>`;
+                cells += `<td class="calc">₹${emp.p_tax}</td>`;
+                cells += `<td class="calc">₹${emp.income_tax}</td>`;
+                cells += `<td><input type="number" value="${emp.advance}" onchange="updateEmp(${idx}, 'advance', this.value)"></td>`;
+                cells += `<td><input type="number" value="${emp.loan}" onchange="updateEmp(${idx}, 'loan', this.value)"></td>`;
+                cells += `<td class="calc">₹${emp.total_deduction}</td>`;
+                cells += `<td class="calc">₹${emp.net_salary}</td>`;
+                cells += `<td><select onchange="updateEmp(${idx}, 'salary_done', this.value)"><option>No</option><option>Yes</option></select></td>`;
+                cells += `<td><input type="date" onchange="updateEmp(${idx}, 'salary_date', this.value)"></td>`;
+                cells += `<td><input type="text" placeholder="Cash/Check/Transfer" onchange="updateEmp(${idx}, 'through', this.value)"></td>`;
+                cells += `<td><input type="text" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)"></td>`;
+                
+                rowsHTML += `<tr>${cells}</tr>`;
             });
+            
+            document.getElementById('tableBody').innerHTML = rowsHTML;
         }
 
-        function cycleAtt(cell) {
+        function cycleAtt(cell, empIdx, day) {
             const statuses = ['P', 'A', 'H', 'WO'];
-            const idx = statuses.indexOf(cell.value.toUpperCase());
+            const curr = cell.value.toUpperCase();
+            const idx = statuses.indexOf(curr);
             const next = statuses[(idx + 1) % statuses.length];
+            
             cell.value = next;
             cell.parentElement.className = 'att-' + next;
+            
+            allData[empIdx].attendance[day] = next;
+            const totalDays = getDaysInMonth(currentMonth);
+            calculateAllFields(allData[empIdx], totalDays);
+            renderTable();
+            updateStats();
             trackChange();
         }
 
-        function trackChange() {
-            changes['tracked'] = true;
+        function updateEmp(idx, field, value) {
+            allData[idx][field] = isNaN(value) ? value : parseFloat(value);
+            const totalDays = getDaysInMonth(currentMonth);
+            calculateAllFields(allData[idx], totalDays);
+            renderTable();
+            updateStats();
+            trackChange();
         }
+
+        function trackChange() { changes['tracked'] = true; }
 
         function filterTable() {
             const search = document.getElementById('searchBox').value.toLowerCase();
@@ -440,24 +514,22 @@
 
         function updateStats() {
             const totalPresent = allData.reduce((s, e) => s + e.present_days, 0);
-            const totalAbsent = allData.reduce((s, e) => s + e.absent, 0);
             const totalNetSalary = allData.reduce((s, e) => s + e.net_salary, 0);
             const totalDeduction = allData.reduce((s, e) => s + e.total_deduction, 0);
             document.getElementById('statsBar').innerHTML = `
-                <div class="stat"><div class="stat-label">✅ Total Present Days</div><div class="stat-value">${totalPresent}</div></div>
-                <div class="stat"><div class="stat-label">❌ Total Absent Days</div><div class="stat-value">${totalAbsent}</div></div>
-                <div class="stat"><div class="stat-label">💰 Total Net Salary</div><div class="stat-value">₹${(totalNetSalary/100000).toFixed(2)}L</div></div>
-                <div class="stat"><div class="stat-label">📊 Total Deductions</div><div class="stat-value">₹${(totalDeduction/100000).toFixed(2)}L</div></div>
-                <div class="stat"><div class="stat-label">🏦 Avg Net/Employee</div><div class="stat-value">₹${Math.round(totalNetSalary/23)/1000}K</div></div>
+                <div class="stat"><div class="stat-label">✅ Total Present</div><div class="stat-value">${totalPresent}</div></div>
+                <div class="stat"><div class="stat-label">💰 Net Salary</div><div class="stat-value">₹${(totalNetSalary/100000).toFixed(2)}L</div></div>
+                <div class="stat"><div class="stat-label">📊 Deductions</div><div class="stat-value">₹${(totalDeduction/100000).toFixed(2)}L</div></div>
+                <div class="stat"><div class="stat-label">🏦 Avg/Employee</div><div class="stat-value">₹${Math.round(totalNetSalary/23)/1000}K</div></div>
             `;
         }
 
         function saveChanges() {
             if (Object.keys(changes).length === 0) {
-                showMessage('ℹ️ No changes made');
+                showMessage('ℹ️ No changes');
                 return;
             }
-            showMessage('✅ Payroll changes saved to Supabase successfully!');
+            showMessage('✅ Payroll saved successfully!');
             changes = {};
         }
 
@@ -467,7 +539,7 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Payroll');
             const monthNames = { '2026-04': 'APR', '2026-05': 'MAY', '2026-06': 'JUN' };
             XLSX.writeFile(wb, `Payroll-${monthNames[currentMonth]}-2026.xlsx`);
-            showMessage('✅ Exported to Excel with all columns!');
+            showMessage('✅ Exported!');
         }
 
         function changeMonth() {
@@ -475,7 +547,6 @@
             if (newMonth !== currentMonth) {
                 currentMonth = newMonth;
                 loadData();
-                showMessage(`📅 Switched to ${document.getElementById('monthSelect').options[document.getElementById('monthSelect').selectedIndex].text}`);
             }
         }
 
@@ -483,7 +554,6 @@
             document.getElementById('searchBox').value = '';
             document.getElementById('branchFilter').value = '';
             filterTable();
-            showMessage('🔄 Filters reset!');
         }
 
         function showMessage(msg) {
