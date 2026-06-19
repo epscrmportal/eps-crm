@@ -143,6 +143,10 @@
             color: #555;
             margin-bottom: 8px;
             font-weight: 500;
+            font-size: 14px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
         }
 
         .form-group input {
@@ -151,6 +155,28 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1em;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
         }
 
         .form-group input:focus {
@@ -232,7 +258,7 @@
         }
 
         .form-group {
-            margin-bottom: 0;
+            margin-bottom: 15px;
         }
 
         .form-actions {
@@ -305,9 +331,9 @@
             background: white;
             padding: 30px;
             border-radius: 10px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
             overflow-y: auto;
         }
 
