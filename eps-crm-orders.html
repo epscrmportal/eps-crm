@@ -1041,6 +1041,60 @@
         // ===== SHARED FUNCTIONS =====
         
         // localStorage Functions
+        async function loadOrdersFromSupabase() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Error loading orders:', error);
+                    return [];
+                }
+
+                // Convert Supabase column names to local format
+                const orders = (data || []).map(order => ({
+                    id: order.order_id,
+                    forwardingNumber: order.forwarding_number,
+                    employeeName: order.employee_name,
+                    employeeId: order.employee_id,
+                    customerName: order.customer_name,
+                    email: order.email,
+                    phone: order.phone,
+                    alternativePhone: order.alternative_phone,
+                    senderAddress: order.sender_address,
+                    senderPincode: order.sender_pincode,
+                    receiverName: order.receiver_name,
+                    receiverPhone: order.receiver_phone,
+                    receiverAddress: order.receiver_address,
+                    receiverPincode: order.receiver_pincode,
+                    origin: order.origin,
+                    destination: order.destination,
+                    serviceType: order.service_type,
+                    shippingMethod: order.shipping_method,
+                    boxes: order.boxes,
+                    weight: order.weight,
+                    length: order.length,
+                    width: order.width,
+                    height: order.height,
+                    itemDescription: order.item_description,
+                    amount: order.amount,
+                    paymentMethod: order.payment_method,
+                    paymentId: order.payment_id,
+                    status: order.status,
+                    orderNotes: order.notes,
+                    createdOn: order.created_on
+                }));
+
+                console.log('📦 Loaded ' + orders.length + ' orders from Supabase');
+                return orders;
+            } catch (error) {
+                console.error('Error loading orders from Supabase:', error);
+                return [];
+            }
+        }
+
         function loadOrdersFromStorage() {
             const data = localStorage.getItem('eps_crm_orders');
             return data ? JSON.parse(data) : [];
@@ -1273,16 +1327,62 @@
             rzp.open();
         }
 
-        function saveOrder(orderData) {
-            window.orders.push(orderData);
-            saveOrdersToStorage();
-            displayOrders();
-            updateDashboard();
-            switchOrdersTab('orders');
-            resetOrderForm();
+        async function saveOrder(orderData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('orders')
+                    .insert([{
+                        order_id: orderData.id,
+                        forwarding_number: orderData.forwardingNumber,
+                        employee_name: orderData.employeeName,
+                        employee_id: orderData.employeeId,
+                        customer_name: orderData.customerName,
+                        email: orderData.email,
+                        phone: orderData.phone,
+                        alternative_phone: orderData.alternativePhone,
+                        sender_address: orderData.senderAddress,
+                        sender_pincode: orderData.senderPincode,
+                        receiver_name: orderData.receiverName,
+                        receiver_phone: orderData.receiverPhone,
+                        receiver_address: orderData.receiverAddress,
+                        receiver_pincode: orderData.receiverPincode,
+                        origin: orderData.origin,
+                        destination: orderData.destination,
+                        service_type: orderData.serviceType,
+                        shipping_method: orderData.shippingMethod,
+                        boxes: orderData.boxes,
+                        weight: orderData.weight,
+                        length: orderData.length,
+                        width: orderData.width,
+                        height: orderData.height,
+                        item_description: orderData.itemDescription,
+                        amount: orderData.amount,
+                        payment_method: orderData.paymentMethod,
+                        payment_id: orderData.paymentId || null,
+                        status: orderData.status,
+                        notes: orderData.orderNotes,
+                        created_on: orderData.createdOn
+                    }]);
 
-            alert('✅ Order ' + orderData.id + ' created successfully!');
-            showInvoice(orderData.id);
+                if (error) {
+                    alert('❌ Error saving order: ' + error.message);
+                    console.error('Supabase error:', error);
+                    return;
+                }
+
+                // Add to local array for display
+                window.orders.push(orderData);
+                displayOrders();
+                updateDashboard();
+                switchOrdersTab('orders');
+                resetOrderForm();
+
+                alert('✅ Order ' + orderData.id + ' created successfully!');
+                showInvoice(orderData.id);
+            } catch (error) {
+                alert('❌ Error saving order: ' + error.message);
+                console.error('Error:', error);
+            }
         }
 
         function displayOrders() {
@@ -1495,7 +1595,7 @@
             document.getElementById('editModal').classList.add('active');
         }
 
-        function saveEditOrder() {
+        async function saveEditOrder() {
             const order = window.orders.find(o => o.id === editingOrderId);
             if (!order) return;
 
@@ -1543,20 +1643,75 @@
             // Status
             order.status = document.getElementById('editStatus').value;
 
-            saveOrdersToStorage();
-            displayOrders();
-            updateDashboard();
-            closeModal('editModal');
-            alert('✅ Order updated successfully');
-        }
+            try {
+                const { error } = await window.supabaseClient
+                    .from('orders')
+                    .update({
+                        employee_name: order.employeeName,
+                        employee_id: order.employeeId,
+                        customer_name: order.customerName,
+                        email: order.email,
+                        phone: order.phone,
+                        alternative_phone: order.alternativePhone,
+                        sender_address: order.senderAddress,
+                        sender_pincode: order.senderPincode,
+                        receiver_name: order.receiverName,
+                        receiver_phone: order.receiverPhone,
+                        receiver_address: order.receiverAddress,
+                        receiver_pincode: order.receiverPincode,
+                        origin: order.origin,
+                        destination: order.destination,
+                        service_type: order.serviceType,
+                        shipping_method: order.shippingMethod,
+                        boxes: order.boxes,
+                        weight: order.weight,
+                        length: order.length,
+                        width: order.width,
+                        height: order.height,
+                        item_description: order.itemDescription,
+                        amount: order.amount,
+                        payment_method: order.paymentMethod,
+                        notes: order.orderNotes,
+                        status: order.status
+                    })
+                    .eq('order_id', editingOrderId);
 
-        function deleteOrder(orderId) {
-            if (confirm('❌ Are you sure you want to delete this order?')) {
-                window.orders = window.orders.filter(o => o.id !== orderId);
-                saveOrdersToStorage();
+                if (error) {
+                    alert('❌ Error updating order: ' + error.message);
+                    return;
+                }
+
                 displayOrders();
                 updateDashboard();
-                alert('✅ Order deleted');
+                closeModal('editModal');
+                alert('✅ Order updated successfully');
+            } catch (error) {
+                alert('❌ Error updating order: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        async function deleteOrder(orderId) {
+            if (confirm('❌ Are you sure you want to delete this order?')) {
+                try {
+                    const { error } = await window.supabaseClient
+                        .from('orders')
+                        .delete()
+                        .eq('order_id', orderId);
+
+                    if (error) {
+                        alert('❌ Error deleting order: ' + error.message);
+                        return;
+                    }
+
+                    window.orders = window.orders.filter(o => o.id !== orderId);
+                    displayOrders();
+                    updateDashboard();
+                    alert('✅ Order deleted');
+                } catch (error) {
+                    alert('❌ Error deleting order: ' + error.message);
+                    console.error('Error:', error);
+                }
             }
         }
 
@@ -1769,8 +1924,23 @@
             location.href = 'https://eps-crm.vercel.app';
         }
 
-        function loadInitialData() {
-            window.orders = loadOrdersFromStorage();
+        function subscribeToOrdersRealTime() {
+            try {
+                window.supabaseClient
+                    .channel('public:orders')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+                        console.log('📦 Order updated in real-time:', payload);
+                        loadInitialData();
+                    })
+                    .subscribe();
+                console.log('✅ Real-time subscription active for orders');
+            } catch (error) {
+                console.error('Error subscribing to orders:', error);
+            }
+        }
+
+        async function loadInitialData() {
+            window.orders = await loadOrdersFromSupabase();
             displayOrders();
             updateDashboard();
 
@@ -1781,6 +1951,9 @@
             if (localStorage.getItem('eps_crm_darkMode')) {
                 document.body.classList.add('dark-mode');
             }
+            
+            // Subscribe to real-time updates
+            subscribeToOrdersRealTime();
         }
 
         // Initialize
