@@ -151,25 +151,27 @@
 
         .form-group input {
             width: 100%;
-            padding: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 15px;
+            padding: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            height: 50px;
         }
 
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 15px;
+            padding: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
             font-family: Arial, sans-serif;
+            min-height: 50px;
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 120px;
         }
 
         .form-group select:focus,
@@ -241,9 +243,10 @@
 
         .form-container {
             background: #f9f9f9;
-            padding: 30px;
+            padding: 40px;
             border-radius: 10px;
             margin-bottom: 20px;
+            max-width: 100%;
         }
 
         body.dark-mode .form-container {
@@ -252,9 +255,13 @@
 
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
         }
 
         .form-group {
