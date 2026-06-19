@@ -1230,16 +1230,61 @@
                     window.allData.meetings = meetingsRes.data || [];
                     window.allData.calls = callsRes.data || [];
                     window.employeePerformance = perfRes.data || [];
+                    
+                    // Load orders from Supabase (Orders module now uses Supabase)
+                    const ordersRes = await window.supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    
+                    if (!ordersRes.error && ordersRes.data) {
+                        window.allData.orders = ordersRes.data.map(order => ({
+                            id: order.order_id,
+                            forwardingNumber: order.forwarding_number,
+                            employeeName: order.employee_name,
+                            employeeId: order.employee_id,
+                            customerName: order.customer_name,
+                            email: order.email,
+                            phone: order.phone,
+                            alternativePhone: order.alternative_phone,
+                            senderAddress: order.sender_address,
+                            senderPincode: order.sender_pincode,
+                            receiverName: order.receiver_name,
+                            receiverPhone: order.receiver_phone,
+                            receiverAddress: order.receiver_address,
+                            receiverPincode: order.receiver_pincode,
+                            origin: order.origin,
+                            destination: order.destination,
+                            serviceType: order.service_type,
+                            shippingMethod: order.shipping_method,
+                            boxes: order.boxes,
+                            weight: order.weight,
+                            length: order.length,
+                            width: order.width,
+                            height: order.height,
+                            itemDescription: order.item_description,
+                            amount: order.amount,
+                            paymentMethod: order.payment_method,
+                            paymentId: order.payment_id,
+                            status: order.status,
+                            orderNotes: order.notes,
+                            createdOn: order.created_on
+                        }));
+                    } else {
+                        window.allData.orders = [];
+                    }
 
                     console.log('Raw data loaded:');
                     console.log('Contacts sample:', window.allData.contacts[0]);
                     console.log('Meetings sample:', window.allData.meetings[0]);
                     console.log('Calls sample:', window.allData.calls[0]);
+                    console.log('Orders sample:', window.allData.orders[0]);
                     
                     console.log('Data loaded:', {
                         contacts: window.allData.contacts.length,
                         meetings: window.allData.meetings.length,
-                        calls: window.allData.calls.length
+                        calls: window.allData.calls.length,
+                        orders: window.allData.orders.length
                     });
 
                     updateTeamReports();
@@ -1285,6 +1330,17 @@
                         window.loadAllData();
                     })
                     .subscribe();
+                
+                // Subscribe to orders changes (now using Supabase)
+                window.supabaseClient
+                    .channel('public:orders')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+                        console.log('📦 Orders update:', payload);
+                        window.loadAllData();
+                    })
+                    .subscribe();
+                
+                console.log('✅ Real-time subscriptions active (including orders)');
             };
 
             window.loadFromLocalStorageOnly = function() {
@@ -1570,6 +1626,11 @@
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
                 document.getElementById(tabName + 'Tab').classList.add('active');
                 event.target.classList.add('active');
+                
+                // Refresh orders data when switching to Orders Reports tab
+                if (tabName === 'ordersReports') {
+                    window.loadAllData();
+                }
             };
 
             window.logout = async function() {
