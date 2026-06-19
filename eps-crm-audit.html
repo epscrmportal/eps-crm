@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS CRM - Smart Reminders</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+        
+        header {
+            background: linear-gradient(135deg, #8E2A8C 0%, #6b1f68 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        header h1 { font-size: 28px; }
+        .user-info { font-size: 14px; }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .logout-btn:hover { background: #c0392b; }
+        
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #8E2A8C;
+            color: white;
+            border-color: #8E2A8C;
+        }
+        
+        .tab-btn:hover { border-color: #8E2A8C; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .reminder-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #8E2A8C;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            animation: slideIn 0.3s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .reminder-card.urgent {
+            border-left-color: #e74c3c;
+            background: #fff5f5;
+        }
+        
+        .reminder-card.upcoming {
+            border-left-color: #f39c12;
+            background: #fffaf0;
+        }
+        
+        .reminder-card.completed {
+            border-left-color: #27ae60;
+            background: #f0fdf4;
+        }
+        
+        .reminder-content h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .reminder-content p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .reminder-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-right: 8px;
+            color: white;
+        }
+        
+        .badge-urgent { background: #e74c3c; }
+        .badge-upcoming { background: #f39c12; }
+        .badge-completed { background: #27ae60; }
+        .badge-meeting { background: #3498db; }
+        .badge-followup { background: #9b59b6; }
+        
+        .reminder-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .btn-complete {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-complete:hover { background: #229954; }
+        
+        .btn-snooze {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-snooze:hover { background: #e67e22; }
+        
+        .btn-delete {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-delete:hover { background: #7f8c8d; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-box h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .stat-box .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #8E2A8C;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .filter-section select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8E2A8C;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-in-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>🔔 Smart Reminders</h1>
+            <div class="user-info" id="userInfo"></div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+    
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Urgent (Today)</h3>
+                <div class="number" id="urgentCount">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Upcoming (7 Days)</h3>
+                <div class="number" id="upcomingCount">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Completed</h3>
+                <div class="number" id="completedCount">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Total Reminders</h3>
+                <div class="number" id="totalCount">0</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('urgent')">🔴 Urgent (Today)</button>
+            <button class="tab-btn" onclick="switchTab('upcoming')">📅 Upcoming (7 Days)</button>
+            <button class="tab-btn" onclick="switchTab('completed')">✅ Completed</button>
+            <button class="tab-btn" onclick="switchTab('all')">📋 All Reminders</button>
+        </div>
+        
+        <!-- Filter -->
+        <div class="filter-section">
+            <label style="font-weight: bold;">Filter by Type:</label>
+            <select id="typeFilter" onchange="applyFilters()">
+                <option value="">All Types</option>
+                <option value="Meeting">Meetings</option>
+                <option value="Follow-up">Follow-ups</option>
+                <option value="Call">Calls</option>
+            </select>
+        </div>
+        
+        <!-- URGENT TAB -->
+        <div id="urgent" class="tab-content active">
+            <div id="urgentList"></div>
+        </div>
+        
+        <!-- UPCOMING TAB -->
+        <div id="upcoming" class="tab-content">
+            <div id="upcomingList"></div>
+        </div>
+        
+        <!-- COMPLETED TAB -->
+        <div id="completed" class="tab-content">
+            <div id="completedList"></div>
+        </div>
+        
+        <!-- ALL TAB -->
+        <div id="all" class="tab-content">
+            <div id="allList"></div>
+        </div>
+    </div>
+    
+    <script>
+        const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTAwOTYzLCJleHAiOjIwOTQ4MjY5NjN9.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+        const supabaseReminders = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentUser = null;
+        let allReminders = [];
+        let currentTab = 'urgent';
+        
+        async function initAuth() {
+            const { data: { session } } = await supabaseReminders.auth.getSession();
+            if (!session) {
+                window.location.href = 'https://www.epscrm.in';
+                return;
+            }
+            
+            currentUser = session.user;
+            document.getElementById('userInfo').textContent = `Logged in as: ${currentUser.email}`;
+            
+            loadReminders();
+            setInterval(loadReminders, 60000); // Refresh every minute
+        }
+        
+        async function loadReminders() {
+            try {
+                // Fetch meetings
+                const { data: meetings, error: meetError } = await supabaseReminders
+                    .from('meetings')
+                    .select('*')
+                    .or(`assigned_to.eq.${currentUser.email},field_exec_email.eq.${currentUser.email}`)
+                    .order('meeting_date', { ascending: true });
+                
+                // Fetch action items (follow-ups)
+                const { data: actionItems, error: actionError } = await supabaseReminders
+                    .from('action_items')
+                    .select('*')
+                    .eq('assigned_to', currentUser.email)
+                    .order('due_date', { ascending: true });
+                
+                // Fetch call reminders
+                const { data: reminders, error: remError } = await supabaseReminders
+                    .from('reminders')
+                    .select('*')
+                    .eq('user_email', currentUser.email)
+                    .order('reminder_date', { ascending: true });
+                
+                allReminders = [];
+                
+                // Process meetings
+                if (meetings) {
+                    allReminders.push(...meetings.map(m => ({
+                        id: m.id,
+                        type: 'Meeting',
+                        title: m.meeting_title,
+                        date: m.meeting_date,
+                        description: `With: ${m.contact_name}`,
+                        status: new Date(m.meeting_date) < new Date() ? 'completed' : 'pending',
+                        source: 'meetings'
+                    })));
+                }
+                
+                // Process action items
+                if (actionItems) {
+                    allReminders.push(...actionItems.map(a => ({
+                        id: a.id,
+                        type: 'Follow-up',
+                        title: a.action_title,
+                        date: a.due_date,
+                        description: a.action_description,
+                        status: a.status || 'pending',
+                        source: 'action_items'
+                    })));
+                }
+                
+                // Process reminders
+                if (reminders) {
+                    allReminders.push(...reminders.map(r => ({
+                        id: r.id,
+                        type: 'Call',
+                        title: `Call reminder: ${r.contact_name}`,
+                        date: r.reminder_date,
+                        description: r.notes,
+                        status: 'pending',
+                        source: 'reminders'
+                    })));
+                }
+                
+                updateStats();
+                displayReminders();
+            } catch (error) {
+                console.error('Error loading reminders:', error);
+            }
+        }
+        
+        function updateStats() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const sevenDaysLater = new Date(today);
+            sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+            
+            const urgent = allReminders.filter(r => {
+                const remDate = new Date(r.date);
+                remDate.setHours(0, 0, 0, 0);
+                return remDate.getTime() === today.getTime() && r.status !== 'completed';
+            }).length;
+            
+            const upcoming = allReminders.filter(r => {
+                const remDate = new Date(r.date);
+                return remDate >= today && remDate <= sevenDaysLater && r.status !== 'completed';
+            }).length;
+            
+            const completed = allReminders.filter(r => r.status === 'completed').length;
+            const total = allReminders.length;
+            
+            document.getElementById('urgentCount').textContent = urgent;
+            document.getElementById('upcomingCount').textContent = upcoming;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+        }
+        
+        function displayReminders() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const sevenDaysLater = new Date(today);
+            sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+            
+            let urgentList = [], upcomingList = [], completedList = [];
+            
+            allReminders.forEach(r => {
+                const remDate = new Date(r.date);
+                remDate.setHours(0, 0, 0, 0);
+                
+                const html = createReminderCard(r);
+                
+                if (r.status === 'completed') {
+                    completedList.push(html);
+                } else if (remDate.getTime() === today.getTime()) {
+                    urgentList.push(html);
+                } else if (remDate >= today && remDate <= sevenDaysLater) {
+                    upcomingList.push(html);
+                }
+            });
+            
+            document.getElementById('urgentList').innerHTML = urgentList.length > 0 ? urgentList.join('') : '<div class="empty-state"><h2>📭 No urgent reminders</h2><p>All set for today!</p></div>';
+            document.getElementById('upcomingList').innerHTML = upcomingList.length > 0 ? upcomingList.join('') : '<div class="empty-state"><h2>✅ No upcoming reminders</h2><p>Keep up the great work!</p></div>';
+            document.getElementById('completedList').innerHTML = completedList.length > 0 ? completedList.join('') : '<div class="empty-state"><h2>🎯 No completed reminders</h2></div>';
+            document.getElementById('allList').innerHTML = [...urgentList, ...upcomingList, ...completedList].join('') || '<div class="empty-state"><h2>📋 No reminders</h2></div>';
+        }
+        
+        function createReminderCard(reminder) {
+            const date = new Date(reminder.date);
+            const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const remDate = new Date(reminder.date);
+            remDate.setHours(0, 0, 0, 0);
+            
+            let cardClass = 'completed';
+            if (reminder.status !== 'completed') {
+                cardClass = remDate.getTime() === today.getTime() ? 'urgent' : 'upcoming';
+            }
+            
+            return `
+                <div class="reminder-card ${cardClass}">
+                    <div class="reminder-content">
+                        <h3>${reminder.title}</h3>
+                        <p>📅 <strong>${dateStr}</strong> at ${timeStr}</p>
+                        <p>${reminder.description}</p>
+                        <span class="reminder-badge badge-${reminder.type.toLowerCase()}">${reminder.type}</span>
+                        ${reminder.status === 'completed' ? '<span class="reminder-badge badge-completed">✓ Completed</span>' : ''}
+                    </div>
+                    <div class="reminder-actions">
+                        ${reminder.status !== 'completed' ? `
+                            <button class="btn-small btn-complete" onclick="completeReminder('${reminder.id}', '${reminder.source}')">Mark Done</button>
+                            <button class="btn-small btn-snooze" onclick="snoozeReminder('${reminder.id}')">Snooze</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function completeReminder(id, source) {
+            try {
+                if (source === 'meetings') {
+                    await supabaseReminders.from('meetings').update({ status: 'completed' }).eq('id', id);
+                } else if (source === 'action_items') {
+                    await supabaseReminders.from('action_items').update({ status: 'completed' }).eq('id', id);
+                }
+                showNotification('✅ Reminder marked as completed!');
+                loadReminders();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function snoozeReminder(id) {
+            const hours = prompt('Snooze for how many hours? (1-24)', '1');
+            if (hours) {
+                const snoozeTime = new Date(Date.now() + hours * 60 * 60 * 1000);
+                showNotification(`⏰ Reminder snoozed until ${snoozeTime.toLocaleTimeString()}`);
+            }
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelector('#' + tabName).classList.add('active');
+            currentTab = tabName;
+            
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function applyFilters() {
+            loadReminders();
+        }
+        
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.remove();
+            }, 3000);
+        }
+        
+        async function logout() {
+            await supabaseReminders.auth.signOut();
+            window.location.href = 'https://www.epscrm.in';
+        }
+        
+        // Initialize
+        initAuth();
+    </script>
+</body>
+</html>
