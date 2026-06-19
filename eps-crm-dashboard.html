@@ -54,7 +54,8 @@
             'admin': 'eps-crm-admin.html',
             'field_exec': 'eps-crm-fieldexec.html',
             'orders': 'eps-crm-orders.html',
-            'collections': 'eps-crm-collections.html'
+            'collections': 'eps-crm-collections.html',
+            'accounts': 'eps-crm-salary-attendance.html'
         };
 
         async function login() {
@@ -76,6 +77,18 @@
                 });
 
                 if (error) throw error;
+
+                // Check if email is accounts@epsworldwide.in - route to Salary Dashboard
+                if (email.toLowerCase() === 'accounts@epsworldwide.in') {
+                    localStorage.setItem('eps_crm_user', JSON.stringify(data.user));
+                    localStorage.setItem('eps_crm_user_role', 'accounts');
+                    showMsg('Login successful! Redirecting to Salary Dashboard...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = ROUTES['accounts'];
+                    }, 1000);
+                    return;
+                }
 
                 const { data: profile } = await supabase
                     .from('user_profiles')
