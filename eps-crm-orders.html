@@ -151,19 +151,19 @@
 
         .form-group input {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 15px;
             font-family: Arial, sans-serif;
         }
 
@@ -252,7 +252,7 @@
 
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
@@ -1852,6 +1852,8 @@
                 const supabaseUrl = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
                 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
                 supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                window.supabaseClient = supabaseClient;  // Make it available globally
+                console.log('✅ Supabase initialized in Orders module');
                 return true;
             }
             return false;
@@ -1959,16 +1961,20 @@
         // Initialize
         window.addEventListener('load', async function() {
             try {
+                // Wait for Supabase to initialize
+                let attempts = 0;
+                while (!supabaseClient && attempts < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    attempts++;
+                }
+
                 if (!supabaseClient) {
-                    const user = getCurrentUser();
-                    if (user && user.module === 'orders') {
-                        document.getElementById('loginSection').style.display = 'none';
-                        document.getElementById('dashboardSection').classList.add('active');
-                        document.getElementById('userEmail').textContent = user.email;
-                        loadInitialData();
-                    }
+                    console.error('❌ Supabase failed to initialize');
+                    alert('❌ Connection error. Please refresh the page.');
                     return;
                 }
+
+                console.log('✅ Supabase ready, checking session...');
 
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
                 
@@ -1983,14 +1989,14 @@
                         id: session.user.id
                     }));
                     
-                    loadInitialData();
+                    await loadInitialData();
                 } else {
                     const user = getCurrentUser();
                     if (user && user.module === 'orders') {
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('dashboardSection').classList.add('active');
                         document.getElementById('userEmail').textContent = user.email;
-                        loadInitialData();
+                        await loadInitialData();
                     }
                 }
             } catch (error) {
@@ -2000,7 +2006,7 @@
                     document.getElementById('loginSection').style.display = 'none';
                     document.getElementById('dashboardSection').classList.add('active');
                     document.getElementById('userEmail').textContent = user.email;
-                    loadInitialData();
+                    await loadInitialData();
                 }
             }
         });
