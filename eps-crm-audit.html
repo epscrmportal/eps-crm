@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS CRM - Audit Trail</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        
+        header {
+            background: linear-gradient(135deg, #8E2A8C 0%, #6b1f68 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        header h1 { font-size: 24px; }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .logout-btn:hover { background: #c0392b; }
+        
+        .container { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .filter-btn {
+            background: #8E2A8C;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            align-self: flex-end;
+        }
+        
+        .filter-btn:hover { background: #6b1f68; }
+        
+        .export-btn {
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .export-btn:hover { background: #229954; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #8E2A8C;
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #8E2A8C;
+        }
+        
+        .audit-table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .audit-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .audit-table thead {
+            background: #8E2A8C;
+            color: white;
+        }
+        
+        .audit-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .audit-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .audit-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .action-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .action-create { background: #27ae60; }
+        .action-update { background: #3498db; }
+        .action-delete { background: #e74c3c; }
+        .action-login { background: #9b59b6; }
+        .action-logout { background: #95a5a6; }
+        .action-view { background: #f39c12; }
+        .action-export { background: #16a085; }
+        
+        .module-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #ecf0f1;
+            color: #333;
+        }
+        
+        .timestamp {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .pagination button:hover { background: #8E2A8C; color: white; }
+        .pagination button.active { background: #8E2A8C; color: white; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8E2A8C;
+            font-weight: bold;
+        }
+        
+        .details-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+        }
+        
+        .details-content {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .details-close {
+            color: #999;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .details-close:hover { color: #333; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📋 EPS CRM - Audit Trail</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+    
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Actions</h3>
+                <div class="value" id="totalActions">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Actions</h3>
+                <div class="value" id="todayActions">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Users</h3>
+                <div class="value" id="activeUsers">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Last 7 Days</h3>
+                <div class="value" id="weekActions">-</div>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>User Email</label>
+                <input type="text" id="filterUser" placeholder="Search email...">
+            </div>
+            <div class="filter-group">
+                <label>Module</label>
+                <select id="filterModule">
+                    <option value="">All Modules</option>
+                    <option value="Telecaller">Telecaller</option>
+                    <option value="Field Exec">Field Exec</option>
+                    <option value="Orders">Orders</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Collections">Collections</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Action Type</label>
+                <select id="filterAction">
+                    <option value="">All Actions</option>
+                    <option value="CREATE">Create</option>
+                    <option value="UPDATE">Update</option>
+                    <option value="DELETE">Delete</option>
+                    <option value="LOGIN">Login</option>
+                    <option value="LOGOUT">Logout</option>
+                    <option value="VIEW">View</option>
+                    <option value="EXPORT">Export</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" id="filterFromDate">
+            </div>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" id="filterToDate">
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn" onclick="applyFilters()">🔍 Filter</button>
+                <button class="export-btn" onclick="exportToCSV()">📥 Export CSV</button>
+            </div>
+        </div>
+        
+        <!-- Audit Table -->
+        <div class="audit-table-container">
+            <div id="loadingSpinner" class="loading" style="display: none;">Loading audit logs...</div>
+            <table class="audit-table" id="auditTable">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Module</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="auditBody">
+                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination" id="paginationContainer"></div>
+    </div>
+    
+    <!-- Details Modal -->
+    <div id="detailsModal" class="details-modal">
+        <div class="details-content">
+            <span class="details-close" onclick="closeDetailsModal()">&times;</span>
+            <h2>Action Details</h2>
+            <div id="detailsContent" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTAwOTYzLCJleHAiOjIwOTQ4MjY5NjN9.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+        const supabaseAudit = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentUser = null;
+        let allAuditLogs = [];
+        let currentPage = 1;
+        const logsPerPage = 50;
+        
+        async function initAuth() {
+            const { data: { session } } = await supabaseAudit.auth.getSession();
+            if (!session) {
+                window.location.href = 'https://www.epscrm.in';
+                return;
+            }
+            
+            const { data: userRole } = await supabaseAudit
+                .from('auth.users')
+                .select('email, raw_user_meta_data')
+                .eq('id', session.user.id)
+                .single();
+            
+            // Check if admin
+            const { data: adminCheck } = await supabaseAudit
+                .from('auth.users')
+                .select('id')
+                .eq('email', session.user.email)
+                .eq('raw_user_meta_data->>role', 'admin');
+            
+            if (!adminCheck || adminCheck.length === 0) {
+                alert('Access Denied! Only admins can view audit trail.');
+                await logout();
+                return;
+            }
+            
+            currentUser = session.user;
+            loadAuditLogs();
+        }
+        
+        async function loadAuditLogs() {
+            try {
+                document.getElementById('loadingSpinner').style.display = 'block';
+                
+                let query = supabaseAudit.from('audit_trail').select('*', { count: 'exact' });
+                
+                const { data, count, error } = await query.order('timestamp', { ascending: false });
+                
+                if (error) throw error;
+                
+                allAuditLogs = data || [];
+                updateStats();
+                displayLogs(1);
+                document.getElementById('loadingSpinner').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                document.getElementById('auditBody').innerHTML = '<tr><td colspan="6" class="no-data">Error loading logs</td></tr>';
+            }
+        }
+        
+        function updateStats() {
+            const today = new Date().toDateString();
+            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            
+            const todayLogs = allAuditLogs.filter(log => 
+                new Date(log.timestamp).toDateString() === today
+            ).length;
+            
+            const weekLogs = allAuditLogs.filter(log => 
+                new Date(log.timestamp) >= weekAgo
+            ).length;
+            
+            const uniqueUsers = new Set(allAuditLogs.map(log => log.user_email)).size;
+            
+            document.getElementById('totalActions').textContent = allAuditLogs.length;
+            document.getElementById('todayActions').textContent = todayLogs;
+            document.getElementById('activeUsers').textContent = uniqueUsers;
+            document.getElementById('weekActions').textContent = weekLogs;
+        }
+        
+        function applyFilters() {
+            const userFilter = document.getElementById('filterUser').value.toLowerCase();
+            const moduleFilter = document.getElementById('filterModule').value;
+            const actionFilter = document.getElementById('filterAction').value;
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+            
+            let filtered = allAuditLogs.filter(log => {
+                if (userFilter && !log.user_email.toLowerCase().includes(userFilter)) return false;
+                if (moduleFilter && log.module !== moduleFilter) return false;
+                if (actionFilter && log.action !== actionFilter) return false;
+                if (fromDate && new Date(log.timestamp) < new Date(fromDate)) return false;
+                if (toDate && new Date(log.timestamp) > new Date(toDate + 'T23:59:59')) return false;
+                return true;
+            });
+            
+            allAuditLogs = filtered;
+            displayLogs(1);
+        }
+        
+        function displayLogs(page) {
+            currentPage = page;
+            const start = (page - 1) * logsPerPage;
+            const end = start + logsPerPage;
+            const logsToShow = allAuditLogs.slice(start, end);
+            
+            if (logsToShow.length === 0) {
+                document.getElementById('auditBody').innerHTML = '<tr><td colspan="6" class="no-data">No audit logs found</td></tr>';
+                document.getElementById('paginationContainer').innerHTML = '';
+                return;
+            }
+            
+            const html = logsToShow.map(log => `
+                <tr>
+                    <td class="timestamp">${new Date(log.timestamp).toLocaleString()}</td>
+                    <td>${log.user_email}</td>
+                    <td>${log.user_role || 'N/A'}</td>
+                    <td><span class="module-badge">${log.module || 'N/A'}</span></td>
+                    <td><span class="action-badge action-${log.action.toLowerCase()}">${log.action}</span></td>
+                    <td>
+                        <button onclick="showDetails('${btoa(JSON.stringify(log))}')" style="background: #8E2A8C; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('auditBody').innerHTML = html;
+            
+            // Pagination
+            const totalPages = Math.ceil(allAuditLogs.length / logsPerPage);
+            let paginationHtml = '';
+            
+            if (page > 1) paginationHtml += `<button onclick="displayLogs(1)">« First</button>`;
+            if (page > 1) paginationHtml += `<button onclick="displayLogs(${page - 1})">‹ Prev</button>`;
+            
+            for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
+                paginationHtml += `<button ${i === page ? 'class="active"' : ''} onclick="displayLogs(${i})">${i}</button>`;
+            }
+            
+            if (page < totalPages) paginationHtml += `<button onclick="displayLogs(${page + 1})">Next ›</button>`;
+            if (page < totalPages) paginationHtml += `<button onclick="displayLogs(${totalPages})">Last »</button>`;
+            
+            paginationHtml += `<span style="color: #666;"> Page ${page} of ${totalPages} </span>`;
+            
+            document.getElementById('paginationContainer').innerHTML = paginationHtml;
+        }
+        
+        function showDetails(encodedLog) {
+            const log = JSON.parse(atob(encodedLog));
+            const detailsHtml = `
+                <strong>User Email:</strong> ${log.user_email}<br><br>
+                <strong>Role:</strong> ${log.user_role || 'N/A'}<br><br>
+                <strong>Module:</strong> ${log.module || 'N/A'}<br><br>
+                <strong>Action:</strong> ${log.action}<br><br>
+                <strong>Timestamp:</strong> ${new Date(log.timestamp).toLocaleString()}<br><br>
+                <strong>Details:</strong><br>
+                <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto;">
+${JSON.stringify(log.details, null, 2)}
+                </pre>
+            `;
+            document.getElementById('detailsContent').innerHTML = detailsHtml;
+            document.getElementById('detailsModal').style.display = 'block';
+        }
+        
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+        
+        function exportToCSV() {
+            let csv = 'Timestamp,User Email,Role,Module,Action,Details\n';
+            
+            allAuditLogs.forEach(log => {
+                const details = JSON.stringify(log.details || {}).replace(/"/g, '""');
+                csv += `"${new Date(log.timestamp).toLocaleString()}","${log.user_email}","${log.user_role || 'N/A'}","${log.module || 'N/A'}","${log.action}","${details}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+        
+        async function logout() {
+            await supabaseAudit.auth.signOut();
+            window.location.href = 'https://www.epscrm.in';
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailsModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Initialize
+        initAuth();
+    </script>
+</body>
+</html>
