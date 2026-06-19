@@ -113,13 +113,19 @@
 
         th.sticky { 
             position: sticky; 
-            left: 0; 
             z-index: 11; 
             background: #d9dce0; 
             writing-mode: horizontal-tb; 
             height: auto;
-            min-width: 110px;
+            min-width: 70px;
         }
+
+        th.sticky:nth-child(1) { left: 0; }
+        th.sticky:nth-child(2) { left: 70px; }
+        th.sticky:nth-child(3) { left: 140px; }
+        th.sticky:nth-child(4) { left: 210px; }
+        th.sticky:nth-child(5) { left: 280px; }
+        th.sticky:nth-child(6) { left: 350px; }
 
         td {
             padding: 4px 2px;
@@ -130,16 +136,22 @@
 
         td.sticky {
             position: sticky;
-            left: 0;
             z-index: 9;
             background: white;
-            text-align: left;
+            text-align: center;
             font-weight: 500;
-            min-width: 110px;
-            max-width: 110px;
+            min-width: 70px;
+            max-width: 70px;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        td.sticky:nth-child(1) { left: 0; }
+        td.sticky:nth-child(2) { left: 70px; }
+        td.sticky:nth-child(3) { left: 140px; }
+        td.sticky:nth-child(4) { left: 210px; }
+        td.sticky:nth-child(5) { left: 280px; }
+        td.sticky:nth-child(6) { left: 350px; }
 
         tr:hover { background: #f8f9fa; }
         tr:hover td.sticky { background: #f0f2f5; }
