@@ -1564,6 +1564,13 @@
             createCharts();
         }
 
+        // Global chart instances
+        let chartInstances = {
+            serviceChart: null,
+            statusChart: null,
+            revenueChart: null
+        };
+
         function createCharts() {
             const shippingMethods = {};
             const statusCounts = { pending: 0, completed: 0 };
@@ -1577,10 +1584,15 @@
                 monthlyRevenue[month] = (monthlyRevenue[month] || 0) + order.amount;
             });
 
+            // Destroy existing charts before creating new ones
+            if (chartInstances.serviceChart) chartInstances.serviceChart.destroy();
+            if (chartInstances.statusChart) chartInstances.statusChart.destroy();
+            if (chartInstances.revenueChart) chartInstances.revenueChart.destroy();
+
             // Service Chart
             const serviceCtx = document.getElementById('serviceChart');
             if (serviceCtx) {
-                const serviceChart = new Chart(serviceCtx, {
+                chartInstances.serviceChart = new Chart(serviceCtx, {
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(shippingMethods),
@@ -1601,7 +1613,7 @@
             // Status Chart
             const statusCtx = document.getElementById('statusChart');
             if (statusCtx) {
-                new Chart(statusCtx, {
+                chartInstances.statusChart = new Chart(statusCtx, {
                     type: 'bar',
                     data: {
                         labels: Object.keys(statusCounts),
@@ -1624,7 +1636,7 @@
             const revenueCtx = document.getElementById('revenueChart');
             if (revenueCtx) {
                 const months = Object.keys(monthlyRevenue).sort();
-                new Chart(revenueCtx, {
+                chartInstances.revenueChart = new Chart(revenueCtx, {
                     type: 'line',
                     data: {
                         labels: months,
