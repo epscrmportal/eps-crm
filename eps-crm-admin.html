@@ -1804,19 +1804,40 @@
                 // Update Daily Targets
                 const dailyBody = document.getElementById('dailyTargetsBody');
                 if (dailyBody) {
-                    dailyBody.innerHTML = '<tr><td>Telecaller Team</td><td>45</td><td>' + todayCalls + '</td><td>' + window.getStatusBadge(todayCalls, 45) + '</td><td>30</td><td>' + todayConnected + '</td><td>' + window.getStatusBadge(todayConnected, 30) + '</td><td>2</td><td>' + todayMeetings + '</td><td>' + window.getStatusBadge(todayMeetings, 2) + '</td></tr>';
+                    const fieldExecDailyMeetings = meetings.filter(m => {
+                        const meetingDate = m.created_at ? m.created_at.split('T')[0] : '';
+                        return meetingDate === todayStr;
+                    }).length;
+                    
+                    dailyBody.innerHTML = 
+                        '<tr><td>Telecaller Team</td><td>45</td><td>' + todayCalls + '</td><td>' + window.getStatusBadge(todayCalls, 45) + '</td><td>30</td><td>' + todayConnected + '</td><td>' + window.getStatusBadge(todayConnected, 30) + '</td><td>2</td><td>' + todayMeetings + '</td><td>' + window.getStatusBadge(todayMeetings, 2) + '</td></tr>' +
+                        '<tr><td>Field Executive Team</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>1</td><td>' + fieldExecDailyMeetings + '</td><td>' + window.getStatusBadge(fieldExecDailyMeetings, 1) + '</td></tr>';
                 }
 
                 // Update Weekly Targets
                 const weeklyBody = document.getElementById('weeklyTargetsBody');
                 if (weeklyBody) {
-                    weeklyBody.innerHTML = '<tr><td>Telecaller Team</td><td>270</td><td>' + weeklyCalls + '</td><td>' + window.getStatusBadge(weeklyCalls, 270) + '</td><td>180</td><td>' + weeklyConnected + '</td><td>' + window.getStatusBadge(weeklyConnected, 180) + '</td><td>12</td><td>' + weeklyMeetings + '</td><td>' + window.getStatusBadge(weeklyMeetings, 12) + '</td></tr>';
+                    const fieldExecWeeklyMeetings = meetings.filter(m => {
+                        const meetingDate = m.created_at ? m.created_at.split('T')[0] : '';
+                        return meetingDate >= weekStartStr && meetingDate <= todayStr;
+                    }).length;
+                    
+                    weeklyBody.innerHTML = 
+                        '<tr><td>Telecaller Team</td><td>270</td><td>' + weeklyCalls + '</td><td>' + window.getStatusBadge(weeklyCalls, 270) + '</td><td>180</td><td>' + weeklyConnected + '</td><td>' + window.getStatusBadge(weeklyConnected, 180) + '</td><td>12</td><td>' + weeklyMeetings + '</td><td>' + window.getStatusBadge(weeklyMeetings, 12) + '</td></tr>' +
+                        '<tr><td>Field Executive Team</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>5</td><td>' + fieldExecWeeklyMeetings + '</td><td>' + window.getStatusBadge(fieldExecWeeklyMeetings, 5) + '</td></tr>';
                 }
 
                 // Update Monthly Targets
                 const monthlyBody = document.getElementById('monthlyTargetsBody');
                 if (monthlyBody) {
-                    monthlyBody.innerHTML = '<tr><td>Telecaller Team</td><td>1080</td><td>' + monthlyCalls + '</td><td>' + window.getStatusBadge(monthlyCalls, 1080) + '</td><td>720</td><td>' + monthlyConnected + '</td><td>' + window.getStatusBadge(monthlyConnected, 720) + '</td><td>48</td><td>' + monthlyMeetings + '</td><td>' + window.getStatusBadge(monthlyMeetings, 48) + '</td></tr>';
+                    const fieldExecMonthlyMeetings = meetings.filter(m => {
+                        const meetingDate = m.created_at ? m.created_at.split('T')[0] : '';
+                        return meetingDate >= monthStartStr && meetingDate <= todayStr;
+                    }).length;
+                    
+                    monthlyBody.innerHTML = 
+                        '<tr><td>Telecaller Team</td><td>1080</td><td>' + monthlyCalls + '</td><td>' + window.getStatusBadge(monthlyCalls, 1080) + '</td><td>720</td><td>' + monthlyConnected + '</td><td>' + window.getStatusBadge(monthlyConnected, 720) + '</td><td>48</td><td>' + monthlyMeetings + '</td><td>' + window.getStatusBadge(monthlyMeetings, 48) + '</td></tr>' +
+                        '<tr><td>Field Executive Team</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>20</td><td>' + fieldExecMonthlyMeetings + '</td><td>' + window.getStatusBadge(fieldExecMonthlyMeetings, 20) + '</td></tr>';
                 }
             };
             window.downloadDailyReportPDF = function() {
