@@ -1304,43 +1304,39 @@
             };
 
             window.subscribeToRealTimeUpdates = function() {
-                // Subscribe to contacts changes
-                window.supabaseClient
-                    .channel('public:contacts')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, (payload) => {
-                        console.log('Contacts update:', payload);
-                        window.loadAllData();
-                    })
-                    .subscribe();
+                try {
+                    // Unsubscribe from previous subscriptions to avoid conflicts
+                    window.supabaseClient.removeAllChannels();
 
-                // Subscribe to meetings changes
-                window.supabaseClient
-                    .channel('public:meetings')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings' }, (payload) => {
-                        console.log('Meetings update:', payload);
-                        window.loadAllData();
-                    })
-                    .subscribe();
-
-                // Subscribe to calls changes
-                window.supabaseClient
-                    .channel('public:calls')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, (payload) => {
-                        console.log('Calls update:', payload);
-                        window.loadAllData();
-                    })
-                    .subscribe();
-                
-                // Subscribe to orders changes (now using Supabase)
-                window.supabaseClient
-                    .channel('public:orders')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-                        console.log('📦 Orders update:', payload);
-                        window.loadAllData();
-                    })
-                    .subscribe();
-                
-                console.log('✅ Real-time subscriptions active (including orders)');
+                    // Create single subscription with all callbacks
+                    window.supabaseClient
+                        .channel('public:all')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, (payload) => {
+                            console.log('Contacts update:', payload);
+                            window.loadAllData();
+                        })
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings' }, (payload) => {
+                            console.log('Meetings update:', payload);
+                            window.loadAllData();
+                        })
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, (payload) => {
+                            console.log('Calls update:', payload);
+                            window.loadAllData();
+                        })
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+                            console.log('📦 Orders update:', payload);
+                            window.loadAllData();
+                        })
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'employee_incentives' }, (payload) => {
+                            console.log('Incentives update:', payload);
+                            window.loadIncentives();
+                        })
+                        .subscribe();
+                    
+                    console.log('✅ Real-time subscriptions active');
+                } catch (error) {
+                    console.error('Subscription error:', error);
+                }
             };
 
             window.loadFromLocalStorageOnly = function() {
@@ -1972,17 +1968,8 @@
             };
 
             window.subscribeToIncentivesUpdates = function() {
-                try {
-                    window.supabaseClient
-                        .channel('public:employee_incentives')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'employee_incentives' }, (payload) => {
-                            console.log('Incentives updated:', payload);
-                            window.loadIncentives();
-                        })
-                        .subscribe();
-                } catch (error) {
-                    console.log('Subscription error (non-critical):', error);
-                }
+                // Now handled by main subscribeToRealTimeUpdates
+                console.log('✅ Incentives updates included in main real-time subscription');
             };
 
             window.generateTestIncentives = async function() {
