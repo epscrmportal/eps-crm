@@ -20,6 +20,118 @@
             padding: 20px;
         }
 
+        /* Login Page Styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #999;
+            font-size: 0.95em;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #f5c6cb;
+            display: none;
+            font-size: 0.9em;
+        }
+
+        .login-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #b8daff;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -361,10 +473,34 @@
     </style>
 </head>
 <body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container hidden">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>🔐 Session Expired</h1>
+                <p>Salary & Attendance Management System</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="login-info">
+                    ℹ️ Your session has expired. Please login again from the main dashboard.
+                </div>
+                
+                <button class="login-btn" onclick="backToMainLogin()">Back to Main Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboardPage" class="hidden">
     <div class="container">
         <div class="header">
             <h1>💰 Salary & Attendance Dashboard</h1>
             <p>Comprehensive Monthly Analytics & Records</p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 0.95em; color: rgba(255,255,255,0.9);">Logged in as: <strong id="userEmail"></strong></span>
+                <button onclick="handleLogout()" style="padding: 8px 20px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">🚪 Logout</button>
+            </div>
         </div>
 
         <div class="controls">
@@ -445,8 +581,64 @@
         </div>
     </div>
 
+        </div>
+    </div>
+
     <script>
-        // Sample data from Excel sheets (APR 26, MAY 26, JUN 26)
+        // Supabase configuration
+        const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
+        
+        // Check authentication on page load
+        window.addEventListener('load', () => {
+            checkAuthentication();
+        });
+
+        function checkAuthentication() {
+            // Check if user is logged in from main CRM
+            const userSession = localStorage.getItem('eps_crm_user');
+            const userEmail = localStorage.getItem('eps_crm_user_email');
+            
+            if (userSession && userEmail === 'accounts@epsworldwide.in') {
+                try {
+                    const user = JSON.parse(userSession);
+                    showDashboard(userEmail);
+                    return;
+                } catch (e) {
+                    console.log('Invalid session');
+                }
+            }
+            
+            // If no valid session, show login page and redirect back
+            showLoginExpired();
+        }
+
+        function showLoginExpired() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+        }
+
+        function showDashboard(email) {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = email;
+            loadData(); // Load dashboard data
+            updateStats();
+        }
+
+        function backToMainLogin() {
+            localStorage.removeItem('eps_crm_user');
+            localStorage.removeItem('eps_crm_user_email');
+            window.location.href = 'eps-crm-dashboard.html';
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('eps_crm_user');
+                localStorage.removeItem('eps_crm_user_email');
+                window.location.href = 'eps-crm-dashboard.html';
+            }
+        }
         const attendanceData = {
             APR26: {
                 month: 'April 2026',
