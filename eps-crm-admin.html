@@ -1237,7 +1237,11 @@
                         .select('*')
                         .order('created_at', { ascending: false });
                     
-                    if (!ordersRes.error && ordersRes.data) {
+                    if (ordersRes.error) {
+                        console.error('❌ Error loading orders from Supabase:', ordersRes.error);
+                        window.allData.orders = [];
+                    } else if (ordersRes.data) {
+                        console.log('📦 Orders from Supabase:', ordersRes.data.length, 'records');
                         window.allData.orders = ordersRes.data.map(order => ({
                             id: order.order_id,
                             forwardingNumber: order.forwarding_number,
@@ -1271,6 +1275,7 @@
                             createdOn: order.created_on
                         }));
                     } else {
+                        console.warn('⚠️ No orders data returned from Supabase');
                         window.allData.orders = [];
                     }
 
