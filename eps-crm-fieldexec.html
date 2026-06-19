@@ -138,6 +138,11 @@
                         </div>
                         <button class="btn btn-primary" onclick="saveActivity()" style="width: 100%; margin-top: 10px;">Log Activity</button>
                     </div>
+                    
+                    <h3>Activity Log</h3>
+                    <div id="activitiesListContainer" style="display: grid; gap: 15px;">
+                        <!-- Activities will load here -->
+                    </div>
                 </div>
             </div>
 
@@ -489,6 +494,11 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
+            
+            // Load activities when switching to logActivity tab
+            if (tabName === 'logActivity') {
+                loadActivities();
+            }
         }
 
         async function loadAllData() {
@@ -496,6 +506,7 @@
                 await loadMeetings();
                 await loadContacts();
                 await loadBusinessCards();
+                await loadActivities();
                 loadGoalProgress();
                 loadSubmittedRegistrations();
                 updateMetrics();
@@ -713,6 +724,54 @@
                 document.getElementById('activityEventName').value = '';
                 document.getElementById('activityDate').value = '';
                 document.getElementById('activityNotes').value = '';
+                loadActivities();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function loadActivities() {
+            try {
+                const { data, error } = await supabase
+                    .from('activities')
+                    .select('*')
+                    .eq('field_exec_email', currentUser.email)
+                    .order('activity_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('activitiesListContainer');
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No activities logged yet</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.map(activity => `
+                    <div style="background: white; padding: 15px; border-left: 4px solid #8E2A8C; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <div style="font-weight: bold; color: #8E2A8C; font-size: 16px;">${activity.event_name}</div>
+                                <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                                    <strong>Type:</strong> ${activity.activity_type} | <strong>Date:</strong> ${new Date(activity.activity_date).toLocaleDateString()}
+                                </div>
+                                ${activity.notes ? '<div style="color: #666; font-size: 14px; margin-top: 8px;"><strong>Notes:</strong> ' + activity.notes + '</div>' : ''}
+                            </div>
+                            <button class="btn btn-sm" onclick="deleteActivity('${activity.id}')" style="background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading activities:', error);
+                document.getElementById('activitiesListContainer').innerHTML = '<p style="color: red;">Error loading activities</p>';
+            }
+        }
+
+        async function deleteActivity(activityId) {
+            if (!confirm('Delete this activity?')) return;
+            try {
+                const { error } = await supabase.from('activities').delete().eq('id', activityId);
+                if (error) throw error;
+                loadActivities();
             } catch (error) {
                 alert('Error: ' + error.message);
             }
