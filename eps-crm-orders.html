@@ -1377,8 +1377,8 @@
                 '</div>' +
                 
                 '<div class="invoice-details">' +
-                '<div class="detail-section"><h3>FROM (PICKUP ADDRESS)</h3><p>' + (order.senderAddress || 'N/A') + '</p><p>' + (order.senderPincode || 'N/A') + '</p></div>' +
-                '<div class="detail-section"><h3>TO (DELIVERY ADDRESS)</h3><p><strong>' + (order.receiverName || 'N/A') + '</strong></p><p>Email: ' + (order.email || 'N/A') + '</p><p>Phone: ' + (order.receiverPhone || 'N/A') + '</p><p>' + (order.receiverAddress || 'N/A') + '</p><p>' + (order.receiverPincode || 'N/A') + '</p></div>' +
+                '<div class="detail-section"><h3>FROM (PICKUP ADDRESS)</h3><p><strong>' + (order.customerName || 'N/A') + '</strong></p><p>Email: ' + (order.email || 'N/A') + '</p><p>Phone: ' + (order.phone || 'N/A') + '</p><p>' + (order.senderAddress || 'N/A') + '</p><p>' + (order.senderPincode || 'N/A') + '</p></div>' +
+                '<div class="detail-section"><h3>TO (DELIVERY ADDRESS)</h3><p><strong>' + (order.receiverName || 'N/A') + '</strong></p><p>Phone: ' + (order.receiverPhone || 'N/A') + '</p><p>' + (order.receiverAddress || 'N/A') + '</p><p>' + (order.receiverPincode || 'N/A') + '</p></div>' +
                 '</div>' +
                 
                 '<div class="table-container"><table><thead><tr><th>S.No</th><th>Date</th><th>Forwarding Ref</th><th>Origin</th><th>Destination</th><th>Service</th><th>Weight</th><th>Dimension</th><th>Pcs</th><th>Charges</th></tr></thead><tbody><tr><td>1</td><td>' + order.createdOn + '</td><td>' + order.forwardingNumber + '</td><td>' + order.origin + '</td><td>' + order.destination + '</td><td>' + (order.serviceType || 'N/A') + '</td><td>' + order.weight + ' kg</td><td>' + order.length + 'x' + order.width + 'x' + order.height + ' cm</td><td>' + order.boxes + '</td><td style="text-align: right;">₹' + order.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr></tbody></table></div>' +
