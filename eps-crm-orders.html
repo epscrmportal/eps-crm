@@ -302,8 +302,8 @@
             padding: 30px;
             border-radius: 10px;
             width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
+            max-width: 800px;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
@@ -789,38 +789,173 @@
 
     <!-- Edit Modal -->
     <div id="editModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
             <div class="modal-header">
                 <span>✏️ Edit Order</span>
                 <button class="close-btn" onclick="closeModal('editModal')">✕</button>
             </div>
+            
+            <!-- Order Reference (Read-only) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Order ID (Read-only):</label>
+                    <input type="text" id="editOrderId" disabled style="background: #e0e0e0;">
+                </div>
+                <div class="form-group">
+                    <label>Forwarding Number (Read-only):</label>
+                    <input type="text" id="editForwardingNumber" disabled style="background: #e0e0e0;">
+                </div>
+            </div>
+
+            <!-- Employee Details -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">👤 Employee Details</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Employee Name:</label>
+                    <input type="text" id="editEmployeeName">
+                </div>
+                <div class="form-group">
+                    <label>Employee ID:</label>
+                    <input type="text" id="editEmployeeId">
+                </div>
+            </div>
+
+            <!-- Customer Details -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">🛍️ Customer Details</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Customer Name:</label>
                     <input type="text" id="editCustomerName">
                 </div>
                 <div class="form-group">
-                    <label>Origin:</label>
+                    <label>Email:</label>
+                    <input type="email" id="editCustomerEmail">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone Number:</label>
+                    <input type="text" id="editCustomerPhone">
+                </div>
+                <div class="form-group">
+                    <label>Alternative Phone:</label>
+                    <input type="text" id="editAlternativePhone">
+                </div>
+            </div>
+
+            <!-- Sender Address -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📍 Sender Address</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Address:</label>
+                    <input type="text" id="editSenderAddress">
+                </div>
+                <div class="form-group">
+                    <label>Pincode:</label>
+                    <input type="text" id="editSenderPincode">
+                </div>
+            </div>
+
+            <!-- Receiver Details -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📦 Receiver Details</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Receiver Name:</label>
+                    <input type="text" id="editReceiverName">
+                </div>
+                <div class="form-group">
+                    <label>Receiver Phone:</label>
+                    <input type="text" id="editReceiverPhone">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Receiver Address:</label>
+                    <input type="text" id="editReceiverAddress">
+                </div>
+                <div class="form-group">
+                    <label>Receiver Pincode:</label>
+                    <input type="text" id="editReceiverPincode">
+                </div>
+            </div>
+
+            <!-- Route -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">🗺️ Origin & Destination</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Origin City:</label>
                     <input type="text" id="editOrigin">
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
-                    <label>Destination:</label>
+                    <label>Destination City:</label>
                     <input type="text" id="editDestination">
                 </div>
+            </div>
+
+            <!-- Service & Shipping -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">⚙️ Service & Shipping</h4>
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Amount:</label>
-                    <input type="number" id="editAmount" onchange="calculateGST()">
+                    <label>Service Type:</label>
+                    <select id="editServiceType" style="width: 100%; padding: 10px; border: 1px solid #ddd;">
+                        <option>Domestic Parcel</option>
+                        <option>Domestic Document</option>
+                        <option>International Parcel</option>
+                        <option>International Document</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Shipping Method:</label>
+                    <select id="editShippingMethod" style="width: 100%; padding: 10px; border: 1px solid #ddd;">
+                        <option>Air</option>
+                        <option>Surface</option>
+                        <option>Train</option>
+                        <option>Express</option>
+                        <option>One Day</option>
+                        <option>Within Maharashtra</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📦 Order Details</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Number of Boxes:</label>
+                    <input type="number" id="editBoxes" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Weight (kg):</label>
+                    <input type="number" id="editWeight" min="0" step="0.1">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Status:</label>
-                    <select id="editStatus" style="width: 100%; padding: 10px; border: 1px solid #ddd;">
-                        <option>pending</option>
-                        <option>completed</option>
-                    </select>
+                    <label>Length (cm):</label>
+                    <input type="number" id="editLength" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Width (cm):</label>
+                    <input type="number" id="editWidth" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Height (cm):</label>
+                    <input type="number" id="editHeight" min="0" step="0.1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Item Description:</label>
+                    <textarea id="editItemDescription" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;"></textarea>
+                </div>
+            </div>
+
+            <!-- Payment Details -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">💳 Payment Details</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Order Amount (₹):</label>
+                    <input type="number" id="editAmount" min="0" step="0.01">
                 </div>
                 <div class="form-group">
                     <label>Payment Method:</label>
@@ -830,8 +965,28 @@
                     </select>
                 </div>
             </div>
-            <div class="form-actions">
-                <button class="btn btn-primary" onclick="saveEditOrder()">Save</button>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Order Notes:</label>
+                    <textarea id="editOrderNotes" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;"></textarea>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📊 Status</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Order Status:</label>
+                    <select id="editStatus" style="width: 100%; padding: 10px; border: 1px solid #ddd;">
+                        <option>pending</option>
+                        <option>paid</option>
+                        <option>completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveEditOrder()">💾 Save Changes</button>
                 <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
             </div>
         </div>
@@ -921,8 +1076,8 @@
             document.getElementById('amount').value = '';
             document.getElementById('paymentMethod').value = 'Cash';
             document.getElementById('orderNotes').value = '';
-            generateOrderId();
-            generateForwardingNumber();
+            document.getElementById('orderId').value = generateOrderId();
+            document.getElementById('forwardingNumber').value = generateForwardingNumber();
         }
 
         function switchOrdersTab(tabName) {
@@ -1163,34 +1318,48 @@
 
             const invoiceHTML = '<style>' +
                 '* { margin: 0; padding: 0; box-sizing: border-box; }' +
+                'html, body { width: 100%; height: 100%; }' +
                 'body { font-family: Arial, sans-serif; background: #f5f5f5; }' +
-                '.invoice-container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; }' +
-                '.invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #8E2A8C; }' +
-                '.company-details h1 { color: #8E2A8C; font-size: 20px; margin-bottom: 5px; }' +
-                '.company-details p { font-size: 12px; color: #666; line-height: 1.6; }' +
-                '.invoice-title h2 { color: #8E2A8C; font-size: 28px; margin-bottom: 10px; text-align: right; }' +
-                '.invoice-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; }' +
-                '.meta-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; font-size: 12px; }' +
+                '.invoice-container { max-width: 100%; margin: 0; background: white; padding: 15mm; }' +
+                '.invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #8E2A8C; page-break-inside: avoid; }' +
+                '.company-details h1 { color: #8E2A8C; font-size: 16px; margin-bottom: 3px; }' +
+                '.company-details p { font-size: 10px; color: #333; line-height: 1.4; }' +
+                '.invoice-title h2 { color: #8E2A8C; font-size: 20px; margin: 0; text-align: right; }' +
+                '.invoice-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; page-break-inside: avoid; }' +
+                '.meta-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd; font-size: 10px; }' +
                 '.meta-label { font-weight: bold; color: #333; }' +
                 '.meta-value { color: #666; text-align: right; }' +
-                '.invoice-details { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; }' +
-                '.detail-section h3 { color: #8E2A8C; font-size: 14px; font-weight: bold; margin-bottom: 10px; }' +
-                '.detail-section p { font-size: 12px; color: #333; line-height: 1.8; margin-bottom: 3px; }' +
-                '.table-container { margin-bottom: 30px; overflow-x: auto; }' +
-                'table { width: 100%; border-collapse: collapse; font-size: 12px; }' +
+                '.invoice-details { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; page-break-inside: avoid; }' +
+                '.detail-section h3 { color: #8E2A8C; font-size: 11px; font-weight: bold; margin-bottom: 5px; }' +
+                '.detail-section p { font-size: 10px; color: #333; line-height: 1.5; margin-bottom: 2px; }' +
+                '.table-container { margin-bottom: 15px; page-break-inside: avoid; }' +
+                'table { width: 100%; border-collapse: collapse; font-size: 10px; }' +
                 'table thead { background: #8E2A8C; color: white; }' +
-                'table th { padding: 12px; text-align: left; font-weight: bold; }' +
-                'table td { padding: 12px; border-bottom: 1px solid #ddd; }' +
+                'table th { padding: 6px; text-align: left; font-weight: bold; border: 1px solid #8E2A8C; }' +
+                'table td { padding: 6px; border: 1px solid #ddd; }' +
                 'table tbody tr:nth-child(even) { background: #f9f9f9; }' +
-                '.summary-section { margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; }' +
-                '.summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }' +
-                '.summary-row.subtotal { border-top: 2px solid #ddd; padding-top: 12px; font-weight: bold; color: #333; }' +
+                '.summary-section { margin-bottom: 15px; padding: 10px; background: #f9f9f9; page-break-inside: avoid; }' +
+                '.summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; }' +
+                '.summary-row.subtotal { border-top: 2px solid #ddd; padding-top: 5px; font-weight: bold; color: #333; }' +
                 '.summary-row.gst { color: #666; }' +
-                '.summary-row.total { border-top: 2px solid #8E2A8C; padding-top: 12px; font-size: 15px; font-weight: bold; color: #8E2A8C; }' +
-                '.amount-in-words { padding: 15px; background: #e8d4f1; border-left: 4px solid #8E2A8C; margin-bottom: 20px; font-size: 12px; color: #333; }' +
+                '.summary-row.total { border-top: 2px solid #8E2A8C; padding-top: 5px; font-size: 12px; font-weight: bold; color: #8E2A8C; }' +
+                '.amount-in-words { padding: 8px; background: #e8d4f1; border-left: 4px solid #8E2A8C; margin-bottom: 10px; font-size: 10px; color: #333; page-break-inside: avoid; }' +
                 '.amount-in-words label { font-weight: bold; color: #8E2A8C; }' +
-                '.bank-details { padding: 15px; background: #f0f9ff; border-left: 4px solid #3b82f6; margin-bottom: 20px; font-size: 11px; line-height: 1.8; }' +
-                '.payment-info { padding: 15px; background: #f0f9ff; border-left: 4px solid #3b82f6; margin-bottom: 20px; font-size: 12px; }' +
+                '.bank-details { padding: 8px; background: #f0f9ff; border-left: 4px solid #3b82f6; margin-bottom: 10px; font-size: 9px; line-height: 1.5; page-break-inside: avoid; }' +
+                '.payment-info { padding: 8px; background: #f0f9ff; border-left: 4px solid #3b82f6; margin-bottom: 10px; font-size: 10px; page-break-inside: avoid; }' +
+                '@media print {' +
+                  'body { margin: 0; padding: 0; background: white; }' +
+                  '.invoice-container { max-width: 100%; margin: 0; padding: 15mm; background: white; }' +
+                  '@page { size: A4; margin: 10mm; }' +
+                  '.invoice-header { page-break-inside: avoid; }' +
+                  '.invoice-meta { page-break-inside: avoid; }' +
+                  '.invoice-details { page-break-inside: avoid; }' +
+                  '.table-container { page-break-inside: avoid; }' +
+                  '.summary-section { page-break-inside: avoid; }' +
+                  '.amount-in-words { page-break-inside: avoid; }' +
+                  '.bank-details { page-break-inside: avoid; }' +
+                  'table { page-break-inside: avoid; }' +
+                '}' +
                 '</style>' +
                 '<div class="invoice-container">' +
                 '<div class="invoice-header">' +
@@ -1254,12 +1423,54 @@
             if (!order) return;
 
             editingOrderId = orderId;
+            
+            // Order Reference (Read-only)
+            document.getElementById('editOrderId').value = order.id;
+            document.getElementById('editForwardingNumber').value = order.forwardingNumber;
+            
+            // Employee Details
+            document.getElementById('editEmployeeName').value = order.employeeName || '';
+            document.getElementById('editEmployeeId').value = order.employeeId || '';
+            
+            // Customer Details
             document.getElementById('editCustomerName').value = order.customerName;
+            document.getElementById('editCustomerEmail').value = order.email || '';
+            document.getElementById('editCustomerPhone').value = order.phone || '';
+            document.getElementById('editAlternativePhone').value = order.alternativePhone || '';
+            
+            // Sender Address
+            document.getElementById('editSenderAddress').value = order.senderAddress || '';
+            document.getElementById('editSenderPincode').value = order.senderPincode || '';
+            
+            // Receiver Details
+            document.getElementById('editReceiverName').value = order.receiverName || '';
+            document.getElementById('editReceiverPhone').value = order.receiverPhone || '';
+            document.getElementById('editReceiverAddress').value = order.receiverAddress || '';
+            document.getElementById('editReceiverPincode').value = order.receiverPincode || '';
+            
+            // Route
             document.getElementById('editOrigin').value = order.origin;
             document.getElementById('editDestination').value = order.destination;
+            
+            // Service & Shipping
+            document.getElementById('editServiceType').value = order.serviceType || 'Domestic Parcel';
+            document.getElementById('editShippingMethod').value = order.shippingMethod || 'Air';
+            
+            // Order Details
+            document.getElementById('editBoxes').value = order.boxes || '';
+            document.getElementById('editWeight').value = order.weight || '';
+            document.getElementById('editLength').value = order.length || '';
+            document.getElementById('editWidth').value = order.width || '';
+            document.getElementById('editHeight').value = order.height || '';
+            document.getElementById('editItemDescription').value = order.itemDescription || '';
+            
+            // Payment Details
             document.getElementById('editAmount').value = order.amount;
-            document.getElementById('editStatus').value = order.status;
             document.getElementById('editPaymentMethod').value = order.paymentMethod;
+            document.getElementById('editOrderNotes').value = order.orderNotes || '';
+            
+            // Status
+            document.getElementById('editStatus').value = order.status;
 
             document.getElementById('editModal').classList.add('active');
         }
@@ -1268,12 +1479,49 @@
             const order = window.orders.find(o => o.id === editingOrderId);
             if (!order) return;
 
+            // Employee Details
+            order.employeeName = document.getElementById('editEmployeeName').value;
+            order.employeeId = document.getElementById('editEmployeeId').value;
+            
+            // Customer Details
             order.customerName = document.getElementById('editCustomerName').value;
+            order.email = document.getElementById('editCustomerEmail').value;
+            order.phone = document.getElementById('editCustomerPhone').value;
+            order.alternativePhone = document.getElementById('editAlternativePhone').value;
+            
+            // Sender Address
+            order.senderAddress = document.getElementById('editSenderAddress').value;
+            order.senderPincode = document.getElementById('editSenderPincode').value;
+            
+            // Receiver Details
+            order.receiverName = document.getElementById('editReceiverName').value;
+            order.receiverPhone = document.getElementById('editReceiverPhone').value;
+            order.receiverAddress = document.getElementById('editReceiverAddress').value;
+            order.receiverPincode = document.getElementById('editReceiverPincode').value;
+            
+            // Route
             order.origin = document.getElementById('editOrigin').value;
             order.destination = document.getElementById('editDestination').value;
+            
+            // Service & Shipping
+            order.serviceType = document.getElementById('editServiceType').value;
+            order.shippingMethod = document.getElementById('editShippingMethod').value;
+            
+            // Order Details
+            order.boxes = parseInt(document.getElementById('editBoxes').value) || 0;
+            order.weight = parseFloat(document.getElementById('editWeight').value) || 0;
+            order.length = parseFloat(document.getElementById('editLength').value) || 0;
+            order.width = parseFloat(document.getElementById('editWidth').value) || 0;
+            order.height = parseFloat(document.getElementById('editHeight').value) || 0;
+            order.itemDescription = document.getElementById('editItemDescription').value;
+            
+            // Payment Details
             order.amount = parseFloat(document.getElementById('editAmount').value) || 0;
-            order.status = document.getElementById('editStatus').value;
             order.paymentMethod = document.getElementById('editPaymentMethod').value;
+            order.orderNotes = document.getElementById('editOrderNotes').value;
+            
+            // Status
+            order.status = document.getElementById('editStatus').value;
 
             saveOrdersToStorage();
             displayOrders();
@@ -1493,6 +1741,10 @@
             window.orders = loadOrdersFromStorage();
             displayOrders();
             updateDashboard();
+
+            // Generate initial Order ID and Forwarding Number
+            document.getElementById('orderId').value = generateOrderId();
+            document.getElementById('forwardingNumber').value = generateForwardingNumber();
 
             if (localStorage.getItem('eps_crm_darkMode')) {
                 document.body.classList.add('dark-mode');
