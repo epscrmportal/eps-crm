@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS CRM - Salary & Attendance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .controls {
+            padding: 25px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .control-group select,
+        .control-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .table-container {
+            padding: 25px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            background: #f0f2f5;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            color: #555;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr.highlight {
+            background: #fff3cd !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-present {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-absent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-holiday {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            background: #f8f9fa;
+            padding: 0 25px;
+            gap: 0;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 25px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .month-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .export-btn {
+            margin: 20px 0;
+        }
+
+        .salary-info {
+            background: #f0f2f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .salary-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #667eea;
+        }
+
+        .salary-item label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .salary-item value {
+            display: block;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 2px solid #e9ecef;
+            font-size: 0.9em;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .controls {
+                display: none;
+            }
+
+            .tab {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.8em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Salary & Attendance Dashboard</h1>
+            <p>Comprehensive Monthly Analytics & Records</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="monthSelect">Select Month:</label>
+                <select id="monthSelect">
+                    <option value="APR26">April 2026</option>
+                    <option value="MAY26">May 2026</option>
+                    <option value="JUN26">June 2026</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="employeeSearch">Search Employee:</label>
+                <input type="text" id="employeeSearch" placeholder="Name or Branch...">
+            </div>
+
+            <div class="control-group">
+                <label for="branchFilter">Filter by Branch:</label>
+                <select id="branchFilter">
+                    <option value="">All Branches</option>
+                    <option value="EPS LTD">EPS LTD</option>
+                    <option value="OFFICE">OFFICE</option>
+                    <option value="CASH">CASH</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exportToExcel()">📊 Export Excel</button>
+                <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+                <button class="btn btn-secondary" onclick="resetFilters()">🔄 Reset</button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be populated by JavaScript -->
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('overview')">📋 Overview</button>
+            <button class="tab" onclick="switchTab('details')">👥 Employee Details</button>
+            <button class="tab" onclick="switchTab('summary')">📈 Summary</button>
+        </div>
+
+        <div class="tab-content active" id="overview">
+            <div class="month-title" id="monthTitle">April 2026</div>
+            <div class="salary-info" id="salaryInfo"></div>
+            <div class="table-container">
+                <table id="attendanceTable">
+                    <thead>
+                        <tr id="tableHeader"></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="details">
+            <div class="month-title">Employee Detailed Information</div>
+            <div class="table-container">
+                <table id="detailsTable">
+                    <thead>
+                        <tr id="detailsHeader"></tr>
+                    </thead>
+                    <tbody id="detailsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="summary">
+            <div class="month-title">Monthly Summary Report</div>
+            <div id="summaryContent"></div>
+        </div>
+
+        <div class="footer">
+            <p>EPS CRM | Salary & Attendance Management System | Updated: <span id="updateTime"></span></p>
+            <p>© 2026 EPS PVT LTD. All Rights Reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data from Excel sheets (APR 26, MAY 26, JUN 26)
+        const attendanceData = {
+            APR26: {
+                month: 'April 2026',
+                totalDays: 30,
+                salaryInfo: {
+                    totalSalary: 645600,
+                    increment: 645600,
+                    totalEmployees: 23
+                },
+                employees: [
+                    { sr: 1, name: 'Rizwan Patel', branch: 'EPS LTD', doj: '', baseSalary: 16000, increment: 2000, grossSalary: 29000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 966.67 },
+                    { sr: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 44000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 1466.67 },
+                    { sr: 3, name: 'Sopan Sable', branch: 'EPS LTD', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 29100, presentDays: 23, weeklyOff: 4, otDays: 0, holidays: 0, absent: 3, halfDay: 0, actualPresent: 27, actualAbsent: 3, totalDays: 30, perDay: 970 },
+                    { sr: 4, name: 'Sonu Prajapati', branch: 'EPS LTD', doj: '', baseSalary: 12500, increment: 1500, grossSalary: 23500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 783.33 },
+                    { sr: 5, name: 'Sudhir Naik', branch: 'EPS LTD', doj: '', baseSalary: 30000, increment: 2000, grossSalary: 41500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 1383.33 },
+                    { sr: 6, name: 'Abhishek Masane', branch: 'OFFICE', doj: '', baseSalary: 15500, increment: 2000, grossSalary: 25500, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 850 },
+                    { sr: 7, name: 'Manaswi Bhosle', branch: 'OFFICE', doj: '', baseSalary: 25000, increment: 2000, grossSalary: 26500, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 883.33 },
+                    { sr: 8, name: 'Sheetal Parulekar', branch: 'OFFICE', doj: '', baseSalary: 14000, increment: 2000, grossSalary: 29800, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 993.33 },
+                    { sr: 9, name: 'Akbar Khan', branch: 'EPS LTD', doj: '', baseSalary: 12000, increment: 1300, grossSalary: 20000, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 666.67 },
+                    { sr: 10, name: 'Jayshree Thorse', branch: 'CASH', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 21500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 716.67 },
+                    { sr: 11, name: 'Joy Mathew', branch: 'OFFICE', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 30000, presentDays: 24, weeklyOff: 4, otDays: 0, holidays: 0, absent: 2, halfDay: 0, actualPresent: 28, actualAbsent: 2, totalDays: 30, perDay: 1000 },
+                    { sr: 12, name: 'Deepikas Satam', branch: 'OFFICE', doj: '', baseSalary: 25000, increment: 2000, grossSalary: 36000, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 1200 },
+                    { sr: 13, name: 'Lavakumar Shetty', branch: 'OFFICE', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 36000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 1200 },
+                    { sr: 14, name: 'Vinayak Bhat', branch: 'OFFICE', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 36000, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 1200 },
+                    { sr: 15, name: 'Pankaj Indulkar', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 28500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 950 },
+                    { sr: 16, name: 'Prakash Patil', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 26700, presentDays: 20, weeklyOff: 3, otDays: 0, holidays: 0, absent: 7, halfDay: 0, actualPresent: 23, actualAbsent: 7, totalDays: 30, perDay: 890 },
+                    { sr: 17, name: 'Darshana Nandosar', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 22000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 733.33 },
+                    { sr: 18, name: 'Jayprakash Yadav', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21700, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 723.33 },
+                    { sr: 19, name: 'Ashok Khade', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21200, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 706.67 },
+                    { sr: 20, name: 'Saeed', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 700 },
+                    { sr: 21, name: 'Anil Kasbekar', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 19600, presentDays: 24, weeklyOff: 4, otDays: 1, holidays: 0, absent: 2, halfDay: 0, actualPresent: 28, actualAbsent: 2, totalDays: 30, perDay: 653.33 },
+                    { sr: 22, name: 'Praful Jogale', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 26500, presentDays: 25, weeklyOff: 4, otDays: 0, holidays: 0, absent: 1, halfDay: 0, actualPresent: 29, actualAbsent: 1, totalDays: 30, perDay: 883.33 },
+                    { sr: 23, name: 'Anjan Sahu', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 30000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 30, perDay: 1000 }
+                ]
+            },
+            MAY26: {
+                month: 'May 2026',
+                totalDays: 31,
+                salaryInfo: {
+                    totalSalary: 645600,
+                    increment: 645600,
+                    totalEmployees: 23
+                },
+                employees: [
+                    { sr: 1, name: 'Rizwan Patel', branch: 'EPS LTD', doj: '', baseSalary: 16000, increment: 2000, grossSalary: 29000, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 935.48 },
+                    { sr: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 44000, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 1419.35 },
+                    { sr: 3, name: 'Sopan Sable', branch: 'EPS LTD', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 29100, presentDays: 25, weeklyOff: 5, otDays: 1, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 938.71 },
+                    { sr: 4, name: 'Sonu Prajapati', branch: 'EPS LTD', doj: '', baseSalary: 12500, increment: 1500, grossSalary: 23500, presentDays: 23, weeklyOff: 5, otDays: 0, holidays: 1, absent: 2, halfDay: 0, actualPresent: 29, actualAbsent: 2, totalDays: 31, perDay: 758.06 },
+                    { sr: 5, name: 'Sudhir Naik', branch: 'EPS LTD', doj: '', baseSalary: 30000, increment: 2000, grossSalary: 41500, presentDays: 20, weeklyOff: 4, otDays: 0, holidays: 1, absent: 6, halfDay: 0, actualPresent: 25, actualAbsent: 6, totalDays: 31, perDay: 1338.71 },
+                    { sr: 6, name: 'Abhishek Masane', branch: 'OFFICE', doj: '', baseSalary: 15500, increment: 2000, grossSalary: 25500, presentDays: 19, weeklyOff: 4, otDays: 0, holidays: 1, absent: 7, halfDay: 0, actualPresent: 24, actualAbsent: 7, totalDays: 31, perDay: 822.58 },
+                    { sr: 7, name: 'Manaswi Bhosle', branch: 'OFFICE', doj: '', baseSalary: 25000, increment: 2000, grossSalary: 26500, presentDays: 22, weeklyOff: 5, otDays: 0, holidays: 1, absent: 3, halfDay: 0, actualPresent: 28, actualAbsent: 3, totalDays: 31, perDay: 854.84 },
+                    { sr: 8, name: 'Sheetal Parulekar', branch: 'OFFICE', doj: '', baseSalary: 14000, increment: 2000, grossSalary: 29800, presentDays: 23, weeklyOff: 5, otDays: 0, holidays: 1, absent: 2, halfDay: 0, actualPresent: 29, actualAbsent: 2, totalDays: 31, perDay: 961.29 },
+                    { sr: 9, name: 'Akbar Khan', branch: 'EPS LTD', doj: '', baseSalary: 12000, increment: 1300, grossSalary: 20000, presentDays: 23, weeklyOff: 5, otDays: 0, holidays: 1, absent: 2, halfDay: 0, actualPresent: 29, actualAbsent: 2, totalDays: 31, perDay: 645.16 },
+                    { sr: 10, name: 'Jayshree Thorse', branch: 'CASH', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 21500, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 693.55 },
+                    { sr: 11, name: 'Joy Mathew', branch: 'OFFICE', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 30000, presentDays: 23, weeklyOff: 5, otDays: 0, holidays: 1, absent: 2, halfDay: 0, actualPresent: 29, actualAbsent: 2, totalDays: 31, perDay: 967.74 },
+                    { sr: 12, name: 'Deepikas Satam', branch: 'OFFICE', doj: '', baseSalary: 25000, increment: 2000, grossSalary: 36000, presentDays: 24, weeklyOff: 5, otDays: 0, holidays: 1, absent: 1, halfDay: 0, actualPresent: 30, actualAbsent: 1, totalDays: 31, perDay: 1161.29 },
+                    { sr: 13, name: 'Lavakumar Shetty', branch: 'OFFICE', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 36000, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 1161.29 },
+                    { sr: 14, name: 'Vinayak Bhat', branch: 'OFFICE', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 36000, presentDays: 24, weeklyOff: 5, otDays: 0, holidays: 1, absent: 1, halfDay: 0, actualPresent: 30, actualAbsent: 1, totalDays: 31, perDay: 1161.29 },
+                    { sr: 15, name: 'Pankaj Indulkar', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 28500, presentDays: 23, weeklyOff: 5, otDays: 0, holidays: 1, absent: 2, halfDay: 0, actualPresent: 29, actualAbsent: 2, totalDays: 31, perDay: 919.35 },
+                    { sr: 16, name: 'Prakash Patil', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 26700, presentDays: 16, weeklyOff: 4, otDays: 1, holidays: 1, absent: 10, halfDay: 0, actualPresent: 21, actualAbsent: 10, totalDays: 31, perDay: 861.29 },
+                    { sr: 17, name: 'Darshana Nandosar', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 22000, presentDays: 23, weeklyOff: 5, otDays: 0, holidays: 1, absent: 2, halfDay: 0, actualPresent: 29, actualAbsent: 2, totalDays: 31, perDay: 709.68 },
+                    { sr: 18, name: 'Jayprakash Yadav', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21700, presentDays: 24, weeklyOff: 5, otDays: 0, holidays: 1, absent: 1, halfDay: 0, actualPresent: 30, actualAbsent: 1, totalDays: 31, perDay: 700 },
+                    { sr: 19, name: 'Ashok Khade', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21200, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 683.87 },
+                    { sr: 20, name: 'Saeed', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21000, presentDays: 24, weeklyOff: 5, otDays: 0, holidays: 1, absent: 1, halfDay: 0, actualPresent: 30, actualAbsent: 1, totalDays: 31, perDay: 677.42 },
+                    { sr: 21, name: 'Anil Kasbekar', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 19600, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 632.26 },
+                    { sr: 22, name: 'Praful Jogale', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 26500, presentDays: 12, weeklyOff: 3, otDays: 0, holidays: 1, absent: 15, halfDay: 0, actualPresent: 16, actualAbsent: 15, totalDays: 31, perDay: 854.84 },
+                    { sr: 23, name: 'Anjan Sahu', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 30000, presentDays: 25, weeklyOff: 5, otDays: 0, holidays: 1, absent: 0, halfDay: 0, actualPresent: 31, actualAbsent: 0, totalDays: 31, perDay: 967.74 }
+                ]
+            },
+            JUN26: {
+                month: 'June 2026',
+                totalDays: 30,
+                salaryInfo: {
+                    totalSalary: 645600,
+                    increment: 645600,
+                    totalEmployees: 23
+                },
+                employees: [
+                    { sr: 1, name: 'Rizwan Patel', branch: 'EPS LTD', doj: '', baseSalary: 16000, increment: 2000, grossSalary: 29000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 935.48 },
+                    { sr: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 44000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 1419.35 },
+                    { sr: 3, name: 'Sopan Sable', branch: 'EPS LTD', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 29100, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 938.71 },
+                    { sr: 4, name: 'Sonu Prajapati', branch: 'EPS LTD', doj: '', baseSalary: 12500, increment: 1500, grossSalary: 23500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 758.06 },
+                    { sr: 5, name: 'Sudhir Naik', branch: 'EPS LTD', doj: '', baseSalary: 30000, increment: 2000, grossSalary: 41500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 1338.71 },
+                    { sr: 6, name: 'Abhishek Masane', branch: 'OFFICE', doj: '', baseSalary: 15500, increment: 2000, grossSalary: 25500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 822.58 },
+                    { sr: 7, name: 'Manaswi Bhosle', branch: 'OFFICE', doj: '', baseSalary: 25000, increment: 2000, grossSalary: 26500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 854.84 },
+                    { sr: 8, name: 'Sheetal Parulekar', branch: 'OFFICE', doj: '', baseSalary: 14000, increment: 2000, grossSalary: 29800, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 961.29 },
+                    { sr: 9, name: 'Akbar Khan', branch: 'EPS LTD', doj: '', baseSalary: 12000, increment: 1300, grossSalary: 20000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 645.16 },
+                    { sr: 10, name: 'Jayshree Thorse', branch: 'CASH', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 21500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 693.55 },
+                    { sr: 11, name: 'Joy Mathew', branch: 'OFFICE', doj: '', baseSalary: 27500, increment: 2000, grossSalary: 30000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 967.74 },
+                    { sr: 12, name: 'Deepikas Satam', branch: 'OFFICE', doj: '', baseSalary: 25000, increment: 2000, grossSalary: 36000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 1161.29 },
+                    { sr: 13, name: 'Lavakumar Shetty', branch: 'OFFICE', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 36000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 1161.29 },
+                    { sr: 14, name: 'Vinayak Bhat', branch: 'OFFICE', doj: '', baseSalary: 15600, increment: 2000, grossSalary: 36000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 1161.29 },
+                    { sr: 15, name: 'Pankaj Indulkar', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 28500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 919.35 },
+                    { sr: 16, name: 'Prakash Patil', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 26700, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 861.29 },
+                    { sr: 17, name: 'Darshana Nandosar', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 22000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 709.68 },
+                    { sr: 18, name: 'Jayprakash Yadav', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21700, presentDays: 26, weeklyOff: 4, otDays: 2, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 700 },
+                    { sr: 19, name: 'Ashok Khade', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21200, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 683.87 },
+                    { sr: 20, name: 'Saeed', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 21000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 677.42 },
+                    { sr: 21, name: 'Anil Kasbekar', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 19600, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 632.26 },
+                    { sr: 22, name: 'Praful Jogale', branch: 'EPS LTD', doj: '', baseSalary: '', increment: '', grossSalary: 26500, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 854.84 },
+                    { sr: 23, name: 'Anjan Sahu', branch: 'OFFICE', doj: '', baseSalary: '', increment: '', grossSalary: 30000, presentDays: 26, weeklyOff: 4, otDays: 0, holidays: 0, absent: 0, halfDay: 0, actualPresent: 30, actualAbsent: 0, totalDays: 31, perDay: 967.74 }
+                ]
+            }
+        };
+
+        let currentMonth = 'APR26';
+        let filteredData = [];
+
+        const columns = ['Sr. No', 'Name', 'Branch', 'Base Salary', 'Increment', 'Gross Salary', 'Present Days', 'Weekly Off', 'OT Days', 'Holidays', 'Absent', 'Half Day', 'Actual Present', 'Actual Absent', 'Total Days', 'Per Day'];
+
+        function loadData() {
+            const data = attendanceData[currentMonth];
+            document.getElementById('monthTitle').textContent = data.month;
+            updateSalaryInfo(data);
+            displayTable(data.employees);
+            filteredData = [...data.employees];
+        }
+
+        function updateSalaryInfo(data) {
+            const html = `
+                <div class="salary-item">
+                    <label>Total Monthly Salary Pool</label>
+                    <value>₹${data.salaryInfo.totalSalary.toLocaleString()}</value>
+                </div>
+                <div class="salary-item">
+                    <label>Total Employees</label>
+                    <value>${data.salaryInfo.totalEmployees}</value>
+                </div>
+                <div class="salary-item">
+                    <label>Days in Month</label>
+                    <value>${data.totalDays} Days</value>
+                </div>
+                <div class="salary-item">
+                    <label>Average Per Employee</label>
+                    <value>₹${(data.salaryInfo.totalSalary / data.salaryInfo.totalEmployees).toLocaleString()}</value>
+                </div>
+            `;
+            document.getElementById('salaryInfo').innerHTML = html;
+        }
+
+        function displayTable(employees) {
+            const header = document.getElementById('tableHeader');
+            const body = document.getElementById('tableBody');
+            
+            header.innerHTML = columns.map(col => `<th onclick="sortTable('${col}')">${col} ↕</th>`).join('');
+            
+            body.innerHTML = employees.map(emp => `
+                <tr>
+                    <td>${emp.sr}</td>
+                    <td><strong>${emp.name}</strong></td>
+                    <td><span class="badge ${emp.branch === 'EPS LTD' ? 'badge-present' : emp.branch === 'OFFICE' ? 'badge-holiday' : 'badge-absent'}">${emp.branch}</span></td>
+                    <td class="text-right">₹${emp.baseSalary ? emp.baseSalary.toLocaleString() : '-'}</td>
+                    <td class="text-right">₹${emp.increment ? emp.increment.toLocaleString() : '-'}</td>
+                    <td class="text-right"><strong>₹${emp.grossSalary.toLocaleString()}</strong></td>
+                    <td class="text-center">${emp.presentDays}</td>
+                    <td class="text-center">${emp.weeklyOff}</td>
+                    <td class="text-center">${emp.otDays}</td>
+                    <td class="text-center">${emp.holidays}</td>
+                    <td class="text-center">${emp.absent}</td>
+                    <td class="text-center">${emp.halfDay}</td>
+                    <td class="text-center">${emp.actualPresent}</td>
+                    <td class="text-center">${emp.actualAbsent}</td>
+                    <td class="text-center">${emp.totalDays}</td>
+                    <td class="text-right">₹${emp.perDay.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const data = attendanceData[currentMonth];
+            const searchTerm = document.getElementById('employeeSearch').value.toLowerCase();
+            const branchFilter = document.getElementById('branchFilter').value;
+            
+            filteredData = data.employees.filter(emp => {
+                const matchSearch = emp.name.toLowerCase().includes(searchTerm) || emp.branch.toLowerCase().includes(searchTerm);
+                const matchBranch = !branchFilter || emp.branch === branchFilter;
+                return matchSearch && matchBranch;
+            });
+            
+            displayTable(filteredData);
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalPresent = filteredData.reduce((sum, e) => sum + e.presentDays, 0);
+            const totalAbsent = filteredData.reduce((sum, e) => sum + e.absent, 0);
+            const totalSalary = filteredData.reduce((sum, e) => sum + e.grossSalary, 0);
+            const avgAttendance = (totalPresent / (filteredData.length * 26)).toFixed(1);
+            
+            const html = `
+                <div class="stat-card">
+                    <h3>Total Present Days</h3>
+                    <div class="value">${totalPresent}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Absences</h3>
+                    <div class="value">${totalAbsent}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Salary (Filtered)</h3>
+                    <div class="value">₹${(totalSalary / 100000).toFixed(1)}L</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Attendance %</h3>
+                    <div class="value">${avgAttendance}%</div>
+                </div>
+            `;
+            document.getElementById('statsGrid').innerHTML = html;
+        }
+
+        function sortTable(column) {
+            const columnIndex = columns.indexOf(column);
+            filteredData.sort((a, b) => {
+                const values = ['sr', 'name', 'branch', 'baseSalary', 'increment', 'grossSalary', 'presentDays', 'weeklyOff', 'otDays', 'holidays', 'absent', 'halfDay', 'actualPresent', 'actualAbsent', 'totalDays', 'perDay'];
+                const key = values[columnIndex];
+                const valA = a[key];
+                const valB = b[key];
+                if (typeof valA === 'number') return valA - valB;
+                return String(valA).localeCompare(String(valB));
+            });
+            displayTable(filteredData);
+        }
+
+        function resetFilters() {
+            document.getElementById('employeeSearch').value = '';
+            document.getElementById('branchFilter').value = '';
+            loadData();
+            updateStats();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function exportToExcel() {
+            const data = attendanceData[currentMonth];
+            const ws = XLSX.utils.json_to_sheet(filteredData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, data.month);
+            XLSX.writeFile(wb, `Salary-Attendance-${currentMonth}.xlsx`);
+        }
+
+        // Event listeners
+        document.getElementById('monthSelect').addEventListener('change', (e) => {
+            currentMonth = e.target.value;
+            loadData();
+            updateStats();
+        });
+
+        document.getElementById('employeeSearch').addEventListener('input', applyFilters);
+        document.getElementById('branchFilter').addEventListener('change', applyFilters);
+
+        // Initialize
+        document.getElementById('updateTime').textContent = new Date().toLocaleString();
+        loadData();
+        updateStats();
+    </script>
+</body>
+</html>
