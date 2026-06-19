@@ -82,7 +82,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.65em;
+            font-size: 0.9em;
         }
 
         thead {
@@ -93,31 +93,35 @@
         }
 
         th {
-            padding: 4px 2px;
+            padding: 12px 6px;
             font-weight: 600;
             color: #333;
             border: 1px solid #ddd;
             text-align: center;
             white-space: nowrap;
+            font-size: 0.9em;
         }
 
         th.sticky { 
             position: sticky; 
             z-index: 12; 
             background: #d9dce0;
-            min-width: 80px;
+            min-width: 100px;
+            padding: 12px 8px;
         }
 
         th.sticky:nth-child(1) { left: 0; }
-        th.sticky:nth-child(2) { left: 80px; }
-        th.sticky:nth-child(3) { left: 160px; }
-        th.sticky:nth-child(4) { left: 240px; }
+        th.sticky:nth-child(2) { left: 100px; }
+        th.sticky:nth-child(3) { left: 200px; }
+        th.sticky:nth-child(4) { left: 300px; }
 
         td {
-            padding: 3px 2px;
+            padding: 10px 6px;
             border: 1px solid #e9ecef;
             text-align: center;
             color: #555;
+            min-height: 50px;
+            vertical-align: middle;
         }
 
         td.sticky {
@@ -126,45 +130,57 @@
             background: white;
             text-align: center;
             font-weight: 500;
-            min-width: 80px;
+            min-width: 100px;
+            padding: 10px 8px;
+            font-size: 0.95em;
         }
 
         td.sticky:nth-child(1) { left: 0; }
-        td.sticky:nth-child(2) { left: 80px; }
-        td.sticky:nth-child(3) { left: 160px; }
-        td.sticky:nth-child(4) { left: 240px; }
+        td.sticky:nth-child(2) { left: 100px; }
+        td.sticky:nth-child(3) { left: 200px; }
+        td.sticky:nth-child(4) { left: 300px; }
 
         tr:hover { background: #f8f9fa; }
         tr:hover td.sticky { background: #e3f2fd; }
 
         input { 
-            width: 100%; 
-            padding: 2px; 
+            width: 95%; 
+            padding: 6px 4px; 
             border: 1px solid #ccc; 
-            border-radius: 2px;
-            font-size: 0.85em; 
+            border-radius: 3px;
+            font-size: 0.95em; 
             text-align: center;
+            min-height: 30px;
         }
-        input:focus { outline: none; border-color: #667eea; background: #f0f8ff; }
+        input, select { 
+            width: 95%; 
+            padding: 6px 4px; 
+            border: 1px solid #ccc; 
+            border-radius: 3px;
+            font-size: 0.95em; 
+            text-align: center;
+            min-height: 30px;
+        }
+        input:focus, select:focus { outline: none; border-color: #667eea; background: #f0f8ff; }
 
         .date-col {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            height: 80px;
-            padding: 2px !important;
+            height: 120px;
+            padding: 6px 4px !important;
         }
 
         .day-header {
             font-weight: 600;
-            font-size: 0.7em;
+            font-size: 0.95em;
         }
 
-        .att-P { background: #c8e6c9; color: #1b5e20; font-weight: 600; cursor: pointer; }
-        .att-A { background: #ffcdd2; color: #b71c1c; font-weight: 600; cursor: pointer; }
-        .att-H { background: #b3e5fc; color: #01579b; font-weight: 600; cursor: pointer; }
-        .att-WO { background: #fff9c4; color: #f57f17; font-weight: 600; cursor: pointer; }
+        .att-P { background: #c8e6c9; color: #1b5e20; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
+        .att-A { background: #ffcdd2; color: #b71c1c; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
+        .att-H { background: #b3e5fc; color: #01579b; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
+        .att-WO { background: #fff9c4; color: #f57f17; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
 
-        .calc { background: #e1f5fe; color: #01579b; font-weight: 600; }
+        .calc { background: #e1f5fe; color: #01579b; font-weight: 600; font-size: 0.95em; padding: 8px; }
 
         .stats { 
             padding: 12px; 
