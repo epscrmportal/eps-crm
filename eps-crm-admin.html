@@ -1232,6 +1232,9 @@
                         email: data.user.email
                     };
 
+                    // Log the login action
+                    await logAuditAction('LOGIN', 'Admin', { user_email: window.currentUser.email, action: 'User logged in' });
+
                     document.getElementById('loginSection').style.display = 'none';
                     document.getElementById('dashboardSection').classList.add('active');
                     document.getElementById('userEmail').textContent = window.currentUser.email;
@@ -1708,6 +1711,10 @@
             };
 
             window.logout = async function() {
+                // Log the logout action
+                const userEmail = window.currentUser?.email || 'unknown';
+                await logAuditAction('LOGOUT', 'Admin', { user_email: userEmail, action: 'User logged out' });
+                
                 await window.supabaseClient.auth.signOut();
                 window.currentUser = null;
                 document.getElementById('loginSection').style.display = 'flex';
@@ -1965,6 +1972,33 @@
                     });
                 }
             };
+
+            // ==========================================
+            // AUDIT TRAIL LOGGING
+            // ==========================================
+            async function logAuditAction(action, module, details) {
+                try {
+                    const logEntry = {
+                        user_email: window.currentUser?.email || 'unknown',
+                        user_role: 'admin',
+                        action: action,
+                        module: module,
+                        details: details || {},
+                        timestamp: new Date().toISOString(),
+                        ip_address: 'web-client'
+                    };
+                    
+                    const { error } = await window.supabaseClient
+                        .from('audit_trail')
+                        .insert([logEntry]);
+                    
+                    if (error) console.error('❌ Audit log error:', error);
+                    else console.log('✅ Logged:', action, module);
+                } catch (error) {
+                    console.error('Error logging audit action:', error);
+                }
+            }
+            window.logAuditAction = logAuditAction;
 
             window.calculateIncentives = async function() {
                 try {
@@ -2347,6 +2381,7 @@
                         }).catch(err => console.log('Document metadata save:', err));
                     }
 
+                    await logAuditAction('CREATE', 'Vehicle', { registration_number: regNumber, vehicle_type: vehicleType, manufacturer: manufacturer });
                     alert('✅ Vehicle added successfully!\n\nRegistration: ' + regNumber + '\n\nDocuments: ' + Object.keys(documents).length + ' uploaded');
                     window.resetVehicleForm();
                     window.switchVehicleView('list');
@@ -2482,6 +2517,7 @@
                     const res = await window.supabaseClient.from('vehicles').delete().eq('id', vehicleId);
                     if (res.error) throw res.error;
                     window.loadVehicles();
+                    await logAuditAction('DELETE', 'Vehicle', { vehicle_id: vehicleId });
                     alert('✅ Vehicle deleted successfully!');
                 } catch (error) {
                     alert('Error: ' + error.message);
@@ -2590,6 +2626,7 @@
                     if (res.error) throw res.error;
 
                     alert('✅ Contract added successfully!\n\nClient: ' + clientName);
+                    await logAuditAction('CREATE', 'Contract', { client_name: clientName, contract_type: contractData.contract_type, contract_value: contractData.contract_value });
                     window.resetContractForm();
                     window.switchContractView('list');
                 } catch (error) {
@@ -2684,6 +2721,7 @@
                     const res = await window.supabaseClient.from('client_contracts').delete().eq('id', contractId);
                     if (res.error) throw res.error;
                     window.loadContracts();
+                    await logAuditAction('DELETE', 'Contract', { contract_id: contractId });
                     alert('✅ Contract deleted successfully!');
                 } catch (error) {
                     alert('Error: ' + error.message);
@@ -2785,6 +2823,7 @@
                     const res = await window.supabaseClient.from('vendor_registrations').insert([vendorData]);
                     if (res.error) throw res.error;
                     alert('✅ Vendor registered successfully!\n\nVendor: ' + vendorName);
+                    await logAuditAction('CREATE', 'Vendor', { vendor_name: vendorName, phone: phoneNo, email: emailId });
                     window.resetVendorForm();
                     window.switchVendorView('list');
                 } catch (error) {
@@ -2909,6 +2948,7 @@
                     if (res.error) throw res.error;
                     window.closeVendorDetail();
                     window.loadVendors();
+                    await logAuditAction('DELETE', 'Vendor', { vendor_id: window.currentVendorId });
                     alert('✅ Vendor deleted successfully!');
                 } catch (error) {
                     alert('Error: ' + error.message);
@@ -2987,15 +3027,19 @@
                     if (document.getElementById('employeeForm').dataset.mode === 'add') {
                         const res = await window.supabaseClient.from('employees').insert([payload]);
                         if (res.error) throw res.error;
+                        window.loadEmployees();
+                        window.closeEmployeeModal();
+                        await logAuditAction('CREATE', 'Employee', { employee_name: name, email: email, role: role });
+                        alert('Employee saved successfully!');
                     } else {
                         const empId = document.getElementById('employeeForm').dataset.empId;
                         const res = await window.supabaseClient.from('employees').update(payload).eq('id', empId);
                         if (res.error) throw res.error;
+                        window.loadEmployees();
+                        window.closeEmployeeModal();
+                        await logAuditAction('UPDATE', 'Employee', { employee_id: empId, employee_name: name, email: email, role: role });
+                        alert('Employee saved successfully!');
                     }
-
-                    window.loadEmployees();
-                    window.closeEmployeeModal();
-                    alert('Employee saved successfully!');
                 } catch (error) {
                     alert('Error: ' + error.message);
                 }
@@ -3025,6 +3069,7 @@
                         const res = await window.supabaseClient.from('employees').delete().eq('id', empId);
                         if (res.error) throw res.error;
                         window.loadEmployees();
+                        await logAuditAction('DELETE', 'Employee', { employee_id: empId });
                         alert('Employee deleted!');
                     } catch (error) {
                         alert('Error: ' + error.message);
