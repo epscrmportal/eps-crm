@@ -93,14 +93,19 @@
         }
 
         th {
-            padding: 12px 6px;
+            padding: 10px 4px;
             font-weight: 600;
             color: #333;
             border: 1px solid #ddd;
             text-align: center;
             white-space: nowrap;
-            font-size: 0.9em;
-            min-width: 90px;
+            font-size: 0.85em;
+        }
+        
+        th.date-col {
+            min-width: 55px;
+            max-width: 55px;
+            padding: 6px 2px;
         }
 
         th.sticky { 
@@ -117,13 +122,22 @@
         th.sticky:nth-child(4) { left: 300px; }
 
         td {
-            padding: 10px 6px;
+            padding: 10px 4px;
             border: 1px solid #e9ecef;
             text-align: center;
             color: #555;
             min-height: 50px;
             vertical-align: middle;
-            min-width: 90px;
+        }
+        
+        td.date-cell {
+            min-width: 55px;
+            max-width: 55px;
+            padding: 8px 2px;
+        }
+        
+        td.summary-cell {
+            min-width: 70px;
         }
 
         td.sticky {
@@ -448,44 +462,44 @@
                 // Attendance dates
                 for (let d = 1; d <= totalDays; d++) {
                     const val = emp.attendance[d] || 'P';
-                    cells += `<td class="att-${val}"><input type="text" value="${val}" maxlength="2" onclick="cycleAtt(this, ${idx}, ${d})" data-emp="${idx}" data-day="${d}"></td>`;
+                    cells += `<td class="att-${val} date-cell"><input type="text" value="${val}" maxlength="2" onclick="cycleAtt(this, ${idx}, ${d})" data-emp="${idx}" data-day="${d}"></td>`;
                 }
                 
                 // Summary columns
-                cells += `<td class="calc">${emp.month_days}</td>`;
-                cells += `<td class="calc">${emp.present_days}</td>`;
-                cells += `<td class="calc">${emp.weekly_off}</td>`;
-                cells += `<td><input type="number" value="${emp.ot_days}" onchange="updateEmp(${idx}, 'ot_days', this.value)"></td>`;
-                cells += `<td class="calc">${emp.per_day_calc}</td>`;
-                cells += `<td><input type="number" value="${emp.holidays}" onchange="updateEmp(${idx}, 'holidays', this.value)"></td>`;
-                cells += `<td class="calc">${emp.absent}</td>`;
-                cells += `<td><input type="number" value="${emp.halfday}" onchange="updateEmp(${idx}, 'halfday', this.value)"></td>`;
-                cells += `<td class="calc">${emp.total_halfday}</td>`;
-                cells += `<td class="calc">${emp.actual_present}</td>`;
-                cells += `<td class="calc">${emp.actual_absent}</td>`;
-                cells += `<td class="calc">${emp.total_days}</td>`;
-                cells += `<td class="calc">${emp.leave_pending}</td>`;
-                cells += `<td class="calc">${emp.adding_leaves}</td>`;
-                cells += `<td class="calc">${emp.leave_available}</td>`;
-                cells += `<td><input type="number" value="${emp.leave_adjusted}" onchange="updateEmp(${idx}, 'leave_adjusted', this.value)"></td>`;
-                cells += `<td class="calc">${emp.leave_next}</td>`;
-                cells += `<td class="calc">${emp.paid_days.toFixed(0)}</td>`;
-                cells += `<td class="calc">${emp.deduction_days.toFixed(0)}</td>`;
-                cells += `<td class="calc">₹${emp.monthly_salary}</td>`;
-                cells += `<td class="calc">₹${emp.ot_salary}</td>`;
-                cells += `<td class="calc">₹${emp.total_earned}</td>`;
-                cells += `<td class="calc">₹${emp.pf}</td>`;
-                cells += `<td class="calc">₹${emp.esic}</td>`;
-                cells += `<td class="calc">₹${emp.p_tax}</td>`;
-                cells += `<td class="calc">₹${emp.income_tax}</td>`;
-                cells += `<td><input type="number" value="${emp.advance}" onchange="updateEmp(${idx}, 'advance', this.value)"></td>`;
-                cells += `<td><input type="number" value="${emp.loan}" onchange="updateEmp(${idx}, 'loan', this.value)"></td>`;
-                cells += `<td class="calc">₹${emp.total_deduction}</td>`;
-                cells += `<td class="calc">₹${emp.net_salary}</td>`;
-                cells += `<td><select onchange="updateEmp(${idx}, 'salary_done', this.value)"><option>No</option><option>Yes</option></select></td>`;
-                cells += `<td><input type="date" onchange="updateEmp(${idx}, 'salary_date', this.value)"></td>`;
-                cells += `<td><input type="text" placeholder="Cash/Check/Transfer" onchange="updateEmp(${idx}, 'through', this.value)"></td>`;
-                cells += `<td><input type="text" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)"></td>`;
+                cells += `<td class="calc summary-cell">${emp.month_days}</td>`;
+                cells += `<td class="calc summary-cell">${emp.present_days}</td>`;
+                cells += `<td class="calc summary-cell">${emp.weekly_off}</td>`;
+                cells += `<td class="summary-cell"><input type="number" value="${emp.ot_days}" onchange="updateEmp(${idx}, 'ot_days', this.value)"></td>`;
+                cells += `<td class="calc summary-cell">${emp.per_day_calc}</td>`;
+                cells += `<td class="summary-cell"><input type="number" value="${emp.holidays}" onchange="updateEmp(${idx}, 'holidays', this.value)"></td>`;
+                cells += `<td class="calc summary-cell">${emp.absent}</td>`;
+                cells += `<td class="summary-cell"><input type="number" value="${emp.halfday}" onchange="updateEmp(${idx}, 'halfday', this.value)"></td>`;
+                cells += `<td class="calc summary-cell">${emp.total_halfday}</td>`;
+                cells += `<td class="calc summary-cell">${emp.actual_present}</td>`;
+                cells += `<td class="calc summary-cell">${emp.actual_absent}</td>`;
+                cells += `<td class="calc summary-cell">${emp.total_days}</td>`;
+                cells += `<td class="calc summary-cell">${emp.leave_pending}</td>`;
+                cells += `<td class="calc summary-cell">${emp.adding_leaves}</td>`;
+                cells += `<td class="calc summary-cell">${emp.leave_available}</td>`;
+                cells += `<td class="summary-cell"><input type="number" value="${emp.leave_adjusted}" onchange="updateEmp(${idx}, 'leave_adjusted', this.value)"></td>`;
+                cells += `<td class="calc summary-cell">${emp.leave_next}</td>`;
+                cells += `<td class="calc summary-cell">${emp.paid_days.toFixed(0)}</td>`;
+                cells += `<td class="calc summary-cell">${emp.deduction_days.toFixed(0)}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.monthly_salary}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.ot_salary}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.total_earned}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.pf}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.esic}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.p_tax}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.income_tax}</td>`;
+                cells += `<td class="summary-cell"><input type="number" value="${emp.advance}" onchange="updateEmp(${idx}, 'advance', this.value)"></td>`;
+                cells += `<td class="summary-cell"><input type="number" value="${emp.loan}" onchange="updateEmp(${idx}, 'loan', this.value)"></td>`;
+                cells += `<td class="calc summary-cell">₹${emp.total_deduction}</td>`;
+                cells += `<td class="calc summary-cell">₹${emp.net_salary}</td>`;
+                cells += `<td class="summary-cell"><select onchange="updateEmp(${idx}, 'salary_done', this.value)"><option>No</option><option>Yes</option></select></td>`;
+                cells += `<td class="summary-cell"><input type="date" onchange="updateEmp(${idx}, 'salary_date', this.value)"></td>`;
+                cells += `<td class="summary-cell"><input type="text" placeholder="Cash/Check/Transfer" onchange="updateEmp(${idx}, 'through', this.value)"></td>`;
+                cells += `<td class="summary-cell"><input type="text" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)"></td>`;
                 
                 rowsHTML += `<tr>${cells}</tr>`;
             });
