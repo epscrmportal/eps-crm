@@ -181,15 +181,12 @@
         input:focus, select:focus { outline: none; border-color: #667eea; background: #f0f8ff; }
 
         .date-col {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            height: 120px;
-            padding: 6px 4px !important;
-        }
-
-        .day-header {
-            font-weight: 600;
-            font-size: 0.95em;
+            writing-mode: horizontal-tb !important;
+            text-orientation: initial !important;
+            height: auto !important;
+            padding: 8px 2px !important;
+            font-size: 0.75em;
+            line-height: 1.2;
         }
 
         .att-P { background: #c8e6c9; color: #1b5e20; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; display: flex; align-items: center; justify-content: center; }
@@ -436,7 +433,7 @@
             for (let d = 1; d <= totalDays; d++) {
                 const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
                 const dayName = getDayName(date);
-                headerHTML += `<th class="date-col"><div class="day-header">${dayName}</div><div>${d}</div></th>`;
+                headerHTML += `<th class="date-col">${dayName}<br>${d}</th>`;
             }
             
             // Rest of columns
