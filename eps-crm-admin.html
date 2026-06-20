@@ -1998,7 +1998,6 @@
                     console.error('Error logging audit action:', error);
                 }
             }
-            window.logAuditAction = logAuditAction;
 
             window.calculateIncentives = async function() {
                 try {
@@ -3238,6 +3237,12 @@
                     loadAuditLogs();
                 }
             };
+
+            // Expose audit functions to global scope (AFTER they're defined)
+            window.logAuditAction = logAuditAction;
+            window.loadAuditLogs = loadAuditLogs;
+            window.exportAuditToCSV = exportAuditToCSV;
+            window.showAuditDetails = showAuditDetails;
         })();
     </script>
 </body>
