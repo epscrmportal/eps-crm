@@ -10,19 +10,19 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        header { background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         header h1 { font-size: 1.8em; }
         .user-info { display: flex; gap: 15px; align-items: center; background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 5px; font-size: 0.9em; }
-        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); }
         .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 400px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #555; margin-bottom: 8px; font-weight: 500; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
-        .form-group input:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 5px rgba(79, 172, 254, 0.3); }
+        .form-group input:focus { outline: none; border-color: #8E2A8C; box-shadow: 0 0 5px rgba(79, 172, 254, 0.3); }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9em; }
-        .btn-primary { background: #4facfe; color: white; }
+        .btn-primary { background: #8E2A8C; color: white; }
         .btn-primary:hover { background: #2a9cdc; }
-        .btn-secondary { background: white; color: #4facfe; border: 1px solid #4facfe; }
+        .btn-secondary { background: white; color: #8E2A8C; border: 1px solid #8E2A8C; }
         .btn-success { background: #10b981; color: white; }
         .btn-warning { background: #f59e0b; color: white; }
         .btn-danger { background: #ef4444; color: white; }
@@ -31,17 +31,17 @@
         .dashboard.active { display: block; }
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; flex-wrap: wrap; overflow-x: auto; padding-bottom: 10px; }
         .tab-btn { padding: 10px 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999; border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
-        .tab-btn.active { color: #4facfe; border-bottom-color: #4facfe; }
+        .tab-btn.active { color: #8E2A8C; border-bottom-color: #8E2A8C; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-        .section h2 { color: #4facfe; margin-bottom: 20px; border-bottom: 2px solid #4facfe; padding-bottom: 10px; }
+        .section h2 { color: #8E2A8C; margin-bottom: 20px; border-bottom: 2px solid #8E2A8C; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .metric-card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .metric-card { background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
         .metric-card h3 { font-size: 0.8em; opacity: 0.9; margin-bottom: 10px; }
         .metric-card .value { font-size: 2em; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #4facfe; color: white; padding: 12px; text-align: left; font-weight: bold; }
+        th { background: #8E2A8C; color: white; padding: 12px; text-align: left; font-weight: bold; }
         td { padding: 12px; border-bottom: 1px solid #ddd; }
         tr:hover { background: #f5f5f5; }
         .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
@@ -56,15 +56,19 @@
         .form-container { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
         .search-box { margin-bottom: 20px; }
         .search-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
-        .alert { padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-        .alert-error { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
-        .alert-info { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        /* Toast notifications (floating, not inline in the page flow) */
+        #alertContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 380px; width: auto; }
+        .alert { padding: 14px 18px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-weight: 500; animation: toastIn 0.25s ease; }
+        .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+        .alert-info { background: #f3e9f3; color: #5c1b5a; border-left: 4px solid #8E2A8C; }
+        .alert-warn { background: #fdf6e3; color: #7a611c; border-left: 4px solid #D4AF37; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
         .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
         .chart-container { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .activity-item { background: #f9f9f9; padding: 15px; border-left: 4px solid #4facfe; margin-bottom: 10px; border-radius: 5px; }
+        .activity-item { background: #f9f9f9; padding: 15px; border-left: 4px solid #8E2A8C; margin-bottom: 10px; border-radius: 5px; }
         .progress-bar { width: 100%; background: #ddd; border-radius: 10px; overflow: hidden; height: 25px; margin: 10px 0; }
-        .progress-fill { background: #4facfe; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85em; font-weight: bold; }
+        .progress-fill { background: #8E2A8C; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85em; font-weight: bold; }
         @media (max-width: 768px) { header { flex-direction: column; } .form-row { grid-template-columns: 1fr; } table { font-size: 0.85em; } .tabs { gap: 0; } }
     </style>
 </head>
@@ -72,7 +76,7 @@
     <!-- Login Section (Hidden - use dashboard instead) -->
     <div id="loginSection" class="login-container" style="display: none;">
         <div class="login-box">
-            <h2 style="color: #4facfe; margin-bottom: 30px; text-align: center;">📞 EPS CRM</h2>
+            <h2 style="color: #8E2A8C; margin-bottom: 30px; text-align: center;">📞 EPS CRM</h2>
             <div id="loginAlert"></div>
             <p style="text-align: center; color: #999; margin-bottom: 20px;">Please use the main login page</p>
             <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='eps-crm-dashboard.html'">Go to Login</button>
@@ -323,7 +327,7 @@
                         </div>
 
                         <!-- CONTACT DETAILS -->
-                        <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4facfe;">
+                        <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8E2A8C;">
                             <h4 style="color: #333; margin-bottom: 15px;">📋 Contact Information</h4>
                             
                             <div class="form-row">
@@ -461,7 +465,7 @@
                 <div class="section">
                     <h2>🎖️ Daily Goals & Targets</h2>
                     
-                    <div id="adminGoalsForm" style="display: none; background: #f0f4ff; padding: 25px; border-radius: 10px; margin-bottom: 30px; border: 2px solid #4facfe;">
+                    <div id="adminGoalsForm" style="display: none; background: #f0f4ff; padding: 25px; border-radius: 10px; margin-bottom: 30px; border: 2px solid #8E2A8C;">
                         <h3 style="margin-top: 0; color: #1a3a52;">📌 Set Your Targets</h3>
                         <p style="color: #666; margin-bottom: 20px;">🔒 Admin Only - Manage team targets here</p>
                         
@@ -536,13 +540,13 @@
                     <h2>📧 Email Templates</h2>
                     <button class="btn btn-primary" onclick="toggleTemplateForm()" style="margin-bottom: 20px;">➕ Create Template</button>
 
-                    <div style="background: #f0f9ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #4facfe;">
+                    <div style="background: #f0f9ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #8E2A8C;">
                         <h3 style="margin-top: 0; color: #1a3a52; margin-bottom: 15px;">⭐ Quick Templates (8 Professional Templates)</h3>
                         <p style="color: #666; margin-bottom: 15px; font-size: 13px;">One-click ready templates - Click to use</p>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe; cursor: pointer; hover: box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="useQuickTemplate('EPS Introduction')">
-                                <h4 style="margin: 0 0 10px 0; color: #4facfe;">🏢 EPS Introduction</h4>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #8E2A8C; cursor: pointer; hover: box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="useQuickTemplate('EPS Introduction')">
+                                <h4 style="margin: 0 0 10px 0; color: #8E2A8C;">🏢 EPS Introduction</h4>
                                 <p style="margin: 0; font-size: 12px; color: #666;">Company introduction & partnership pitch</p>
                             </div>
                             <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; cursor: pointer;" onclick="useQuickTemplate('Follow-up')">
@@ -625,19 +629,19 @@
                     <h2>📈 Analytics & Reports</h2>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px;">
                         <div class="chart-container">
-                            <h3 style="color: #4facfe; margin-bottom: 15px;">Call Outcomes</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Call Outcomes</h3>
                             <canvas id="callOutcomeChart"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3 style="color: #4facfe; margin-bottom: 15px;">Lead Quality Distribution</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Lead Quality Distribution</h3>
                             <canvas id="leadQualityChart"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3 style="color: #4facfe; margin-bottom: 15px;">Interest Level</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Interest Level</h3>
                             <canvas id="interestChart"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3 style="color: #4facfe; margin-bottom: 15px;">Call Duration Trend</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Call Duration Trend</h3>
                             <canvas id="durationChart"></canvas>
                         </div>
                     </div>
@@ -646,7 +650,7 @@
                         <h2 style="border: none; margin: 0 0 20px 0;">Performance Metrics</h2>
                         <div class="grid">
                             <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
-                                <h3 style="color: #4facfe; margin-bottom: 15px;">📊 Statistics</h3>
+                                <h3 style="color: #8E2A8C; margin-bottom: 15px;">📊 Statistics</h3>
                                 <p style="margin: 10px 0;"><strong>Total Calls:</strong> <span id="stat_totalCalls">0</span></p>
                                 <p style="margin: 10px 0;"><strong>Connected Rate:</strong> <span id="stat_connectedRate">0%</span></p>
                                 <p style="margin: 10px 0;"><strong>Conversion Rate:</strong> <span id="stat_conversionRate">0%</span></p>
@@ -1029,7 +1033,7 @@
 
             table.innerHTML = myLeads.map(lead =>
                 '<tr>' +
-                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail(\'' + lead.id + '\')">' + escapeHtml(lead.name) + '</strong></td>' +
+                '<td><strong style="cursor: pointer; color: #8E2A8C;" onclick="showContactDetail(\'' + lead.id + '\')">' + escapeHtml(lead.name) + '</strong></td>' +
                 '<td>' + escapeHtml(lead.phone) + '</td>' +
                 '<td>' + escapeHtml(lead.company || 'N/A') + '</td>' +
                 '<td><span class="badge badge-' + lead.lead_status + '">' + lead.lead_status.toUpperCase() + '</span></td>' +
@@ -1074,10 +1078,10 @@
                 callsHtml = '<p style="color: #999; text-align: center; padding: 20px;">No calls logged yet</p>';
             } else {
                 callsHtml = contactCalls.map((call, index) => `
-                    <div style="background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #4facfe;">
+                    <div style="background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #8E2A8C;">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <p style="margin: 0 0 8px 0;"><strong style="color: #4facfe;">Call ${contactCalls.length - index}</strong></p>
+                                <p style="margin: 0 0 8px 0;"><strong style="color: #8E2A8C;">Call ${contactCalls.length - index}</strong></p>
                                 <p style="margin: 0 0 5px 0; font-size: 0.9em; color: #666;">
                                     📅 ${new Date(call.created_at).toLocaleDateString()} 
                                     ⏰ ${new Date(call.created_at).toLocaleTimeString()}
@@ -1101,31 +1105,31 @@
                     <div style="background: white; width: 95%; max-width: 900px; margin: 20px auto; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow-y: auto; max-height: 90vh;">
                         
                         <!-- Header -->
-                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 25px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <h2 style="margin: 0 0 8px 0;">👤 ${lead.name}</h2>
                                 <p style="margin: 0; font-size: 0.9em; opacity: 0.9;">${lead.company || 'Company not specified'}</p>
                             </div>
-                            <button onclick="document.getElementById('${modalId}').remove();" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 1.8em; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">✕</button>
+                            <button onclick="document.getElementById('${modalId}').remove();" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 1.8em; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;" aria-label="Close">✕</button>
                         </div>
 
                         <div style="padding: 25px;">
                             
                             <!-- Contact Info -->
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px;">
-                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #8E2A8C;">
                                     <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">PHONE</p>
                                     <p style="margin: 0; font-size: 1.1em; font-weight: bold; color: #333;">${lead.phone}</p>
                                 </div>
-                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #8E2A8C;">
                                     <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">EMAIL</p>
                                     <p style="margin: 0; font-size: 1em; color: #333;">${lead.email || 'Not provided'}</p>
                                 </div>
-                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #8E2A8C;">
                                     <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">LEAD QUALITY</p>
                                     <p style="margin: 0;"><span class="badge badge-${lead.lead_status}" style="padding: 8px 15px;">${lead.lead_status.toUpperCase()}</span></p>
                                 </div>
-                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #4facfe;">
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #8E2A8C;">
                                     <p style="margin: 0 0 8px 0; color: #999; font-size: 0.85em; font-weight: bold;">CLAIMED ON</p>
                                     <p style="margin: 0; font-size: 1em; color: #333;">${new Date(lead.assigned_at).toLocaleDateString()}</p>
                                 </div>
@@ -1139,7 +1143,7 @@
 
                             <!-- Call History -->
                             <div style="margin-bottom: 25px;">
-                                <h3 style="color: #4facfe; border-bottom: 2px solid #4facfe; padding-bottom: 10px; margin: 0 0 15px 0;">📞 Call History (${contactCalls.length} calls)</h3>
+                                <h3 style="color: #8E2A8C; border-bottom: 2px solid #8E2A8C; padding-bottom: 10px; margin: 0 0 15px 0;">📞 Call History (${contactCalls.length} calls)</h3>
                                 <div style="max-height: 350px; overflow-y: auto;">
                                     ${callsHtml}
                                 </div>
@@ -1174,7 +1178,7 @@
             
             const html = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">' +
                 '<div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">' +
-                '<h2 style="margin: 0 0 20px 0; color: #4facfe;">📞 Log New Call - ' + lead.name + '</h2>' +
+                '<h2 style="margin: 0 0 20px 0; color: #8E2A8C;">📞 Log New Call - ' + lead.name + '</h2>' +
                 '<div class="form-group">' +
                 '<label>Call Status</label>' +
                 '<select id="callStatus_' + leadId + '">' +
@@ -1216,7 +1220,7 @@
             
             const html = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">' +
                 '<div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">' +
-                '<h2 style="margin: 0 0 20px 0; color: #4facfe;">⏰ Set Reminder - ' + lead.name + '</h2>' +
+                '<h2 style="margin: 0 0 20px 0; color: #8E2A8C;">⏰ Set Reminder - ' + lead.name + '</h2>' +
                 '<div class="form-group">' +
                 '<label>Reminder Type</label>' +
                 '<select id="reminderType_' + leadId + '">' +
@@ -1247,7 +1251,7 @@
             
             const html = '<div id="' + modalId + '" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000;">' +
                 '<div style="background: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">' +
-                '<h2 style="margin: 0 0 20px 0; color: #4facfe;">📅 Schedule Meeting - ' + lead.name + '</h2>' +
+                '<h2 style="margin: 0 0 20px 0; color: #8E2A8C;">📅 Schedule Meeting - ' + lead.name + '</h2>' +
                 '<div class="form-group">' +
                 '<label>Meeting Date</label>' +
                 '<input type="date" id="meetingDate_' + leadId + '" required>' +
@@ -1622,7 +1626,7 @@
                 const priorityLabel = daysLeft <= 0 ? '🔴 OVERDUE' : daysLeft <= 2 ? '🟠 URGENT' : '✅ OK';
                 
                 return '<tr style="border-left: 4px solid ' + priorityColor + '; background: ' + (daysLeft <= 0 ? '#fff5f5' : '') + '">' +
-                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="openFollowupModal(\'' + fu.id + '\')">' + escapeHtml(lead?.name || 'Unknown') + '</strong></td>' +
+                '<td><strong style="cursor: pointer; color: #8E2A8C;" onclick="openFollowupModal(\'' + fu.id + '\')">' + escapeHtml(lead?.name || 'Unknown') + '</strong></td>' +
                 '<td>' + escapeHtml(fu.follow_up_date) + '</td>' +
                 '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(fu.follow_up_notes || 'N/A') + '</td>' +
                 '<td style="color: ' + priorityColor + '; font-weight: bold;">' + priorityLabel + ' (' + (daysLeft <= 0 ? '0d' : daysLeft + 'd') + ')</td>' +
@@ -1878,7 +1882,7 @@
 
             container.innerHTML = goals.map(goal => {
                 const progress = Math.min((goal.current_value / goal.target_value) * 100, 100);
-                return '<div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">' +
+                return '<div style="background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 20px; border-radius: 10px;">' +
                 '<h3 style="margin-bottom: 10px;">' + goal.goal_type + '</h3>' +
                 '<p style="margin-bottom: 15px; opacity: 0.9;">Target: ' + goal.target_value + ' | Current: ' + goal.current_value + '</p>' +
                 '<div class="progress-bar">' +
@@ -2170,12 +2174,12 @@
                             datasets: [{
                                 label: 'Duration (mins)',
                                 data: durations.length > 0 ? durations : [0],
-                                borderColor: '#4facfe',
+                                borderColor: '#8E2A8C',
                                 backgroundColor: 'rgba(79,172,254,0.1)',
                                 borderWidth: 2,
                                 fill: true,
                                 tension: 0.4,
-                                pointBackgroundColor: '#4facfe',
+                                pointBackgroundColor: '#8E2A8C',
                                 pointBorderColor: '#fff',
                                 pointBorderWidth: 2,
                                 pointRadius: 5
@@ -2281,7 +2285,7 @@
         }
 
         function viewMemberDetails(memberId) {
-            alert('Member details view coming soon');
+            showAlert('Member details view coming soon', 'info');
         }
 
         // ============================================================
@@ -2367,7 +2371,7 @@
                             {
                                 label: 'Total Calls',
                                 data: [weekData['Sun'], weekData['Mon'], weekData['Tue'], weekData['Wed'], weekData['Thu'], weekData['Fri'], weekData['Sat']],
-                                backgroundColor: '#4facfe',
+                                backgroundColor: '#8E2A8C',
                                 borderColor: '#2a9cdc',
                                 borderWidth: 1
                             },
@@ -2443,7 +2447,7 @@
                     icon: '➡️',
                     text: 'Follow-up: ' + escapeHtml(lead?.name || 'Unknown') + ' (' + escapeHtml(f.follow_up_type) + ')',
                     time: f.follow_up_date,
-                    color: '#4facfe'
+                    color: '#8E2A8C'
                 });
             });
 
@@ -2619,11 +2623,11 @@
                 // Display today
                 todayProgressEl.innerHTML = 
                 '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">' +
-                '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">' +
+                '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8E2A8C;">' +
                 '<div style="font-size: 14px; color: #666;">📞 Total Calls</div>' +
-                '<div style="font-size: 24px; font-weight: bold; color: #4facfe;">' + todayCalls + '/' + targets.daily_calls + '</div>' +
+                '<div style="font-size: 24px; font-weight: bold; color: #8E2A8C;">' + todayCalls + '/' + targets.daily_calls + '</div>' +
                 '<div style="width: 100%; height: 8px; background: #e0e7ff; border-radius: 4px; margin-top: 10px;">' +
-                '<div style="width: ' + Math.min((todayCalls / targets.daily_calls) * 100, 100) + '%; height: 100%; background: #4facfe; border-radius: 4px;"></div></div>' +
+                '<div style="width: ' + Math.min((todayCalls / targets.daily_calls) * 100, 100) + '%; height: 100%; background: #8E2A8C; border-radius: 4px;"></div></div>' +
                 '</div>' +
                 '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">' +
                 '<div style="font-size: 14px; color: #666;">✅ Connected Calls</div>' +
@@ -2641,11 +2645,11 @@
             // Display week
             weekProgressEl.innerHTML = 
                 '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">' +
-                '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">' +
+                '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8E2A8C;">' +
                 '<div style="font-size: 14px; color: #666;">📞 Total Calls</div>' +
-                '<div style="font-size: 24px; font-weight: bold; color: #4facfe;">' + weekCalls + '/' + targets.weekly_calls + '</div>' +
+                '<div style="font-size: 24px; font-weight: bold; color: #8E2A8C;">' + weekCalls + '/' + targets.weekly_calls + '</div>' +
                 '<div style="width: 100%; height: 8px; background: #e0e7ff; border-radius: 4px; margin-top: 10px;">' +
-                '<div style="width: ' + Math.min((weekCalls / targets.weekly_calls) * 100, 100) + '%; height: 100%; background: #4facfe; border-radius: 4px;"></div></div>' +
+                '<div style="width: ' + Math.min((weekCalls / targets.weekly_calls) * 100, 100) + '%; height: 100%; background: #8E2A8C; border-radius: 4px;"></div></div>' +
                 '</div>' +
                 '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">' +
                 '<div style="font-size: 14px; color: #666;">✅ Connected Calls</div>' +
@@ -2663,11 +2667,11 @@
             // Display month
             monthProgressEl.innerHTML = 
                 '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">' +
-                '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">' +
+                '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8E2A8C;">' +
                 '<div style="font-size: 14px; color: #666;">📞 Total Calls</div>' +
-                '<div style="font-size: 24px; font-weight: bold; color: #4facfe;">' + monthCalls + '/' + targets.monthly_calls + '</div>' +
+                '<div style="font-size: 24px; font-weight: bold; color: #8E2A8C;">' + monthCalls + '/' + targets.monthly_calls + '</div>' +
                 '<div style="width: 100%; height: 8px; background: #e0e7ff; border-radius: 4px; margin-top: 10px;">' +
-                '<div style="width: ' + Math.min((monthCalls / targets.monthly_calls) * 100, 100) + '%; height: 100%; background: #4facfe; border-radius: 4px;"></div></div>' +
+                '<div style="width: ' + Math.min((monthCalls / targets.monthly_calls) * 100, 100) + '%; height: 100%; background: #8E2A8C; border-radius: 4px;"></div></div>' +
                 '</div>' +
                 '<div style="background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">' +
                 '<div style="font-size: 14px; color: #666;">✅ Connected Calls</div>' +
@@ -2720,10 +2724,16 @@
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
             const alert = document.createElement('div');
-            alert.className = 'alert alert-' + type;
+            alert.className = 'alert alert-' + (type || 'info');
+            alert.setAttribute('role', 'status');
             alert.textContent = message;
             container.appendChild(alert);
-            setTimeout(() => alert.remove(), 5000);
+            const life = (type === 'error' || type === 'warn') ? 6000 : 3500;
+            setTimeout(() => {
+                alert.style.transition = 'opacity 0.3s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, life);
         }
 
         // ============================================================
