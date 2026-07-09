@@ -264,39 +264,6 @@
         const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // SECURITY NOTE: this used to be a hardcoded array of all 23 employees'
-        // real names/salaries/loans shipped in the page source (readable by
-        // anyone with the URL, logged in or not). It has been moved to a
-        // Supabase table (`employees`, protected by RLS - see
-        // supabase-payroll-migration.sql). This local copy only exists as a
-        // one-time fallback so the page keeps working until that migration is
-        // run, and should be deleted once `usingLiveData` is always true.
-        const FALLBACK_EMPLOYEES_DO_NOT_SHIP_LONG_TERM = [
-            { sr_no: 1, name: 'Rizwan Patel', branch: 'EPS LTD', gross_salary: 29000, leave_pending: 46, advance: 0, loan: 5000 },
-            { sr_no: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', gross_salary: 44000, leave_pending: 131, advance: 0, loan: 0 },
-            { sr_no: 3, name: 'Sopan Sable', branch: 'EPS LTD', gross_salary: 29100, leave_pending: 41, advance: 1500, loan: 0 },
-            { sr_no: 4, name: 'Sonu Prajapati', branch: 'EPS LTD', gross_salary: 23500, leave_pending: 33, advance: 0, loan: 0 },
-            { sr_no: 5, name: 'Sudhir Naik', branch: 'EPS LTD', gross_salary: 41500, leave_pending: 120, advance: 0, loan: 0 },
-            { sr_no: 6, name: 'Abhishek Masane', branch: 'OFFICE', gross_salary: 25500, leave_pending: 35, advance: 0, loan: 2000 },
-            { sr_no: 7, name: 'Manaswi Bhosle', branch: 'OFFICE', gross_salary: 26500, leave_pending: 38, advance: 0, loan: 0 },
-            { sr_no: 8, name: 'Sheetal Parulekar', branch: 'OFFICE', gross_salary: 29800, leave_pending: 43, advance: 500, loan: 0 },
-            { sr_no: 9, name: 'Akbar Khan', branch: 'EPS LTD', gross_salary: 20000, leave_pending: 23, advance: 0, loan: 1000 },
-            { sr_no: 10, name: 'Jayshree Thorse', branch: 'CASH', gross_salary: 21500, leave_pending: 50, advance: 0, loan: 0 },
-            { sr_no: 11, name: 'Joy Mathew', branch: 'OFFICE', gross_salary: 30000, leave_pending: 60, advance: 0, loan: 3000 },
-            { sr_no: 12, name: 'Deepikas Satam', branch: 'OFFICE', gross_salary: 36000, leave_pending: 75, advance: 0, loan: 0 },
-            { sr_no: 13, name: 'Lavakumar Shetty', branch: 'OFFICE', gross_salary: 36000, leave_pending: 65, advance: 0, loan: 2500 },
-            { sr_no: 14, name: 'Vinayak Bhat', branch: 'OFFICE', gross_salary: 36000, leave_pending: 70, advance: 1000, loan: 0 },
-            { sr_no: 15, name: 'Pankaj Indulkar', branch: 'OFFICE', gross_salary: 28500, leave_pending: 55, advance: 0, loan: 0 },
-            { sr_no: 16, name: 'Prakash Patil', branch: 'EPS LTD', gross_salary: 26700, leave_pending: 40, advance: 0, loan: 1500 },
-            { sr_no: 17, name: 'Darshana Nandosar', branch: 'OFFICE', gross_salary: 22000, leave_pending: 35, advance: 0, loan: 0 },
-            { sr_no: 18, name: 'Jayprakash Yadav', branch: 'EPS LTD', gross_salary: 21700, leave_pending: 38, advance: 500, loan: 0 },
-            { sr_no: 19, name: 'Ashok Khade', branch: 'EPS LTD', gross_salary: 21200, leave_pending: 30, advance: 0, loan: 1000 },
-            { sr_no: 20, name: 'Saeed', branch: 'EPS LTD', gross_salary: 21000, leave_pending: 33, advance: 0, loan: 0 },
-            { sr_no: 21, name: 'Anil Kasbekar', branch: 'EPS LTD', gross_salary: 19600, leave_pending: 28, advance: 0, loan: 500 },
-            { sr_no: 22, name: 'Praful Jogale', branch: 'EPS LTD', gross_salary: 26500, leave_pending: 48, advance: 0, loan: 2000 },
-            { sr_no: 23, name: 'Anjan Sahu', branch: 'OFFICE', gross_salary: 30000, leave_pending: 60, advance: 0, loan: 0 }
-        ];
-
         window.addEventListener('load', () => { checkAuth(); });
 
         function checkAuth() {
@@ -311,22 +278,19 @@
         async function fetchEmployees() {
             try {
                 const { data, error } = await supabase
-                    .from('employees')
+                    .from('payroll_employees')
                     .select('sr_no, name, branch, gross_salary, leave_pending, advance, loan')
                     .order('sr_no', { ascending: true });
 
                 if (error) throw error;
-                if (data && data.length > 0) {
-                    usingLiveData = true;
-                    return data;
-                }
+                usingLiveData = true;
+                return data || [];
             } catch (err) {
-                console.warn('Could not load employees from Supabase, using local fallback:', err.message || err);
+                usingLiveData = false;
+                console.error('Could not load employees from Supabase:', err.message || err);
+                showMessage('❌ Could not load payroll data from the database: ' + (err.message || err), true);
+                return [];
             }
-
-            usingLiveData = false;
-            showMessage('⚠️ Showing local sample data - run supabase-payroll-migration.sql and refresh to load the live, database-backed employee list.', true);
-            return FALLBACK_EMPLOYEES_DO_NOT_SHIP_LONG_TERM;
         }
 
         async function fetchPayrollEntries(month) {
