@@ -1197,8 +1197,24 @@
     <script>
         (function() {
             const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
-            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+            const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
             window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const escapeHtml = window.escapeHtml = function(value) {
+                return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+                });
+            };
+            // Safe to interpolate into a single-quoted JS string literal that
+            // itself sits inside an onclick="..." HTML attribute: first JS-escape
+            // (backslash/quote/newline), then HTML-attribute-escape the result.
+            const jsAttrEscape = window.jsAttrEscape = function(value) {
+                const jsSafe = String(value ?? '')
+                    .replace(/\\/g, '\\\\')
+                    .replace(/'/g, "\\'")
+                    .replace(/\n/g, '\\n')
+                    .replace(/\r/g, '\\r');
+                return escapeHtml(jsSafe);
+            };
             window.currentUser = null;
             window.allData = { contacts: [], meetings: [], calls: [], orders: [] };
             window.allEmployees = [];
@@ -1276,8 +1292,6 @@
 
             window.loadAllData = async function() {
                 try {
-                    console.log('Loading data from Supabase...');
-                    
                     // Load from Supabase
                     const [contactsRes, meetingsRes, callsRes, perfRes] = await Promise.all([
                         window.supabaseClient.from('contacts').select('*').limit(500),
@@ -1317,7 +1331,6 @@
                         console.error('❌ Error loading orders from Supabase:', ordersRes.error);
                         window.allData.orders = [];
                     } else if (ordersRes.data) {
-                        console.log('📦 Orders from Supabase:', ordersRes.data.length, 'records');
                         window.allData.orders = ordersRes.data.map(order => ({
                             id: order.order_id,
                             forwardingNumber: order.forwarding_number,
@@ -1355,19 +1368,6 @@
                         window.allData.orders = [];
                     }
 
-                    console.log('Raw data loaded:');
-                    console.log('Contacts sample:', window.allData.contacts[0]);
-                    console.log('Meetings sample:', window.allData.meetings[0]);
-                    console.log('Calls sample:', window.allData.calls[0]);
-                    console.log('Orders sample:', window.allData.orders[0]);
-                    
-                    console.log('Data loaded:', {
-                        contacts: window.allData.contacts.length,
-                        meetings: window.allData.meetings.length,
-                        calls: window.allData.calls.length,
-                        orders: window.allData.orders.length
-                    });
-
                     updateTeamReports();
                     updateOrdersReports();
                     updatePerformance();
@@ -1392,29 +1392,22 @@
                     // Create single subscription with all callbacks
                     window.supabaseClient
                         .channel('public:all')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, (payload) => {
-                            console.log('Contacts update:', payload);
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => {
                             window.loadAllData();
                         })
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings' }, (payload) => {
-                            console.log('Meetings update:', payload);
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings' }, () => {
                             window.loadAllData();
                         })
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, (payload) => {
-                            console.log('Calls update:', payload);
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, () => {
                             window.loadAllData();
                         })
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-                            console.log('📦 Orders update:', payload);
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
                             window.loadAllData();
                         })
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'employee_incentives' }, (payload) => {
-                            console.log('Incentives update:', payload);
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'employee_incentives' }, () => {
                             window.loadIncentives();
                         })
                         .subscribe();
-                    
-                    console.log('✅ Real-time subscriptions active');
                 } catch (error) {
                     console.error('Subscription error:', error);
                 }
@@ -1550,7 +1543,7 @@
                         const callStatus = data.calls >= 45 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.calls + '/45</span>';
                         const connectedStatus = data.connected >= 30 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.connected + '/30</span>';
                         const meetingStatus = data.meetings >= 2 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.meetings + '/2</span>';
-                        row.innerHTML = '<td>' + email + '</td><td>' + data.role + '</td><td>' + data.calls + '</td><td>' + callStatus + '</td><td>' + data.connected + '</td><td>' + connectedStatus + '</td><td>' + data.meetings + '</td><td>' + meetingStatus + '</td><td><span class="status-badge status-success">Active</span></td>';
+                        row.innerHTML = '<td>' + escapeHtml(email) + '</td><td>' + escapeHtml(data.role) + '</td><td>' + data.calls + '</td><td>' + callStatus + '</td><td>' + data.connected + '</td><td>' + connectedStatus + '</td><td>' + data.meetings + '</td><td>' + meetingStatus + '</td><td><span class="status-badge status-success">Active</span></td>';
                     });
                 }
 
@@ -1564,7 +1557,7 @@
                         const callStatus = data.calls >= 270 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.calls + '/270</span>';
                         const connectedStatus = data.connected >= 180 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.connected + '/180</span>';
                         const meetingStatus = data.meetings >= 12 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.meetings + '/12</span>';
-                        row.innerHTML = '<td>' + email + '</td><td>' + data.role + '</td><td>' + data.calls + '</td><td>' + callStatus + '</td><td>' + data.connected + '</td><td>' + connectedStatus + '</td><td>' + data.meetings + '</td><td>' + meetingStatus + '</td><td><span class="status-badge status-success">Active</span></td>';
+                        row.innerHTML = '<td>' + escapeHtml(email) + '</td><td>' + escapeHtml(data.role) + '</td><td>' + data.calls + '</td><td>' + callStatus + '</td><td>' + data.connected + '</td><td>' + connectedStatus + '</td><td>' + data.meetings + '</td><td>' + meetingStatus + '</td><td><span class="status-badge status-success">Active</span></td>';
                     });
                 }
 
@@ -1578,7 +1571,7 @@
                         const callStatus = data.calls >= 1080 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.calls + '/1080</span>';
                         const connectedStatus = data.connected >= 720 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.connected + '/720</span>';
                         const meetingStatus = data.meetings >= 48 ? '<span class="status-badge status-success">✅ Met</span>' : '<span class="status-badge status-danger">' + data.meetings + '/48</span>';
-                        row.innerHTML = '<td>' + email + '</td><td>' + data.role + '</td><td>' + data.calls + '</td><td>' + callStatus + '</td><td>' + data.connected + '</td><td>' + connectedStatus + '</td><td>' + data.meetings + '</td><td>' + meetingStatus + '</td><td><span class="status-badge status-success">Active</span></td>';
+                        row.innerHTML = '<td>' + escapeHtml(email) + '</td><td>' + escapeHtml(data.role) + '</td><td>' + data.calls + '</td><td>' + callStatus + '</td><td>' + data.connected + '</td><td>' + connectedStatus + '</td><td>' + data.meetings + '</td><td>' + meetingStatus + '</td><td><span class="status-badge status-success">Active</span></td>';
                     });
                 }
 
@@ -1618,7 +1611,7 @@
                     const customerId = order.id || 'N/A';
                     const customerName = order.customerName || 'Unknown';
                     
-                    row.innerHTML = '<td>' + customerId + '</td><td>' + customerName + '</td><td>₹' + amount.toFixed(0) + '</td><td><span class="status-badge ' + (status === 'Completed' || status === 'completed' ? 'status-success' : 'status-warning') + '">' + status + '</span></td><td>' + payment + '</td><td>' + date + '</td>';
+                    row.innerHTML = '<td>' + escapeHtml(customerId) + '</td><td>' + escapeHtml(customerName) + '</td><td>₹' + amount.toFixed(0) + '</td><td><span class="status-badge ' + (status === 'Completed' || status === 'completed' ? 'status-success' : 'status-warning') + '">' + escapeHtml(status) + '</span></td><td>' + escapeHtml(payment) + '</td><td>' + escapeHtml(date) + '</td>';
                 });
             };
 
@@ -1653,7 +1646,7 @@
                                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } } }
                             });
                         } catch (e) {
-                            console.log('Chart error:', e);
+                            console.error('Chart error:', e);
                         }
                     }
                 }
@@ -1679,7 +1672,7 @@
                             options: { responsive: true, maintainAspectRatio: false }
                         });
                     } catch (e) {
-                        console.log('Chart error:', e);
+                        console.error('Chart error:', e);
                     }
                 }
 
@@ -1930,7 +1923,7 @@
                     topCallers.forEach((entry, i) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 5px; margin-bottom: 10px;';
-                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + entry[0] + '</div><div><strong>' + entry[1].calls + ' calls</strong></div>';
+                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].calls + ' calls</strong></div>';
                         callsBoard.appendChild(div);
                     });
                 }
@@ -1943,7 +1936,7 @@
                     topMeetings.forEach((entry, i) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 5px; margin-bottom: 10px;';
-                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + entry[0] + '</div><div><strong>' + entry[1].meetings + ' meetings</strong></div>';
+                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].meetings + ' meetings</strong></div>';
                         meetingsBoard.appendChild(div);
                     });
                 }
@@ -1956,7 +1949,7 @@
                     topPerformers.forEach((entry, i) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 5px; margin-bottom: 10px;';
-                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + entry[0] + '</div><div><strong>' + entry[1].score.toFixed(0) + ' pts</strong></div>';
+                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].score.toFixed(0) + ' pts</strong></div>';
                         performersBoard.appendChild(div);
                     });
                 }
@@ -1968,7 +1961,7 @@
                     topPerformers.slice(0, 10).forEach((entry, i) => {
                         const row = tbody.insertRow();
                         const emp = window.allEmployees.find(e => e.email === entry[0]);
-                        row.innerHTML = '<td>' + (i + 1) + '</td><td>' + entry[0] + '</td><td>' + (emp ? emp.role : 'N/A') + '</td><td>' + entry[1].calls + '</td><td>' + entry[1].meetings + '</td><td>' + (emp ? emp.performance_score || 0 : 0) + '%</td><td><strong>' + entry[1].score.toFixed(0) + '</strong></td>';
+                        row.innerHTML = '<td>' + (i + 1) + '</td><td>' + escapeHtml(entry[0]) + '</td><td>' + escapeHtml(emp ? emp.role : 'N/A') + '</td><td>' + entry[1].calls + '</td><td>' + entry[1].meetings + '</td><td>' + (emp ? emp.performance_score || 0 : 0) + '%</td><td><strong>' + entry[1].score.toFixed(0) + '</strong></td>';
                     });
                 }
             };
@@ -1993,7 +1986,6 @@
                         .insert([logEntry]);
                     
                     if (error) console.error('❌ Audit log error:', error);
-                    else console.log('✅ Logged:', action, module);
                 } catch (error) {
                     console.error('Error logging audit action:', error);
                 }
@@ -2101,7 +2093,6 @@
 
             window.subscribeToIncentivesUpdates = function() {
                 // Now handled by main subscribeToRealTimeUpdates
-                console.log('✅ Incentives updates included in main real-time subscription');
             };
 
             window.generateTestIncentives = async function() {
@@ -2188,7 +2179,7 @@
                     
                     const row = tbody.insertRow();
                     const statusClass = inc.status === 'paid' ? 'status-success' : 'status-warning';
-                    row.innerHTML = '<td>' + (emp ? emp.name : 'Unknown') + '</td><td>' + (inc.month || 'N/A') + '</td><td>₹' + salary.toFixed(0) + '</td><td>' + target + '</td><td>' + achievementBadge + '</td><td>₹' + incentive.toFixed(0) + '</td><td><strong>₹' + total.toFixed(0) + '</strong></td><td><span class="status-badge ' + statusClass + '">' + (inc.status || 'pending') + '</span></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="openEditIncentiveModal(\'' + inc.id + '\', \'' + (emp ? emp.name : 'Unknown') + '\', ' + incentive + ')">✏️ Edit</button><button class="btn btn-success" style="padding: 5px 10px; font-size: 0.8em;" onclick="markIncentivePaid(\'' + inc.id + '\')">Mark Paid</button></td>';
+                    row.innerHTML = '<td>' + escapeHtml(emp ? emp.name : 'Unknown') + '</td><td>' + escapeHtml(inc.month || 'N/A') + '</td><td>₹' + salary.toFixed(0) + '</td><td>' + target + '</td><td>' + achievementBadge + '</td><td>₹' + incentive.toFixed(0) + '</td><td><strong>₹' + total.toFixed(0) + '</strong></td><td><span class="status-badge ' + statusClass + '">' + escapeHtml(inc.status || 'pending') + '</span></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="openEditIncentiveModal(\'' + inc.id + '\', \'' + jsAttrEscape(emp ? emp.name : 'Unknown') + '\', ' + incentive + ')">✏️ Edit</button><button class="btn btn-success" style="padding: 5px 10px; font-size: 0.8em;" onclick="markIncentivePaid(\'' + inc.id + '\')">Mark Paid</button></td>';
                 });
             };
 
@@ -2377,7 +2368,7 @@
                         await window.supabaseClient.from('vehicle_documents').insert({
                             vehicle_id: insertedVehicle.id,
                             documents: JSON.stringify(documents)
-                        }).catch(err => console.log('Document metadata save:', err));
+                        }).catch(err => console.error('Document metadata save failed:', err));
                     }
 
                     await logAuditAction('CREATE', 'Vehicle', { registration_number: regNumber, vehicle_type: vehicleType, manufacturer: manufacturer });
@@ -2468,7 +2459,7 @@
                     
                     const docStatusText = docStatus.length > 0 ? '⚠️ ' + docStatus.join(', ') : '✅ Valid';
 
-                    row.innerHTML = '<td><strong>' + vehicle.registration_number + '</strong></td><td>' + vehicle.vehicle_type + '</td><td>' + (vehicle.vehicle_model || 'N/A') + '</td><td>' + (vehicle.owner_name || 'N/A') + '</td><td>' + (vehicle.last_service_date || 'N/A') + '</td><td>' + serviceStatus + '</td><td>' + docStatusText + '</td><td><span class="status-badge status-success">✅ ' + vehicle.vehicle_status + '</span></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="viewVehicleDetails(\'' + vehicle.id + '\')">👁️ View</button><button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em; background: #ef4444;" onclick="deleteVehicle(\'' + vehicle.id + '\')">🗑️ Delete</button></td>';
+                    row.innerHTML = '<td><strong>' + escapeHtml(vehicle.registration_number) + '</strong></td><td>' + escapeHtml(vehicle.vehicle_type) + '</td><td>' + escapeHtml(vehicle.vehicle_model || 'N/A') + '</td><td>' + escapeHtml(vehicle.owner_name || 'N/A') + '</td><td>' + escapeHtml(vehicle.last_service_date || 'N/A') + '</td><td>' + serviceStatus + '</td><td>' + docStatusText + '</td><td><span class="status-badge status-success">✅ ' + escapeHtml(vehicle.vehicle_status) + '</span></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="viewVehicleDetails(\'' + vehicle.id + '\')">👁️ View</button><button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em; background: #ef4444;" onclick="deleteVehicle(\'' + vehicle.id + '\')">🗑️ Delete</button></td>';
                 });
             };
 
@@ -2688,7 +2679,7 @@
                         statusClass = 'status-warning';
                     }
 
-                    row.innerHTML = '<td><strong>' + contract.client_name + '</strong></td><td>' + (contract.company_name || 'N/A') + '</td><td>' + (contract.contact_person || 'N/A') + '</td><td>' + contract.contract_start_date + '</td><td>' + contract.contract_end_date + '</td><td><span class="status-badge ' + statusClass + '">' + status + '</span></td><td><strong>' + (daysLeft > 0 ? daysLeft + ' days' : 'Expired') + '</strong></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="viewContractDetails(\'' + contract.id + '\')">👁️ View</button><button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em; background: #ef4444;" onclick="deleteContract(\'' + contract.id + '\')">🗑️ Delete</button></td>';
+                    row.innerHTML = '<td><strong>' + escapeHtml(contract.client_name) + '</strong></td><td>' + escapeHtml(contract.company_name || 'N/A') + '</td><td>' + escapeHtml(contract.contact_person || 'N/A') + '</td><td>' + escapeHtml(contract.contract_start_date) + '</td><td>' + escapeHtml(contract.contract_end_date) + '</td><td><span class="status-badge ' + statusClass + '">' + escapeHtml(status) + '</span></td><td><strong>' + (daysLeft > 0 ? daysLeft + ' days' : 'Expired') + '</strong></td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em; margin-right: 5px;" onclick="viewContractDetails(\'' + contract.id + '\')">👁️ View</button><button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em; background: #ef4444;" onclick="deleteContract(\'' + contract.id + '\')">🗑️ Delete</button></td>';
                 });
             };
 
@@ -2882,7 +2873,7 @@
                     const row = tbody.insertRow();
                     const statusClass = vendor.vendor_registered ? 'status-success' : 'status-warning';
                     const statusText = vendor.vendor_registered ? '✅ Registered' : '⏳ Pending';
-                    row.innerHTML = '<td style="cursor: pointer; color: #f093fb; font-weight: bold;" onclick="viewVendorDetails(\'' + vendor.id + '\')">' + vendor.vendor_name + '</td><td>' + vendor.contact_person + '</td><td>' + vendor.phone + '</td><td>' + vendor.email + '</td><td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td><td>' + (vendor.registration_code || 'N/A') + '</td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em;" onclick="approveVendor(\'' + vendor.id + '\')">✏️ Approve</button></td>';
+                    row.innerHTML = '<td style="cursor: pointer; color: #f093fb; font-weight: bold;" onclick="viewVendorDetails(\'' + vendor.id + '\')">' + escapeHtml(vendor.vendor_name) + '</td><td>' + escapeHtml(vendor.contact_person) + '</td><td>' + escapeHtml(vendor.phone) + '</td><td>' + escapeHtml(vendor.email) + '</td><td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td><td>' + escapeHtml(vendor.registration_code || 'N/A') + '</td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em;" onclick="approveVendor(\'' + vendor.id + '\')">✏️ Approve</button></td>';
                 });
             };
 
@@ -2994,7 +2985,7 @@
                     const row = tbody.insertRow();
                     const statusClass = emp.status === 'active' ? 'status-active' : 'status-inactive';
                     const joiningDate = emp.joining_date ? emp.joining_date.split('T')[0] : 'N/A';
-                    row.innerHTML = '<td>' + emp.name + '</td><td>' + emp.email + '</td><td>' + (emp.role || 'N/A') + '</td><td>' + (emp.department || 'N/A') + '</td><td>' + joiningDate + '</td><td><span class="status-badge ' + statusClass + '">' + emp.status + '</span></td><td>' + (emp.performance_score || 0) + '%</td><td><button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8em;" onclick="editEmployee(\'' + emp.id + '\')">Edit</button> <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em;" onclick="deleteEmployee(\'' + emp.id + '\')">Delete</button></td>';
+                    row.innerHTML = '<td>' + escapeHtml(emp.name) + '</td><td>' + escapeHtml(emp.email) + '</td><td>' + escapeHtml(emp.role || 'N/A') + '</td><td>' + escapeHtml(emp.department || 'N/A') + '</td><td>' + escapeHtml(joiningDate) + '</td><td><span class="status-badge ' + statusClass + '">' + escapeHtml(emp.status) + '</span></td><td>' + (emp.performance_score || 0) + '%</td><td><button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8em;" onclick="editEmployee(\'' + emp.id + '\')">Edit</button> <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8em;" onclick="deleteEmployee(\'' + emp.id + '\')">Delete</button></td>';
                 });
             };
 
@@ -3186,11 +3177,11 @@
                 document.getElementById('auditTableBody').innerHTML = logs.map(log => `
                     <tr style="border-bottom: 1px solid #eee;">
                         <td style="padding: 10px;">${new Date(log.timestamp).toLocaleString()}</td>
-                        <td style="padding: 10px;">${log.user_email}</td>
-                        <td style="padding: 10px;"><span style="background: #ecf0f1; padding: 4px 8px; border-radius: 3px; font-size: 11px;">${log.module || 'N/A'}</span></td>
+                        <td style="padding: 10px;">${escapeHtml(log.user_email)}</td>
+                        <td style="padding: 10px;"><span style="background: #ecf0f1; padding: 4px 8px; border-radius: 3px; font-size: 11px;">${escapeHtml(log.module || 'N/A')}</span></td>
                         <td style="padding: 10px;">
                             <span style="background: ${actionColors[log.action] || '#95a5a6'}; color: white; padding: 4px 10px; border-radius: 3px; font-size: 11px; font-weight: bold;">
-                                ${log.action}
+                                ${escapeHtml(log.action)}
                             </span>
                         </td>
                         <td style="padding: 10px;">
