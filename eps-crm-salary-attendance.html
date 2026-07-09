@@ -8,9 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #8E2A8C 0%, #5c1b5a 100%);
             min-height: 100vh;
             padding: 12px;
         }
@@ -25,71 +25,86 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8E2A8C 0%, #5c1b5a 100%);
             color: white;
             padding: 20px;
             text-align: center;
+            border-bottom: 3px solid #D4AF37;
         }
 
         .header h1 { font-size: 1.6em; margin-bottom: 5px; }
         .header p { font-size: 0.85em; opacity: 0.9; }
 
         .controls {
-            padding: 12px;
+            padding: 14px;
             background: #f8f9fa;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
             border-bottom: 2px solid #e9ecef;
             align-items: flex-end;
         }
 
-        .control { display: flex; flex-direction: column; gap: 3px; min-width: 120px; }
-        .control label { font-weight: 600; font-size: 0.75em; color: #333; }
+        .control { display: flex; flex-direction: column; gap: 4px; min-width: 130px; }
+        .control label { font-weight: 600; font-size: 0.78em; color: #333; }
         .control input, .control select {
-            padding: 5px;
+            padding: 7px;
             border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 0.75em;
+            border-radius: 4px;
+            font-size: 0.85em;
         }
 
         .btn {
-            padding: 5px 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%);
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.75em;
+            font-size: 0.82em;
         }
 
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3); }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(142, 42, 140, 0.35); }
+        .btn.gold { background: linear-gradient(135deg, #D4AF37 0%, #b3901f 100%); color: #3a2e00; }
 
         .message {
-            padding: 8px 12px;
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
+            padding: 10px 14px;
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
             margin: 0;
-            font-size: 0.8em;
+            font-size: 0.85em;
         }
 
         .message.warn {
             background: #fff3cd;
             color: #856404;
-            border-left-color: #ffc107;
+            border-left-color: #D4AF37;
         }
+
+        .legend {
+            padding: 8px 14px;
+            background: #fff;
+            font-size: 0.78em;
+            color: #555;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .legend span { display: inline-flex; align-items: center; gap: 5px; }
+        .legend i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
 
         .table-wrapper {
             overflow: auto;
-            max-height: calc(100vh - 320px);
+            max-height: calc(100vh - 340px);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9em;
+            font-size: 0.95em;
         }
 
         thead {
@@ -99,37 +114,47 @@
             z-index: 10;
         }
 
+        thead tr.group-row th {
+            background: #6b1f69;
+            color: white;
+            font-size: 0.8em;
+            padding: 6px 4px;
+            border-color: #5c1b5a;
+        }
+
         th {
-            padding: 12px 6px;
+            padding: 10px 8px;
             font-weight: 600;
             color: #333;
             border: 1px solid #ddd;
             text-align: center;
-            white-space: nowrap;
-            font-size: 0.9em;
+            white-space: normal;
+            word-break: break-word;
+            font-size: 0.85em;
+            min-width: 90px;
         }
 
-        th.sticky { 
-            position: sticky; 
-            z-index: 12; 
+        th.sticky {
+            position: sticky;
+            z-index: 12;
             background: #d9dce0;
-            min-width: 100px;
-            padding: 12px 8px;
         }
 
-        th.sticky:nth-child(1) { left: 0; }
-        th.sticky:nth-child(2) { left: 100px; }
-        th.sticky:nth-child(3) { left: 200px; }
-        th.sticky:nth-child(4) { left: 300px; }
+        th.sticky:nth-child(1) { left: 0; min-width: 55px; width: 55px; }
+        th.sticky:nth-child(2) { left: 55px; min-width: 170px; width: 170px; }
 
         td {
-            padding: 10px 6px;
+            padding: 8px 8px;
             border: 1px solid #e9ecef;
             text-align: center;
-            color: #555;
-            min-height: 50px;
+            color: #333;
+            min-height: 40px;
             vertical-align: middle;
+            min-width: 90px;
         }
+
+        td.wide { min-width: 150px; }
+        td.money { min-width: 110px; }
 
         td.sticky {
             position: sticky;
@@ -137,109 +162,155 @@
             background: white;
             text-align: center;
             font-weight: 500;
-            min-width: 100px;
-            padding: 10px 8px;
             font-size: 0.95em;
         }
 
-        td.sticky:nth-child(1) { left: 0; }
-        td.sticky:nth-child(2) { left: 100px; }
-        td.sticky:nth-child(3) { left: 200px; }
-        td.sticky:nth-child(4) { left: 300px; }
+        td.sticky:nth-child(1) { left: 0; width: 55px; }
+        td.sticky:nth-child(2) { left: 55px; width: 170px; text-align: left; padding-left: 12px; }
 
-        tr:hover { background: #f8f9fa; }
-        tr:hover td.sticky { background: #e3f2fd; }
+        tr:hover { background: #faf5fa; }
+        tr:hover td.sticky { background: #f3e6f3; }
 
-        input { 
-            width: 95%; 
-            padding: 6px 4px; 
-            border: 1px solid #ccc; 
+        input, select {
+            width: 95%;
+            padding: 7px 5px;
+            border: 1px solid #ccc;
             border-radius: 3px;
-            font-size: 0.95em; 
+            font-size: 0.95em;
             text-align: center;
-            min-height: 30px;
+            min-height: 32px;
         }
-        input, select { 
-            width: 95%; 
-            padding: 6px 4px; 
-            border: 1px solid #ccc; 
-            border-radius: 3px;
-            font-size: 0.95em; 
-            text-align: center;
-            min-height: 30px;
-        }
-        input:focus, select:focus { outline: none; border-color: #667eea; background: #f0f8ff; }
+        input:focus, select:focus { outline: none; border-color: #8E2A8C; background: #fbf3fb; }
 
         .date-col {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            height: 120px;
-            padding: 6px 4px !important;
+            height: 100px;
+            padding: 6px 2px !important;
+            min-width: 42px !important;
+            width: 42px;
         }
 
-        .day-header {
-            font-weight: 600;
-            font-size: 0.95em;
-        }
+        .day-header { font-weight: 600; font-size: 0.9em; }
 
-        .att-P { background: #c8e6c9; color: #1b5e20; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
-        .att-A { background: #ffcdd2; color: #b71c1c; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
-        .att-H { background: #b3e5fc; color: #01579b; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
-        .att-WO { background: #fff9c4; color: #f57f17; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 8px; }
+        .att-P { background: #c8e6c9; color: #1b5e20; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 6px; min-width: 42px; }
+        .att-A { background: #ffcdd2; color: #b71c1c; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 6px; min-width: 42px; }
+        .att-H { background: #b3e5fc; color: #01579b; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 6px; min-width: 42px; }
+        .att-HD { background: #ffe0b2; color: #e65100; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 6px; min-width: 42px; }
+        .att-WO { background: #fff9c4; color: #f57f17; font-weight: 600; cursor: pointer; font-size: 0.95em; padding: 6px; min-width: 42px; }
 
-        .calc { background: #e1f5fe; color: #01579b; font-weight: 600; font-size: 0.95em; padding: 8px; }
+        .att-P input, .att-A input, .att-H input, .att-HD input, .att-WO input { min-height: auto; padding: 4px; font-weight: 700; }
 
-        .stats { 
-            padding: 12px; 
-            background: #f8f9fa; 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+        .calc { background: #f3e9f3; color: #5c1b5a; font-weight: 600; font-size: 0.95em; padding: 8px; }
+        .calc.gold { background: #fdf6e3; color: #7a611c; }
+        .calc.balance-due { background: #ffe4e4; color: #b71c1c; }
+        .calc.balance-ok { background: #e2f7e9; color: #1b5e20; }
+
+        .stats {
+            padding: 14px;
+            background: #f8f9fa;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
             gap: 10px;
         }
 
-        .stat { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 4px; 
-            text-align: center; 
-            border-left: 3px solid #667eea;
+        .stat {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+            border-left: 3px solid #8E2A8C;
         }
-        .stat-label { font-size: 0.7em; color: #666; font-weight: 600; }
-        .stat-value { font-size: 1.1em; font-weight: bold; color: #333; margin-top: 3px; }
+        .stat-label { font-size: 0.72em; color: #666; font-weight: 600; }
+        .stat-value { font-size: 1.15em; font-weight: bold; color: #333; margin-top: 4px; }
+
+        /* Toast notifications */
+        #toastContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 360px; }
+        .toast { padding: 14px 18px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-size: 0.9em; font-weight: 500; animation: toastIn 0.25s ease; }
+        .toast-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .toast-error { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+        .toast-info { background: #f3e9f3; color: #5c1b5a; border-left: 4px solid #8E2A8C; }
+        .toast-warn { background: #fdf6e3; color: #7a611c; border-left: 4px solid #D4AF37; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+        .loading-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.85);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 14px; z-index: 5000;
+        }
+        .spinner {
+            width: 42px; height: 42px; border-radius: 50%;
+            border: 4px solid #e9d5e8; border-top-color: #8E2A8C;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            body { padding: 6px; }
+            .header h1 { font-size: 1.1em; }
+            .header p { font-size: 0.75em; }
+            .controls { padding: 8px; gap: 6px; }
+            .control { min-width: 100px; }
+            .btn { padding: 7px 10px; font-size: 0.75em; }
+            .table-wrapper { max-height: calc(100vh - 300px); }
+            th, td { font-size: 0.75em; padding: 6px 4px; min-width: 70px; }
+            th.sticky:nth-child(2), td.sticky:nth-child(2) { min-width: 120px; width: 120px; left: 55px; }
+            .stats { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); }
+        }
     </style>
 </head>
 <body>
+    <div id="toastContainer"></div>
+
     <div class="container">
         <div class="header">
-            <h1>💰 Complete Payroll Dashboard | 23 Employees | Auto-Calculated All Fields</h1>
-            <p>Dates with Day Names | Auto-detect Sundays as WO | Real-time Salary Calculations</p>
+            <h1>💰 Complete Payroll Dashboard</h1>
+            <p id="headerSubtitle">Auto-calculated attendance, leave and salary — matches the accounts formula sheet</p>
         </div>
 
         <div class="controls">
             <div class="control">
-                <label>📅 Month:</label>
-                <select id="monthSelect" onchange="changeMonth()">
+                <label for="monthSelect">📅 Month</label>
+                <select id="monthSelect" onchange="changeMonth()" aria-label="Select payroll month">
+                    <option value="2026-01">January 2026</option>
+                    <option value="2026-02">February 2026</option>
+                    <option value="2026-03">March 2026</option>
                     <option value="2026-04">April 2026</option>
                     <option value="2026-05">May 2026</option>
                     <option value="2026-06">June 2026</option>
+                    <option value="2026-07">July 2026</option>
+                    <option value="2026-08">August 2026</option>
+                    <option value="2026-09">September 2026</option>
+                    <option value="2026-10">October 2026</option>
+                    <option value="2026-11">November 2026</option>
+                    <option value="2026-12">December 2026</option>
                 </select>
             </div>
             <div class="control">
-                <label>🔍 Search:</label>
-                <input type="text" id="searchBox" placeholder="Name..." onkeyup="filterTable()">
+                <label for="searchBox">🔍 Search</label>
+                <input type="text" id="searchBox" placeholder="Name..." onkeyup="filterTable()" aria-label="Search employees by name">
             </div>
             <div class="control">
-                <label>🏢 Branch:</label>
-                <select id="branchFilter" onchange="filterTable()">
+                <label for="branchFilter">🏢 Branch</label>
+                <select id="branchFilter" onchange="filterTable()" aria-label="Filter by branch">
                     <option value="">All</option>
                     <option value="EPS LTD">EPS LTD</option>
                     <option value="OFFICE">OFFICE</option>
                     <option value="CASH">CASH</option>
                 </select>
             </div>
-            <button class="btn" onclick="saveChanges()">💾 Save</button>
-            <button class="btn" onclick="exportToExcel()">📊 Export</button>
-            <button class="btn" onclick="resetFilters()">🔄 Reset</button>
+            <button class="btn" onclick="saveChanges()" aria-label="Save payroll changes">💾 Save</button>
+            <button class="btn gold" onclick="exportToExcel()" aria-label="Export payroll to Excel">📊 Export</button>
+            <button class="btn" onclick="resetFilters()" aria-label="Reset search and filters">🔄 Reset</button>
+        </div>
+
+        <div class="legend" aria-hidden="true">
+            <span><i style="background:#c8e6c9"></i> Present (P)</span>
+            <span><i style="background:#ffcdd2"></i> Absent (A)</span>
+            <span><i style="background:#b3e5fc"></i> Holiday (H)</span>
+            <span><i style="background:#ffe0b2"></i> Half Day (HD)</span>
+            <span><i style="background:#fff9c4"></i> Weekly Off (WO)</span>
+            <span style="color:#8E2A8C; font-weight:600;">Click any attendance cell to cycle P → A → H → HD → WO</span>
         </div>
 
         <div id="messageBox"></div>
@@ -264,14 +335,45 @@
         const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.addEventListener('load', () => { checkAuth(); });
+        window.addEventListener('load', () => {
+            document.getElementById('monthSelect').value = currentMonth;
+            checkAuth();
+        });
 
-        function checkAuth() {
-            const userEmail = localStorage.getItem('eps_crm_user_email');
-            if (userEmail === 'accounts@epsworldwide.in') {
+        async function checkAuth() {
+            // Requires a real, currently-valid Supabase session for the
+            // accounts@epsworldwide.in account before loading any salary data -
+            // never trust a localStorage flag alone for this.
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const email = session?.user?.email?.toLowerCase();
+
+                if (!session || email !== 'accounts@epsworldwide.in') {
+                    localStorage.removeItem('eps_crm_user_email');
+                    window.location.href = 'eps-crm-dashboard.html';
+                    return;
+                }
+
+                localStorage.setItem('eps_crm_user_email', email);
                 loadData();
-            } else {
+            } catch (error) {
+                console.error('Auth check error:', error);
                 window.location.href = 'eps-crm-dashboard.html';
+            }
+        }
+
+        function showLoading(show) {
+            let overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'loadingOverlay';
+                    overlay.className = 'loading-overlay';
+                    overlay.innerHTML = '<div class="spinner" role="status" aria-label="Loading payroll data"></div><div>Loading payroll data…</div>';
+                    document.body.appendChild(overlay);
+                }
+            } else if (overlay) {
+                overlay.remove();
             }
         }
 
@@ -280,6 +382,7 @@
                 const { data, error } = await supabase
                     .from('payroll_employees')
                     .select('sr_no, name, branch, gross_salary, leave_pending, advance, loan')
+                    .eq('active', true)
                     .order('sr_no', { ascending: true });
 
                 if (error) throw error;
@@ -288,7 +391,7 @@
             } catch (err) {
                 usingLiveData = false;
                 console.error('Could not load employees from Supabase:', err.message || err);
-                showMessage('❌ Could not load payroll data from the database: ' + (err.message || err), true);
+                showAlert('Could not load payroll data from the database: ' + (err.message || err) + '. Run supabase-payroll-migration.sql in your Supabase SQL editor, then refresh.', 'error');
                 return [];
             }
         }
@@ -320,88 +423,118 @@
             return days[date.getDay()];
         }
 
+        // ------------------------------------------------------------------
+        // Calculation engine - mirrors the formulas in the accounts team's
+        // real payroll spreadsheet (COUNTIF-based attendance, leave offsetting
+        // absences, PF at 12%/capped Rs1800, ESIC at 0.75% under the Rs21,000
+        // wage ceiling, "Salary Done" as an amount-paid/balance field).
+        // ------------------------------------------------------------------
         function calculateAllFields(emp, totalDays) {
-            // Count attended days and Sundays
-            let presentDays = 0, weeklyOff = 0;
             const attendance = emp.attendance || {};
-            
+
+            // Count every attendance code directly from the grid (like
+            // COUNTIF in the spreadsheet) rather than guessing from the
+            // calendar - accounts can mark any day as P/A/H/HD/WO by hand.
+            let presentDays = 0, weeklyOff = 0, holidays = 0, absentDays = 0, halfDays = 0;
             for (let d = 1; d <= totalDays; d++) {
-                const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
-                const dayNum = date.getDay();
-                
-                if (dayNum === 0) {
-                    weeklyOff++;
-                } else {
-                    const status = (attendance[d] || 'P').toUpperCase();
-                    if (status === 'P') presentDays++;
-                }
+                const code = (attendance[d] || 'P').toUpperCase();
+                if (code === 'P') presentDays++;
+                else if (code === 'WO') weeklyOff++;
+                else if (code === 'H') holidays++;
+                else if (code === 'A') absentDays++;
+                else if (code === 'HD') halfDays++;
             }
-            
+
             emp.present_days = presentDays;
             emp.weekly_off = weeklyOff;
-            emp.total_days = totalDays;
+            emp.holidays = holidays;
+            emp.absent = absentDays;
+            emp.halfday = halfDays;
             emp.month_days = totalDays;
-            
-            // Auto-calculate absent = total - present - weekly off - holidays
-            const holidays = parseInt(emp.holidays) || 0;
-            const absent = totalDays - presentDays - weeklyOff - holidays;
-            emp.absent = Math.max(0, absent);
-            
-            // Half days
-            emp.halfday = parseInt(emp.halfday) || 0;
-            emp.total_halfday = emp.halfday;
-            
-            // Actual present/absent
-            emp.actual_present = presentDays;
-            emp.actual_absent = emp.absent;
-            
-            // Per day calculation
-            emp.per_day_calc = (emp.gross_salary / totalDays).toFixed(2);
-            
-            // Paid days = present + (halfday/2) - OT that's separate
-            const otDays = parseInt(emp.ot_days) || 0;
-            emp.paid_days = presentDays + (emp.halfday / 2);
-            emp.deduction_days = totalDays - emp.paid_days;
-            
-            // Salary calculations
-            const monthlySalary = Math.round((emp.gross_salary / totalDays) * emp.paid_days);
-            const otSalary = otDays > 0 ? Math.round((emp.gross_salary / totalDays) * otDays * 2) : 0;
+
+            const totalHalfDays = halfDays * 0.5;
+            emp.total_halfday = totalHalfDays;
+
+            // Actual present / actual absent (spreadsheet columns AV / AW)
+            const actualPresent = presentDays + weeklyOff + holidays - totalHalfDays;
+            const actualAbsent = absentDays + totalHalfDays;
+            emp.actual_present = actualPresent;
+            emp.actual_absent = actualAbsent;
+            emp.total_days = actualPresent + actualAbsent; // sanity-check column, should equal month days
+
+            // Per-day rate
+            const perDay = emp.gross_salary / totalDays;
+            emp.per_day_calc = perDay;
+
+            // Leave: opening balance + this month's accrual, automatically
+            // used to cover absences up to whatever leave is available
+            // (spreadsheet columns AY-BC)
+            const leavePending = parseFloat(emp.leave_pending) || 0;
+            const addingLeaves = parseFloat(emp.adding_leaves) || 0;
+            const leaveAvailable = leavePending + addingLeaves;
+            const leaveAdjusted = Math.min(leaveAvailable, actualAbsent);
+            const leaveNext = leaveAvailable - leaveAdjusted;
+
+            emp.leave_available = leaveAvailable;
+            emp.leave_adjusted = leaveAdjusted;
+            emp.leave_next = leaveNext;
+
+            // Paid days = actual present + absences covered by leave
+            const paidDays = actualPresent + leaveAdjusted;
+            const deductionDays = actualAbsent - leaveAdjusted;
+            emp.paid_days = paidDays;
+            emp.deduction_days = deductionDays;
+
+            // Earnings
+            const otDays = parseFloat(emp.ot_days) || 0;
+            const monthlySalary = Math.round(paidDays * perDay);
+            const otSalary = Math.round(otDays * perDay);
             const totalEarned = monthlySalary + otSalary;
-            
+
             emp.monthly_salary = monthlySalary;
             emp.ot_salary = otSalary;
             emp.total_earned = totalEarned;
-            
-            // Deductions (fixed components)
-            const pf = Math.round((monthlySalary * 6.17) / 100);
-            const esic = Math.round((monthlySalary * 0.75) / 100);
-            const pTax = 200;
-            const incomeTax = monthlySalary > 50000 ? Math.round((monthlySalary * 5) / 100) : 0;
-            
+
+            // Statutory deductions - PF: 12% of monthly salary, capped at a
+            // flat Rs 1800 once monthly salary exceeds Rs 15,000. ESIC:
+            // 0.75% of total earned, but only while total earned is at or
+            // under the Rs 21,000/month ESIC wage ceiling (matches the
+            // source spreadsheet exactly, including which employees get 0).
+            const pf = Math.round(monthlySalary > 15000 ? 1800 : monthlySalary * 0.12);
+            const esic = totalEarned <= 21000 ? Math.ceil(totalEarned * 0.0075) : 0;
             emp.pf = pf;
             emp.esic = esic;
-            emp.p_tax = pTax;
-            emp.income_tax = incomeTax;
-            
-            // Variable deductions
-            emp.advance = parseInt(emp.advance) || 0;
-            emp.loan = parseInt(emp.loan) || 0;
-            
-            emp.total_deduction = pf + esic + pTax + incomeTax + emp.advance + emp.loan;
-            emp.net_salary = totalEarned - emp.total_deduction;
-            
-            // Leaves
-            emp.adding_leaves = 2;
-            emp.leave_available = emp.leave_pending + emp.adding_leaves;
-            emp.leave_adjusted = parseInt(emp.leave_adjusted) || 0;
-            emp.leave_next = emp.leave_available - emp.leave_adjusted;
+
+            // P.Tax and Income Tax are entered directly by accounts in the
+            // source sheet (they vary per employee/state slab, not a single
+            // formula) - keep them as editable fields, not auto-calculated.
+            emp.p_tax = emp.p_tax === undefined || emp.p_tax === null || emp.p_tax === '' ? 200 : parseFloat(emp.p_tax) || 0;
+            emp.income_tax = parseFloat(emp.income_tax) || 0;
+
+            emp.advance = parseFloat(emp.advance) || 0;
+            emp.loan = parseFloat(emp.loan) || 0;
+
+            const totalDeduction = pf + esic + emp.p_tax + emp.income_tax + emp.advance + emp.loan;
+            emp.total_deduction = totalDeduction;
+            emp.net_salary = totalEarned - totalDeduction;
+
+            // Payment tracking - "Salary Done" in the source sheet is the
+            // actual amount paid (not a yes/no flag), so Balance = what's
+            // still owed. This lets partial payments be tracked correctly.
+            emp.salary_paid = parseFloat(emp.salary_paid) || 0;
+            emp.balance_salary = emp.net_salary - emp.salary_paid;
         }
 
         async function loadData() {
+            showLoading(true);
             const totalDays = getDaysInMonth(currentMonth);
             const employees = await fetchEmployees();
             const savedEntries = await fetchPayrollEntries(currentMonth);
             const localEntries = usingLiveData ? {} : JSON.parse(localStorage.getItem('eps_crm_payroll_' + currentMonth) || '{}');
+
+            document.getElementById('headerSubtitle').textContent = employees.length
+                ? `${employees.length} employees | ${usingLiveData ? 'Live database data' : 'Local browser data only'}`
+                : 'No employees found';
 
             allData = employees.map(emp => {
                 const saved = savedEntries[emp.sr_no] || localEntries[emp.sr_no] || null;
@@ -416,15 +549,15 @@
 
                 // Editable fields - restored from a previous save if one exists
                 data.ot_days = saved?.ot_days ?? 0;
-                data.holidays = saved?.holidays ?? 0;
-                data.halfday = saved?.halfday ?? 0;
-                data.leave_adjusted = saved?.leave_adjusted ?? 0;
-                data.salary_done = saved?.salary_done ?? 'No';
+                data.adding_leaves = saved?.adding_leaves ?? 2;
+                data.p_tax = saved?.ptax ?? 200;
+                data.income_tax = saved?.income_tax ?? 0;
+                data.salary_paid = saved?.salary_paid ?? 0;
                 data.salary_date = saved?.salary_date ?? '';
                 data.through = saved?.through ?? '';
                 data.remarks = saved?.remarks ?? '';
-                if (saved?.advance !== undefined) data.advance = saved.advance;
-                if (saved?.loan !== undefined) data.loan = saved.loan;
+                if (saved?.advance !== undefined && saved?.advance !== null) data.advance = saved.advance;
+                if (saved?.loan !== undefined && saved?.loan !== null) data.loan = saved.loan;
 
                 calculateAllFields(data, totalDays);
                 return data;
@@ -432,103 +565,113 @@
 
             renderTable();
             updateStats();
+            showLoading(false);
         }
 
         function renderTable() {
             const totalDays = getDaysInMonth(currentMonth);
-            const monthNames = { '2026-04': 'April', '2026-05': 'May', '2026-06': 'June' };
-            
+
+            // Grouped header row for readability across ~35 summary columns
+            let groupHTML = '<tr class="group-row">';
+            groupHTML += '<th class="sticky" colspan="2"></th>';
+            groupHTML += '<th colspan="2">Employee</th>';
+            groupHTML += `<th colspan="${totalDays}">Daily Attendance</th>`;
+            groupHTML += '<th colspan="12">Attendance Summary</th>';
+            groupHTML += '<th colspan="5">Leave</th>';
+            groupHTML += '<th colspan="5">Earnings</th>';
+            groupHTML += '<th colspan="7">Deductions</th>';
+            groupHTML += '<th colspan="6">Net &amp; Payment</th>';
+            groupHTML += '</tr>';
+
             // Build header
             let headerHTML = '<tr>';
             headerHTML += '<th class="sticky">Sr</th>';
             headerHTML += '<th class="sticky">Name</th>';
-            headerHTML += '<th class="sticky">Branch</th>';
-            headerHTML += '<th class="sticky">Gross Salary</th>';
-            
+            headerHTML += '<th>Branch</th>';
+            headerHTML += '<th>Gross Salary</th>';
+
             // Date columns with day names
             for (let d = 1; d <= totalDays; d++) {
                 const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
                 const dayName = getDayName(date);
                 headerHTML += `<th class="date-col"><div class="day-header">${dayName}</div><div>${d}</div></th>`;
             }
-            
+
             // Rest of columns
-            const colHeaders = ['Month Days', 'Present', 'W/O', 'OT', 'Per Day', 'Holidays', 'Absent', 'Half Day', 'Tot Half', 'Act Pres', 'Act Abs', 'Tot Days', 
-                'Lvng Pend', 'Add Lvng', 'Lvng Avl', 'Adj Lvng', 'Lvng Nxt', 'Paid Days', 'Ded Days', 'Monthly Sal', 'OT Sal', 'Tot Earn', 
-                'PF', 'ESIC', 'P.TAX', 'Inc Tax', 'Advance', 'Loan', 'Tot Ded', 'Net Sal', 'Salary Done', 'Sal Date', 'Through', 'Remarks'];
-            
+            const colHeaders = ['Month Days', 'Present', 'W/O', 'OT', 'Per Day', 'Holidays', 'Absent', 'Half Day', 'Tot Half', 'Act Pres', 'Act Abs', 'Tot Days',
+                'Lvng Pend', 'Add Lvng', 'Lvng Avl', 'Adj Lvng', 'Lvng Nxt', 'Paid Days', 'Ded Days', 'Monthly Sal', 'OT Sal', 'Tot Earn',
+                'PF', 'ESIC', 'P.TAX', 'Inc Tax', 'Advance', 'Loan', 'Tot Ded', 'Net Sal', 'Amount Paid', 'Balance', 'Sal Date', 'Through', 'Remarks'];
+
             colHeaders.forEach(col => {
                 headerHTML += `<th>${col}</th>`;
             });
             headerHTML += '</tr>';
-            
-            document.getElementById('tableHead').innerHTML = headerHTML;
+
+            document.getElementById('tableHead').innerHTML = groupHTML + headerHTML;
 
             // Build rows
             let rowsHTML = '';
             allData.forEach((emp, idx) => {
                 let cells = `<td class="sticky">${emp.sr_no}</td>`;
                 cells += `<td class="sticky"><strong>${escapeHtml(emp.name)}</strong></td>`;
-                cells += `<td class="sticky">${escapeHtml(emp.branch)}</td>`;
-                cells += `<td class="sticky">₹${emp.gross_salary}</td>`;
-                
+                cells += `<td>${escapeHtml(emp.branch)}</td>`;
+                cells += `<td class="money">₹${emp.gross_salary}</td>`;
+
                 // Attendance dates
                 for (let d = 1; d <= totalDays; d++) {
                     const val = emp.attendance[d] || 'P';
-                    cells += `<td class="att-${val}"><input type="text" value="${val}" maxlength="2" onclick="cycleAtt(this, ${idx}, ${d})" data-emp="${idx}" data-day="${d}"></td>`;
+                    cells += `<td class="att-${val}"><input type="text" value="${val}" maxlength="2" readonly onclick="cycleAtt(this, ${idx}, ${d})" data-emp="${idx}" data-day="${d}" aria-label="Day ${d} (${getDayName(new Date(currentMonth + '-' + String(d).padStart(2,'0')))}) attendance: ${val}. Click to change."></td>`;
                 }
-                
+
                 // Summary columns
                 cells += `<td class="calc">${emp.month_days}</td>`;
                 cells += `<td class="calc">${emp.present_days}</td>`;
                 cells += `<td class="calc">${emp.weekly_off}</td>`;
-                cells += `<td><input type="number" value="${emp.ot_days}" onchange="updateEmp(${idx}, 'ot_days', this.value)"></td>`;
-                cells += `<td class="calc">${emp.per_day_calc}</td>`;
-                cells += `<td><input type="number" value="${emp.holidays}" onchange="updateEmp(${idx}, 'holidays', this.value)"></td>`;
+                cells += `<td><input type="number" value="${emp.ot_days}" onchange="updateEmp(${idx}, 'ot_days', this.value)" aria-label="Overtime days for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td class="calc">₹${emp.per_day_calc.toFixed(2)}</td>`;
+                cells += `<td class="calc">${emp.holidays}</td>`;
                 cells += `<td class="calc">${emp.absent}</td>`;
-                cells += `<td><input type="number" value="${emp.halfday}" onchange="updateEmp(${idx}, 'halfday', this.value)"></td>`;
+                cells += `<td class="calc">${emp.halfday}</td>`;
                 cells += `<td class="calc">${emp.total_halfday}</td>`;
                 cells += `<td class="calc">${emp.actual_present}</td>`;
                 cells += `<td class="calc">${emp.actual_absent}</td>`;
                 cells += `<td class="calc">${emp.total_days}</td>`;
                 cells += `<td class="calc">${emp.leave_pending}</td>`;
-                cells += `<td class="calc">${emp.adding_leaves}</td>`;
+                cells += `<td><input type="number" value="${emp.adding_leaves}" onchange="updateEmp(${idx}, 'adding_leaves', this.value)" aria-label="Leaves added this month for ${escapeHtml(emp.name)}"></td>`;
                 cells += `<td class="calc">${emp.leave_available}</td>`;
-                cells += `<td><input type="number" value="${emp.leave_adjusted}" onchange="updateEmp(${idx}, 'leave_adjusted', this.value)"></td>`;
+                cells += `<td class="calc">${emp.leave_adjusted}</td>`;
                 cells += `<td class="calc">${emp.leave_next}</td>`;
-                cells += `<td class="calc">${emp.paid_days.toFixed(0)}</td>`;
-                cells += `<td class="calc">${emp.deduction_days.toFixed(0)}</td>`;
-                cells += `<td class="calc">₹${emp.monthly_salary}</td>`;
-                cells += `<td class="calc">₹${emp.ot_salary}</td>`;
-                cells += `<td class="calc">₹${emp.total_earned}</td>`;
-                cells += `<td class="calc">₹${emp.pf}</td>`;
-                cells += `<td class="calc">₹${emp.esic}</td>`;
-                cells += `<td class="calc">₹${emp.p_tax}</td>`;
-                cells += `<td class="calc">₹${emp.income_tax}</td>`;
-                cells += `<td><input type="number" value="${emp.advance}" onchange="updateEmp(${idx}, 'advance', this.value)"></td>`;
-                cells += `<td><input type="number" value="${emp.loan}" onchange="updateEmp(${idx}, 'loan', this.value)"></td>`;
-                cells += `<td class="calc">₹${emp.total_deduction}</td>`;
-                cells += `<td class="calc">₹${emp.net_salary}</td>`;
-                cells += `<td><select onchange="updateEmp(${idx}, 'salary_done', this.value)"><option${emp.salary_done === 'No' ? ' selected' : ''}>No</option><option${emp.salary_done === 'Yes' ? ' selected' : ''}>Yes</option></select></td>`;
-                cells += `<td><input type="date" value="${escapeHtml(emp.salary_date || '')}" onchange="updateEmp(${idx}, 'salary_date', this.value)"></td>`;
-                cells += `<td><input type="text" value="${escapeHtml(emp.through || '')}" placeholder="Cash/Check/Transfer" onchange="updateEmp(${idx}, 'through', this.value)"></td>`;
-                cells += `<td><input type="text" value="${escapeHtml(emp.remarks || '')}" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)"></td>`;
-                
+                cells += `<td class="calc">${emp.paid_days.toFixed(1)}</td>`;
+                cells += `<td class="calc">${emp.deduction_days.toFixed(1)}</td>`;
+                cells += `<td class="calc money">₹${emp.monthly_salary}</td>`;
+                cells += `<td class="calc money">₹${emp.ot_salary}</td>`;
+                cells += `<td class="calc money">₹${emp.total_earned}</td>`;
+                cells += `<td class="calc gold money">₹${emp.pf}</td>`;
+                cells += `<td class="calc gold money">₹${emp.esic}</td>`;
+                cells += `<td><input type="number" value="${emp.p_tax}" onchange="updateEmp(${idx}, 'p_tax', this.value)" aria-label="Professional tax for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td><input type="number" value="${emp.income_tax}" onchange="updateEmp(${idx}, 'income_tax', this.value)" aria-label="Income tax for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td><input type="number" value="${emp.advance}" onchange="updateEmp(${idx}, 'advance', this.value)" aria-label="Advance deduction for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td><input type="number" value="${emp.loan}" onchange="updateEmp(${idx}, 'loan', this.value)" aria-label="Loan deduction for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td class="calc gold money">₹${emp.total_deduction}</td>`;
+                cells += `<td class="calc money">₹${emp.net_salary}</td>`;
+                cells += `<td><input type="number" value="${emp.salary_paid}" onchange="updateEmp(${idx}, 'salary_paid', this.value)" aria-label="Amount paid to ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td class="calc money ${emp.balance_salary > 0 ? 'balance-due' : 'balance-ok'}">₹${emp.balance_salary}</td>`;
+                cells += `<td><input type="date" value="${escapeHtml(emp.salary_date || '')}" onchange="updateEmp(${idx}, 'salary_date', this.value)" aria-label="Salary payment date for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td class="wide"><input type="text" value="${escapeHtml(emp.through || '')}" placeholder="Cash/Cheque/Transfer" onchange="updateEmp(${idx}, 'through', this.value)" aria-label="Payment method for ${escapeHtml(emp.name)}"></td>`;
+                cells += `<td class="wide"><input type="text" value="${escapeHtml(emp.remarks || '')}" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)" aria-label="Remarks for ${escapeHtml(emp.name)}"></td>`;
+
                 rowsHTML += `<tr>${cells}</tr>`;
             });
-            
+
             document.getElementById('tableBody').innerHTML = rowsHTML;
         }
 
         function cycleAtt(cell, empIdx, day) {
-            const statuses = ['P', 'A', 'H', 'WO'];
+            const statuses = ['P', 'A', 'H', 'HD', 'WO'];
             const curr = cell.value.toUpperCase();
             const idx = statuses.indexOf(curr);
             const next = statuses[(idx + 1) % statuses.length];
-            
-            cell.value = next;
-            cell.parentElement.className = 'att-' + next;
-            
+
             allData[empIdx].attendance[day] = next;
             const totalDays = getDaysInMonth(currentMonth);
             calculateAllFields(allData[empIdx], totalDays);
@@ -552,7 +695,7 @@
             const search = document.getElementById('searchBox').value.toLowerCase();
             const branch = document.getElementById('branchFilter').value;
             document.querySelectorAll('#tableBody tr').forEach(row => {
-                const match = (!search || row.cells[1].textContent.toLowerCase().includes(search)) && 
+                const match = (!search || row.cells[1].textContent.toLowerCase().includes(search)) &&
                               (!branch || row.cells[2].textContent === branch);
                 row.style.display = match ? '' : 'none';
             });
@@ -562,17 +705,20 @@
             const totalPresent = allData.reduce((s, e) => s + e.present_days, 0);
             const totalNetSalary = allData.reduce((s, e) => s + e.net_salary, 0);
             const totalDeduction = allData.reduce((s, e) => s + e.total_deduction, 0);
+            const totalBalanceDue = allData.reduce((s, e) => s + Math.max(0, e.balance_salary), 0);
+            const count = allData.length || 1;
             document.getElementById('statsBar').innerHTML = `
                 <div class="stat"><div class="stat-label">✅ Total Present</div><div class="stat-value">${totalPresent}</div></div>
                 <div class="stat"><div class="stat-label">💰 Net Salary</div><div class="stat-value">₹${(totalNetSalary/100000).toFixed(2)}L</div></div>
                 <div class="stat"><div class="stat-label">📊 Deductions</div><div class="stat-value">₹${(totalDeduction/100000).toFixed(2)}L</div></div>
-                <div class="stat"><div class="stat-label">🏦 Avg/Employee</div><div class="stat-value">₹${Math.round(totalNetSalary/23)/1000}K</div></div>
+                <div class="stat"><div class="stat-label">🏦 Avg/Employee</div><div class="stat-value">₹${Math.round(totalNetSalary/count/1000)}K</div></div>
+                <div class="stat"><div class="stat-label">⏳ Balance Due</div><div class="stat-value">₹${totalBalanceDue.toLocaleString('en-IN')}</div></div>
             `;
         }
 
         async function saveChanges() {
             if (Object.keys(changes).length === 0) {
-                showMessage('ℹ️ No changes');
+                showAlert('No changes to save', 'info');
                 return;
             }
 
@@ -581,12 +727,12 @@
                 month: currentMonth,
                 attendance: emp.attendance,
                 ot_days: emp.ot_days,
-                holidays: emp.holidays,
-                halfday: emp.halfday,
-                leave_adjusted: emp.leave_adjusted,
+                adding_leaves: emp.adding_leaves,
                 advance: emp.advance,
                 loan: emp.loan,
-                salary_done: emp.salary_done,
+                ptax: emp.p_tax,
+                income_tax: emp.income_tax,
+                salary_paid: emp.salary_paid,
                 salary_date: emp.salary_date || null,
                 through: emp.through || null,
                 remarks: emp.remarks || null
@@ -598,7 +744,7 @@
                         .from('payroll_entries')
                         .upsert(rows, { onConflict: 'sr_no,month' });
                     if (error) throw error;
-                    showMessage('✅ Payroll saved to database!');
+                    showAlert('Payroll saved to database!', 'success');
                     changes = {};
                     return;
                 } catch (err) {
@@ -610,7 +756,7 @@
             const localEntries = JSON.parse(localStorage.getItem('eps_crm_payroll_' + currentMonth) || '{}');
             rows.forEach(row => { localEntries[row.sr_no] = row; });
             localStorage.setItem('eps_crm_payroll_' + currentMonth, JSON.stringify(localEntries));
-            showMessage('⚠️ Saved to this browser only (not the database) - run supabase-payroll-migration.sql to enable real saving.', true);
+            showAlert('Saved to this browser only (not the database) - run supabase-payroll-migration.sql in Supabase, then refresh to enable real saving.', 'warn');
             changes = {};
         }
 
@@ -618,9 +764,9 @@
             const ws = XLSX.utils.table_to_sheet(document.getElementById('dataTable'));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Payroll');
-            const monthNames = { '2026-04': 'APR', '2026-05': 'MAY', '2026-06': 'JUN' };
-            XLSX.writeFile(wb, `Payroll-${monthNames[currentMonth]}-2026.xlsx`);
-            showMessage('✅ Exported!');
+            const monthLabel = document.getElementById('monthSelect').selectedOptions[0].textContent.replace(' ', '-');
+            XLSX.writeFile(wb, `Payroll-${monthLabel}.xlsx`);
+            showAlert('Exported!', 'success');
         }
 
         function changeMonth() {
@@ -637,10 +783,20 @@
             filterTable();
         }
 
-        function showMessage(msg, warn) {
-            const box = document.getElementById('messageBox');
-            box.innerHTML = `<div class="message${warn ? ' warn' : ''}">${escapeHtml(msg)}</div>`;
-            setTimeout(() => { box.innerHTML = ''; }, warn ? 6000 : 2500);
+        function showAlert(message, type) {
+            type = type || 'info';
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.setAttribute('role', 'status');
+            toast.textContent = message;
+            container.appendChild(toast);
+            const life = type === 'error' || type === 'warn' ? 6000 : 3000;
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, life);
         }
 
         function escapeHtml(value) {
