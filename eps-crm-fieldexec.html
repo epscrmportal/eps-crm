@@ -439,6 +439,12 @@
         const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
+        }
+
         let currentUser = null;
         let currentMeeting = null;
         let allMeetings = [];
@@ -535,7 +541,7 @@
 
             let html = '<table><thead><tr><th>NAME</th><th>COMPANY</th><th>DESIGNATION</th><th>EMAIL</th><th>PHONE</th><th>HOW MET</th><th>POTENTIAL</th></tr></thead><tbody>';
             cards.forEach(card => {
-                html += '<tr><td>' + (card.contact_name || '-') + '</td><td>' + (card.company || '-') + '</td><td>' + (card.designation || '-') + '</td><td>' + (card.email || '-') + '</td><td>' + (card.phone || '-') + '</td><td>' + (card.how_met || '-') + '</td><td>' + (card.lead_potential || '-') + '</td></tr>';
+                html += '<tr><td>' + escapeHtml(card.contact_name || '-') + '</td><td>' + escapeHtml(card.company || '-') + '</td><td>' + escapeHtml(card.designation || '-') + '</td><td>' + escapeHtml(card.email || '-') + '</td><td>' + escapeHtml(card.phone || '-') + '</td><td>' + escapeHtml(card.how_met || '-') + '</td><td>' + escapeHtml(card.lead_potential || '-') + '</td></tr>';
             });
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -579,7 +585,7 @@
             allMeetings.forEach(m => {
                 const badge = m.status === 'attended' ? 'badge-attended' : 'badge-scheduled';
                 const status = m.status === 'attended' ? 'ATTENDED' : 'SCHEDULED';
-                html += '<tr><td>' + m.contact_name + '</td><td>' + m.date + ' ' + m.time + '</td><td><span class="badge ' + badge + '">' + status + '</span></td><td><button class="btn btn-primary" onclick="openMeetingModal(' + "'" + m.id + "'" + ')">View</button></td></tr>';
+                html += '<tr><td>' + escapeHtml(m.contact_name) + '</td><td>' + escapeHtml(m.date) + ' ' + escapeHtml(m.time) + '</td><td><span class="badge ' + badge + '">' + status + '</span></td><td><button class="btn btn-primary" onclick="openMeetingModal(' + "'" + m.id + "'" + ')">View</button></td></tr>';
             });
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -589,12 +595,12 @@
             currentMeeting = allMeetings.find(m => m.id === meetingId);
             if (!currentMeeting) return;
 
-            let html = '<p><strong>Contact:</strong> ' + currentMeeting.contact_name + '</p>';
-            html += '<p><strong>Date:</strong> ' + currentMeeting.date + '</p>';
-            html += '<p><strong>Time:</strong> ' + currentMeeting.time + '</p>';
-            html += '<p><strong>Agenda:</strong> ' + (currentMeeting.agenda || 'No notes') + '</p>';
+            let html = '<p><strong>Contact:</strong> ' + escapeHtml(currentMeeting.contact_name) + '</p>';
+            html += '<p><strong>Date:</strong> ' + escapeHtml(currentMeeting.date) + '</p>';
+            html += '<p><strong>Time:</strong> ' + escapeHtml(currentMeeting.time) + '</p>';
+            html += '<p><strong>Agenda:</strong> ' + escapeHtml(currentMeeting.agenda || 'No notes') + '</p>';
             if (currentMeeting.feedback) {
-                html += '<p style="background: #e8f5e9; padding: 10px; border-radius: 5px;"><strong>Feedback:</strong> ' + currentMeeting.feedback + '</p>';
+                html += '<p style="background: #e8f5e9; padding: 10px; border-radius: 5px;"><strong>Feedback:</strong> ' + escapeHtml(currentMeeting.feedback) + '</p>';
             }
 
             document.getElementById('modalTitle').textContent = 'Meeting: ' + currentMeeting.contact_name;
@@ -648,7 +654,7 @@
 
             const infoDiv = document.createElement('div');
             infoDiv.style.cssText = 'background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #43e97b;';
-            infoDiv.innerHTML = '<p><strong>Meeting:</strong> ' + currentMeeting.contact_name + '</p><p><strong>Date:</strong> ' + currentMeeting.date + '</p><p><strong>Time:</strong> ' + currentMeeting.time + '</p>';
+            infoDiv.innerHTML = '<p><strong>Meeting:</strong> ' + escapeHtml(currentMeeting.contact_name) + '</p><p><strong>Date:</strong> ' + escapeHtml(currentMeeting.date) + '</p><p><strong>Time:</strong> ' + escapeHtml(currentMeeting.time) + '</p>';
             modalDiv.appendChild(infoDiv);
 
             const label = document.createElement('label');
@@ -750,11 +756,11 @@
                     <div style="background: white; padding: 15px; border-left: 4px solid #8E2A8C; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <div style="font-weight: bold; color: #8E2A8C; font-size: 16px;">${activity.event_name}</div>
+                                <div style="font-weight: bold; color: #8E2A8C; font-size: 16px;">${escapeHtml(activity.event_name)}</div>
                                 <div style="color: #666; font-size: 14px; margin-top: 5px;">
-                                    <strong>Type:</strong> ${activity.activity_type} | <strong>Date:</strong> ${new Date(activity.activity_date).toLocaleDateString()}
+                                    <strong>Type:</strong> ${escapeHtml(activity.activity_type)} | <strong>Date:</strong> ${new Date(activity.activity_date).toLocaleDateString()}
                                 </div>
-                                ${activity.notes ? '<div style="color: #666; font-size: 14px; margin-top: 8px;"><strong>Notes:</strong> ' + activity.notes + '</div>' : ''}
+                                ${activity.notes ? '<div style="color: #666; font-size: 14px; margin-top: 8px;"><strong>Notes:</strong> ' + escapeHtml(activity.notes) + '</div>' : ''}
                             </div>
                             <button class="btn btn-sm" onclick="deleteActivity('${activity.id}')" style="background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                         </div>
@@ -1005,7 +1011,7 @@
 
             let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
             addresses.forEach((addr, index) => {
-                html += '<div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; border-radius: 4px; border-left: 3px solid #4facfe;"><span style="flex: 1; color: #333;">' + (index + 1) + '. ' + addr + '</span><button type="button" class="btn btn-sm btn-danger" onclick="removePickupAddress(' + index + ')" style="padding: 4px 8px; font-size: 12px;">✕ Remove</button></div>';
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; border-radius: 4px; border-left: 3px solid #4facfe;"><span style="flex: 1; color: #333;">' + (index + 1) + '. ' + escapeHtml(addr) + '</span><button type="button" class="btn btn-sm btn-danger" onclick="removePickupAddress(' + index + ')" style="padding: 4px 8px; font-size: 12px;">✕ Remove</button></div>';
             });
             html += '</div>';
 
@@ -1042,7 +1048,7 @@
             let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #4facfe; color: white;"><th style="padding: 12px; text-align: left;">Company Name</th><th style="padding: 12px; text-align: left;">Director</th><th style="padding: 12px; text-align: left;">GST No</th><th style="padding: 12px; text-align: left;">Date</th><th style="padding: 12px; text-align: center;">Action</th></tr></thead><tbody>';
 
             regs.forEach(reg => {
-                html += '<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 12px;"><strong>' + reg.firm_name + '</strong></td><td style="padding: 12px;">' + reg.director_name + '</td><td style="padding: 12px;">' + (reg.gst_no || 'N/A') + '</td><td style="padding: 12px;">' + new Date(reg.submitted_date).toLocaleDateString() + '</td><td style="padding: 12px; text-align: center;"><button class="btn btn-sm btn-primary" data-reg-id="' + reg.id + '" onclick="downloadRegistration(this)">📥 Download</button></td></tr>';
+                html += '<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 12px;"><strong>' + escapeHtml(reg.firm_name) + '</strong></td><td style="padding: 12px;">' + escapeHtml(reg.director_name) + '</td><td style="padding: 12px;">' + escapeHtml(reg.gst_no || 'N/A') + '</td><td style="padding: 12px;">' + new Date(reg.submitted_date).toLocaleDateString() + '</td><td style="padding: 12px; text-align: center;"><button class="btn btn-sm btn-primary" data-reg-id="' + reg.id + '" onclick="downloadRegistration(this)">📥 Download</button></td></tr>';
             });
 
             html += '</tbody></table>';
