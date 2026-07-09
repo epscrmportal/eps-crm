@@ -1087,7 +1087,6 @@
                     createdOn: order.created_on
                 }));
 
-                console.log('📦 Loaded ' + orders.length + ' orders from Supabase');
                 return orders;
             } catch (error) {
                 console.error('Error loading orders from Supabase:', error);
@@ -1102,7 +1101,6 @@
 
         function saveOrdersToStorage() {
             localStorage.setItem('eps_crm_orders', JSON.stringify(window.orders));
-            console.log('💾 Orders saved to localStorage');
         }
 
         function getCurrentUser() {
@@ -1401,14 +1399,14 @@
                 const paymentIcon = order.paymentMethod === 'Razorpay' ? '💳' : '💵';
 
                 const row = tbody.insertRow();
-                let html = '<td><strong>' + order.id + '</strong></td>' +
-                    '<td>' + order.customerName + '</td>' +
-                    '<td>' + order.origin + ' → ' + order.destination + '</td>' +
+                let html = '<td><strong>' + escapeHtml(order.id) + '</strong></td>' +
+                    '<td>' + escapeHtml(order.customerName) + '</td>' +
+                    '<td>' + escapeHtml(order.origin) + ' → ' + escapeHtml(order.destination) + '</td>' +
                     '<td style="text-align: center;">' + order.boxes + '</td>' +
                     '<td style="text-align: right;">₹' + order.amount.toFixed(2) + '</td>' +
-                    '<td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">' + order.status + '</span></td>' +
-                    '<td><span style="background: ' + paymentBgColor + '; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">' + paymentIcon + ' ' + order.paymentMethod + '</span></td>' +
-                    '<td>' + order.createdOn + '</td>' +
+                    '<td><span style="background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">' + escapeHtml(order.status) + '</span></td>' +
+                    '<td><span style="background: ' + paymentBgColor + '; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">' + paymentIcon + ' ' + escapeHtml(order.paymentMethod) + '</span></td>' +
+                    '<td>' + escapeHtml(order.createdOn) + '</td>' +
                     '<td style="text-align: center;"><div class="action-buttons">' +
                     '<button class="btn btn-sm btn-primary" onclick="showInvoice(\'' + order.id + '\')">🧾 Print</button>' +
                     '<button class="btn btn-sm btn-success" onclick="editOrderForm(\'' + order.id + '\')">✏️ Edit</button>' +
@@ -1488,20 +1486,20 @@
                 '</div>' +
                 
                 '<div class="invoice-meta">' +
-                '<div><div class="meta-row"><span class="meta-label">Invoice No.:</span><span class="meta-value">' + order.id + '</span></div>' +
-                '<div class="meta-row"><span class="meta-label">Date:</span><span class="meta-value">' + order.createdOn + '</span></div>' +
-                '<div class="meta-row"><span class="meta-label">Forwarding Ref:</span><span class="meta-value">' + order.forwardingNumber + '</span></div></div>' +
+                '<div><div class="meta-row"><span class="meta-label">Invoice No.:</span><span class="meta-value">' + escapeHtml(order.id) + '</span></div>' +
+                '<div class="meta-row"><span class="meta-label">Date:</span><span class="meta-value">' + escapeHtml(order.createdOn) + '</span></div>' +
+                '<div class="meta-row"><span class="meta-label">Forwarding Ref:</span><span class="meta-value">' + escapeHtml(order.forwardingNumber) + '</span></div></div>' +
                 '<div><div class="meta-row"><span class="meta-label">AWB No.:</span><span class="meta-value">—</span></div>' +
-                '<div class="meta-row"><span class="meta-label">Transaction ID:</span><span class="meta-value">' + (order.paymentId || '—') + '</span></div>' +
-                '<div class="meta-row"><span class="meta-label">Payment Method:</span><span class="meta-value">' + order.paymentMethod + '</span></div></div>' +
+                '<div class="meta-row"><span class="meta-label">Transaction ID:</span><span class="meta-value">' + escapeHtml(order.paymentId || '—') + '</span></div>' +
+                '<div class="meta-row"><span class="meta-label">Payment Method:</span><span class="meta-value">' + escapeHtml(order.paymentMethod) + '</span></div></div>' +
                 '</div>' +
-                
+
                 '<div class="invoice-details">' +
-                '<div class="detail-section"><h3>FROM (PICKUP ADDRESS)</h3><p><strong>' + (order.customerName || 'N/A') + '</strong></p><p>Email: ' + (order.email || 'N/A') + '</p><p>Phone: ' + (order.phone || 'N/A') + '</p><p>' + (order.senderAddress || 'N/A') + '</p><p>' + (order.senderPincode || 'N/A') + '</p></div>' +
-                '<div class="detail-section"><h3>TO (DELIVERY ADDRESS)</h3><p><strong>' + (order.receiverName || 'N/A') + '</strong></p><p>Phone: ' + (order.receiverPhone || 'N/A') + '</p><p>' + (order.receiverAddress || 'N/A') + '</p><p>' + (order.receiverPincode || 'N/A') + '</p></div>' +
+                '<div class="detail-section"><h3>FROM (PICKUP ADDRESS)</h3><p><strong>' + escapeHtml(order.customerName || 'N/A') + '</strong></p><p>Email: ' + escapeHtml(order.email || 'N/A') + '</p><p>Phone: ' + escapeHtml(order.phone || 'N/A') + '</p><p>' + escapeHtml(order.senderAddress || 'N/A') + '</p><p>' + escapeHtml(order.senderPincode || 'N/A') + '</p></div>' +
+                '<div class="detail-section"><h3>TO (DELIVERY ADDRESS)</h3><p><strong>' + escapeHtml(order.receiverName || 'N/A') + '</strong></p><p>Phone: ' + escapeHtml(order.receiverPhone || 'N/A') + '</p><p>' + escapeHtml(order.receiverAddress || 'N/A') + '</p><p>' + escapeHtml(order.receiverPincode || 'N/A') + '</p></div>' +
                 '</div>' +
-                
-                '<div class="table-container"><table><thead><tr><th>S.No</th><th>Date</th><th>Forwarding Ref</th><th>Origin</th><th>Destination</th><th>Service</th><th>Weight</th><th>Dimension</th><th>Pcs</th><th>Charges</th></tr></thead><tbody><tr><td>1</td><td>' + order.createdOn + '</td><td>' + order.forwardingNumber + '</td><td>' + order.origin + '</td><td>' + order.destination + '</td><td>' + (order.serviceType || 'N/A') + '</td><td>' + order.weight + ' kg</td><td>' + order.length + 'x' + order.width + 'x' + order.height + ' cm</td><td>' + order.boxes + '</td><td style="text-align: right;">₹' + order.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr></tbody></table></div>' +
+
+                '<div class="table-container"><table><thead><tr><th>S.No</th><th>Date</th><th>Forwarding Ref</th><th>Origin</th><th>Destination</th><th>Service</th><th>Weight</th><th>Dimension</th><th>Pcs</th><th>Charges</th></tr></thead><tbody><tr><td>1</td><td>' + escapeHtml(order.createdOn) + '</td><td>' + escapeHtml(order.forwardingNumber) + '</td><td>' + escapeHtml(order.origin) + '</td><td>' + escapeHtml(order.destination) + '</td><td>' + escapeHtml(order.serviceType || 'N/A') + '</td><td>' + order.weight + ' kg</td><td>' + order.length + 'x' + order.width + 'x' + order.height + ' cm</td><td>' + order.boxes + '</td><td style="text-align: right;">₹' + order.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr></tbody></table></div>' +
                 
                 '<div class="amount-in-words"><label>Amount in Words:</label> ' + numberToWords(grandTotal) + '</div>' +
                 
@@ -1847,13 +1845,18 @@
 
         let supabaseClient = null;
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
+        }
+
         function initSupabase() {
             if (typeof supabase !== 'undefined') {
                 const supabaseUrl = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
-                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieHh2bHJtY3ZycWVudG1jdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTA5NjMsImV4cCI6MjA5NDgyNjk2M30.g6vgxJJGBQK6kbXGLVBigqOfhsXC6obHXka54zaahqM';
+                const supabaseKey = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
                 supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 window.supabaseClient = supabaseClient;  // Make it available globally
-                console.log('✅ Supabase initialized in Orders module');
                 return true;
             }
             return false;
@@ -1930,12 +1933,10 @@
             try {
                 window.supabaseClient
                     .channel('public:orders')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-                        console.log('📦 Order updated in real-time:', payload);
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
                         loadInitialData();
                     })
                     .subscribe();
-                console.log('✅ Real-time subscription active for orders');
             } catch (error) {
                 console.error('Error subscribing to orders:', error);
             }
@@ -1974,8 +1975,6 @@
                     return;
                 }
 
-                console.log('✅ Supabase ready, checking session...');
-
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
                 
                 if (session && session.user.user_metadata?.role === 'orders') {
@@ -2000,7 +1999,7 @@
                     }
                 }
             } catch (error) {
-                console.log('Session check error:', error.message);
+                console.error('Session check error:', error.message);
                 const user = getCurrentUser();
                 if (user && user.module === 'orders') {
                     document.getElementById('loginSection').style.display = 'none';
