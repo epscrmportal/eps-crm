@@ -703,6 +703,12 @@
         const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
+        }
+
         let currentUser = null;
         let currentUserProfile = null;
         let allLeads = [];
@@ -733,7 +739,7 @@
                         chart.destroy();
                         chartInstances[key] = null;
                     } catch (e) {
-                        console.log('Chart destroy error:', e);
+                        console.error('Chart destroy error:', e);
                     }
                 }
             }
@@ -997,13 +1003,13 @@
                 return;
             }
 
-            table.innerHTML = unclaimedLeads.map(lead => 
+            table.innerHTML = unclaimedLeads.map(lead =>
                 '<tr>' +
-                '<td><strong>' + lead.name + '</strong></td>' +
-                '<td>' + lead.phone + '</td>' +
-                '<td>' + (lead.company || 'N/A') + '</td>' +
+                '<td><strong>' + escapeHtml(lead.name) + '</strong></td>' +
+                '<td>' + escapeHtml(lead.phone) + '</td>' +
+                '<td>' + escapeHtml(lead.company || 'N/A') + '</td>' +
                 '<td><span class="badge badge-' + lead.lead_status + '">' + lead.lead_status.toUpperCase() + '</span></td>' +
-                '<td>' + (userProfiles[lead.created_by]?.full_name || 'Unknown') + '</td>' +
+                '<td>' + escapeHtml(userProfiles[lead.created_by]?.full_name || 'Unknown') + '</td>' +
                 '<td><button class="btn btn-sm btn-success" onclick="claimLead(\'' + lead.id + '\')">CLAIM</button></td>' +
                 '</tr>'
             ).join('');
@@ -1021,11 +1027,11 @@
                 return;
             }
 
-            table.innerHTML = myLeads.map(lead => 
+            table.innerHTML = myLeads.map(lead =>
                 '<tr>' +
-                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail(\'' + lead.id + '\')">' + lead.name + '</strong></td>' +
-                '<td>' + lead.phone + '</td>' +
-                '<td>' + (lead.company || 'N/A') + '</td>' +
+                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="showContactDetail(\'' + lead.id + '\')">' + escapeHtml(lead.name) + '</strong></td>' +
+                '<td>' + escapeHtml(lead.phone) + '</td>' +
+                '<td>' + escapeHtml(lead.company || 'N/A') + '</td>' +
                 '<td><span class="badge badge-' + lead.lead_status + '">' + lead.lead_status.toUpperCase() + '</span></td>' +
                 '<td><span class="badge badge-claimed">' + lead.status.toUpperCase() + '</span></td>' +
                 '<td>' + new Date(lead.assigned_at).toLocaleDateString() + '</td>' +
@@ -1555,12 +1561,12 @@
             table.innerHTML = myCalls.map(call => {
                 const lead = allLeads.find(l => l.id === call.contact_id);
                 return '<tr>' +
-                '<td>' + (lead?.name || 'Unknown') + '</td>' +
-                '<td><span class="badge ' + (call.call_status === 'Connected' ? 'badge-connected' : 'badge-notconnected') + '">' + call.call_status + '</span></td>' +
+                '<td>' + escapeHtml(lead?.name || 'Unknown') + '</td>' +
+                '<td><span class="badge ' + (call.call_status === 'Connected' ? 'badge-connected' : 'badge-notconnected') + '">' + escapeHtml(call.call_status) + '</span></td>' +
                 '<td>' + call.duration_minutes + ' min</td>' +
                 '<td>' + (call.interested === 'Yes' ? '✅' : '❌') + '</td>' +
                 '<td>' + new Date(call.created_at).toLocaleDateString() + '</td>' +
-                '<td>' + (call.discussion_notes || 'N/A') + '</td>' +
+                '<td>' + escapeHtml(call.discussion_notes || 'N/A') + '</td>' +
                 '</tr>';
             }).join('');
         }
@@ -1572,8 +1578,8 @@
                 return;
             }
 
-            select.innerHTML = '<option>-- Select Lead --</option>' + 
-                myLeads.map(l => '<option value="' + l.id + '">' + l.name + '</option>').join('');
+            select.innerHTML = '<option>-- Select Lead --</option>' +
+                myLeads.map(l => '<option value="' + l.id + '">' + escapeHtml(l.name) + '</option>').join('');
         }
 
         // ============================================================
@@ -1616,11 +1622,11 @@
                 const priorityLabel = daysLeft <= 0 ? '🔴 OVERDUE' : daysLeft <= 2 ? '🟠 URGENT' : '✅ OK';
                 
                 return '<tr style="border-left: 4px solid ' + priorityColor + '; background: ' + (daysLeft <= 0 ? '#fff5f5' : '') + '">' +
-                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="openFollowupModal(\'' + fu.id + '\')">' + (lead?.name || 'Unknown') + '</strong></td>' +
-                '<td>' + fu.follow_up_date + '</td>' +
-                '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">' + (fu.follow_up_notes || 'N/A') + '</td>' +
+                '<td><strong style="cursor: pointer; color: #4facfe;" onclick="openFollowupModal(\'' + fu.id + '\')">' + escapeHtml(lead?.name || 'Unknown') + '</strong></td>' +
+                '<td>' + escapeHtml(fu.follow_up_date) + '</td>' +
+                '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(fu.follow_up_notes || 'N/A') + '</td>' +
                 '<td style="color: ' + priorityColor + '; font-weight: bold;">' + priorityLabel + ' (' + (daysLeft <= 0 ? '0d' : daysLeft + 'd') + ')</td>' +
-                '<td><span class="badge">' + fu.status + '</span></td>' +
+                '<td><span class="badge">' + escapeHtml(fu.status) + '</span></td>' +
                 '<td>' +
                 (fu.follow_up_type === 'Meeting' && fu.status === 'pending' ?
                     '<button class="btn btn-sm btn-primary" onclick="openMeetingFeedbackModal(\'' + fu.id + '\')" style="background: #2563eb; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px;">👁️ View</button>' :
@@ -1898,10 +1904,10 @@
                 return;
             }
 
-            table.innerHTML = templates.map(t => 
+            table.innerHTML = templates.map(t =>
                 '<tr>' +
-                '<td><strong>' + t.template_name + '</strong></td>' +
-                '<td>' + t.subject + '</td>' +
+                '<td><strong>' + escapeHtml(t.template_name) + '</strong></td>' +
+                '<td>' + escapeHtml(t.subject) + '</td>' +
                 '<td>' +
                 '<button class="btn btn-sm btn-primary" onclick="viewTemplate(\'' + t.id + '\')">View</button>' +
                 '<button class="btn btn-sm btn-danger" onclick="deleteTemplate(\'' + t.id + '\')">Delete</button>' +
@@ -2040,17 +2046,13 @@
             }
 
             destroyAllCharts();
-            
-            console.log('Creating analytics charts with myCalls:', myCalls.length, 'myLeads:', myLeads.length);
-            
+
             // Call Outcome Chart
             const outcomes = { connected: 0, not: 0 };
             myCalls.forEach(c => {
                 if (c.call_status === 'Connected') outcomes.connected++;
                 else outcomes.not++;
             });
-
-            console.log('Call outcomes:', outcomes);
 
             const ctx1 = document.getElementById('callOutcomeChart');
             if (ctx1) {
@@ -2072,7 +2074,6 @@
                             plugins: { legend: { position: 'bottom' } }
                         }
                     });
-                    console.log('Call outcome chart created successfully');
                 } catch (e) {
                     console.error('Error creating call outcome chart:', e);
                 }
@@ -2087,8 +2088,6 @@
                 if (qualities.hasOwnProperty(status)) qualities[status]++;
                 else qualities['Cold']++;
             });
-
-            console.log('Lead qualities:', qualities);
 
             const ctx2 = document.getElementById('leadQualityChart');
             if (ctx2) {
@@ -2112,7 +2111,6 @@
                             plugins: { legend: { display: true } }
                         }
                     });
-                    console.log('Lead quality chart created successfully');
                 } catch (e) {
                     console.error('Error creating lead quality chart:', e);
                 }
@@ -2126,8 +2124,6 @@
                 if (c.interested === 'Yes') interest.yes++;
                 else interest.no++;
             });
-
-            console.log('Interest data:', interest);
 
             const ctx3 = document.getElementById('interestChart');
             if (ctx3) {
@@ -2149,7 +2145,6 @@
                             plugins: { legend: { position: 'bottom' } }
                         }
                     });
-                    console.log('Interest chart created successfully');
                 } catch (e) {
                     console.error('Error creating interest chart:', e);
                 }
@@ -2159,8 +2154,6 @@
 
             // Duration Trend
             const durations = myCalls.map(c => c.duration_minutes || 0).slice(-7);
-
-            console.log('Duration data:', durations);
 
             const ctx4 = document.getElementById('durationChart');
             if (ctx4) {
@@ -2197,7 +2190,6 @@
                             plugins: { legend: { display: true } }
                         }
                     });
-                    console.log('Duration chart created successfully');
                 } catch (e) {
                     console.error('Error creating duration chart:', e);
                 }
@@ -2226,7 +2218,7 @@
                     remindersList.push({
                         type: 'overdue',
                         title: '🔴 Overdue Reminder',
-                        message: r.contact_name + ' - ' + r.reminder_text + ' (Due ' + daysLeft + ' days ago)',
+                        message: escapeHtml(r.contact_name) + ' - ' + escapeHtml(r.reminder_text) + ' (Due ' + daysLeft + ' days ago)',
                         color: '#fee2e2'
                     });
                 }
@@ -2239,7 +2231,7 @@
                     remindersList.push({
                         type: 'upcoming',
                         title: '⏰ Upcoming Reminder',
-                        message: r.contact_name + ' - ' + r.reminder_text + ' (Due ' + r.reminder_date.substring(0, 10) + ')',
+                        message: escapeHtml(r.contact_name) + ' - ' + escapeHtml(r.reminder_text) + ' (Due ' + r.reminder_date.substring(0, 10) + ')',
                         color: '#fef3c7'
                     });
                 }
@@ -2276,8 +2268,8 @@
                 const rate = memberCalls.length > 0 ? Math.round((connected / memberCalls.length) * 100) : 0;
 
                 return '<tr>' +
-                '<td><strong>' + member.full_name + '</strong></td>' +
-                '<td>' + member.email + '</td>' +
+                '<td><strong>' + escapeHtml(member.full_name) + '</strong></td>' +
+                '<td>' + escapeHtml(member.email) + '</td>' +
                 '<td>' + memberLeads.length + '</td>' +
                 '<td>' + memberCalls.length + '</td>' +
                 '<td>' + rate + '%</td>' +
@@ -2316,19 +2308,15 @@
         }
 
         function createWeeklyChart() {
-            console.log('===== WEEKLY CHART DEBUG START =====');
-            
             // Check if Chart library is loaded
             if (typeof Chart === 'undefined') {
                 console.warn('⚠️  Chart.js library not loaded yet, retrying in 500ms');
                 setTimeout(createWeeklyChart, 500);
                 return;
             }
-            console.log('✅ Chart library loaded');
 
             destroyAllCharts();
-            console.log('✅ Old instances destroyed');
-            
+
             const weekData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const connectedData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
             const meetingsData = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
@@ -2337,9 +2325,7 @@
             const weekStart = new Date();
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
             weekStart.setHours(0, 0, 0, 0);
-            console.log('✅ Week start:', weekStart.toISOString());
 
-            console.log('Step 5: Process calls (' + myCalls.length + ' total)');
             myCalls.forEach(c => {
                 const callDate = new Date(c.created_at);
                 if (callDate >= weekStart) {
@@ -2352,9 +2338,7 @@
                     }
                 }
             });
-            console.log('✅ Calls processed. Week data:', weekData);
 
-            console.log('Step 6: Process follow-ups (' + followups.length + ' total)');
             followups.forEach(f => {
                 if (f.follow_up_type === 'Meeting') {
                     const meetingDate = new Date(f.follow_up_date);
@@ -2366,19 +2350,15 @@
                     }
                 }
             });
-            console.log('✅ Meetings processed. Meetings data:', meetingsData);
 
             const ctx = document.getElementById('weeklyChart');
-            console.log('Canvas found:', !!ctx);
-            
+
             if (!ctx) {
                 console.error('❌ FATAL: weeklyChart canvas not found');
                 return;
             }
 
             try {
-                console.log('Step 9: Creating Chart.js instance');
-                
                 chartInstances.weeklyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -2426,9 +2406,6 @@
                         }
                     }
                 });
-                
-                console.log('✅ Chart instance created successfully');
-                console.log('===== WEEKLY CHART SUCCESS ✅ =====');
             } catch (e) {
                 console.error('❌ Error creating chart:', e.message);
             }
@@ -2451,7 +2428,7 @@
                 activitiesByDay[day].push({
                     type: 'call',
                     icon: '📞',
-                    text: 'Called ' + (lead?.name || 'Unknown') + ' - ' + c.call_status,
+                    text: 'Called ' + escapeHtml(lead?.name || 'Unknown') + ' - ' + escapeHtml(c.call_status),
                     time: new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
                     color: c.call_status === 'Connected' ? '#10b981' : '#f59e0b'
                 });
@@ -2464,7 +2441,7 @@
                 activitiesByDay[day].push({
                     type: 'followup',
                     icon: '➡️',
-                    text: 'Follow-up: ' + (lead?.name || 'Unknown') + ' (' + f.follow_up_type + ')',
+                    text: 'Follow-up: ' + escapeHtml(lead?.name || 'Unknown') + ' (' + escapeHtml(f.follow_up_type) + ')',
                     time: f.follow_up_date,
                     color: '#4facfe'
                 });
@@ -2476,7 +2453,7 @@
                 activitiesByDay[day].push({
                     type: 'claimed',
                     icon: '✅',
-                    text: 'Claimed lead: ' + l.name,
+                    text: 'Claimed lead: ' + escapeHtml(l.name),
                     time: new Date(l.assigned_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
                     color: '#10b981'
                 });
@@ -2763,9 +2740,7 @@
                     const userData = JSON.parse(storedUser);
                     currentUser = userData;
                     currentUserProfile = { role: storedRole };
-                    
-                    console.log('User from localStorage:', userData.email, 'Role:', storedRole);
-                    
+
                     // Get fresh profile from Supabase
                     const { data: profile } = await supabase
                         .from('user_profiles')
@@ -2789,7 +2764,7 @@
                     loadAllData();
                     return;
                 } catch (e) {
-                    console.log('localStorage auth failed:', e);
+                    console.error('localStorage auth failed:', e);
                     localStorage.removeItem('eps_crm_user');
                     localStorage.removeItem('eps_crm_user_role');
                 }
