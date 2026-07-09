@@ -9,33 +9,42 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        header { background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         header h1 { font-size: 1.8em; }
-        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); }
         .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 400px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #555; margin-bottom: 8px; font-weight: 500; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9em; }
-        .btn-primary { background: #43e97b; color: white; }
-        .btn-primary:hover { background: #2ab86f; }
+        .btn-primary { background: #8E2A8C; color: white; }
+        .btn-primary:hover { background: #6b1f69; }
+
+        /* Toast notifications (replaces native showAlert() popups) */
+        #toastContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+        .toast { padding: 14px 18px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-size: 0.9em; font-weight: 500; white-space: pre-line; animation: toastIn 0.25s ease; }
+        .toast-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .toast-error { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+        .toast-info { background: #f3e9f3; color: #5c1b5a; border-left: 4px solid #8E2A8C; }
+        .toast-warn { background: #fdf6e3; color: #7a611c; border-left: 4px solid #D4AF37; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
         .btn-success { background: #10b981; color: white; }
         .btn-success:hover { background: #059669; }
-        .btn-secondary { background: white; color: #43e97b; border: 1px solid #43e97b; }
+        .btn-secondary { background: white; color: #8E2A8C; border: 1px solid #8E2A8C; }
         .dashboard { display: none; }
         .dashboard.active { display: block; }
         .tabs { display: flex; gap: 5px; margin-bottom: 25px; border-bottom: 2px solid #ddd; flex-wrap: wrap; }
         .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999; border-bottom: 3px solid transparent; transition: 0.3s; }
-        .tab-btn.active { color: #43e97b; border-bottom-color: #43e97b; }
+        .tab-btn.active { color: #8E2A8C; border-bottom-color: #8E2A8C; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-        .section h2 { color: #43e97b; margin-bottom: 20px; border-bottom: 2px solid #43e97b; padding-bottom: 10px; }
+        .section h2 { color: #8E2A8C; margin-bottom: 20px; border-bottom: 2px solid #8E2A8C; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .metric-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .metric-card { background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
         .metric-card .value { font-size: 2em; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #43e97b; color: white; padding: 12px; text-align: left; font-weight: bold; }
+        th { background: #8E2A8C; color: white; padding: 12px; text-align: left; font-weight: bold; }
         td { padding: 12px; border-bottom: 1px solid #ddd; }
         tr:hover { background: #f5f5f5; }
         .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
@@ -47,16 +56,18 @@
     </style>
 </head>
 <body>
+    <div id="toastContainer"></div>
+
     <div id="loginSection" class="login-container">
         <div class="login-box">
-            <h2 style="color: #43e97b; text-align: center; margin-bottom: 30px;">Field Executive</h2>
+            <h2 style="color: #8E2A8C; text-align: center; margin-bottom: 30px;">Field Executive</h2>
             <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="loginEmail" placeholder="sales@epsworldwide.in">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" placeholder="your@epsworldwide.in" autocomplete="username" aria-label="Email address">
             </div>
             <div class="form-group">
-                <label>Password:</label>
-                <input type="password" id="loginPassword" placeholder="password">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" aria-label="Password">
             </div>
             <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="handleLogin()">Login</button>
             <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="window.location.href='eps-crm-dashboard.html';">Back</button>
@@ -373,13 +384,13 @@
                 <div class="section">
                     <h2>Monthly Goals & Targets</h2>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #43e97b;">
-                            <h3 style="color: #43e97b; margin-bottom: 15px;">Non-BNI Meetings</h3>
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #8E2A8C;">
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Non-BNI Meetings</h3>
                             <p style="color: #666; margin-bottom: 10px;">Monthly Target: <strong>20</strong></p>
                             <div style="background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
                                 <p style="margin: 0; color: #0369a1;">Completed: <span id="nonBniCount">0</span> / 20</p>
                                 <div style="background: white; height: 20px; border-radius: 5px; margin-top: 8px; overflow: hidden;">
-                                    <div id="nonBniBar" style="background: #43e97b; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                                    <div id="nonBniBar" style="background: #8E2A8C; height: 100%; width: 0%; transition: width 0.3s;"></div>
                                 </div>
                             </div>
                             <button class="btn btn-primary" style="width: 100%;" onclick="addGoalProgress('Non-BNI Meeting')">+ Add Non-BNI Meeting</button>
@@ -424,7 +435,7 @@
 
     <div id="meetingModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle" style="color: #43e97b; margin-bottom: 20px;">Meeting Details</h2>
+            <h2 id="modalTitle" style="color: #8E2A8C; margin-bottom: 20px;">Meeting Details</h2>
             <div id="modalContent"></div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-success" id="feedbackBtn" onclick="openFeedbackModal()" style="flex: 1;">Add Feedback</button>
@@ -445,6 +456,29 @@
             });
         }
 
+        // Toast notification helper - replaces native window.alert popups.
+        // If no type is passed, infer it from the message text itself.
+        function showAlert(message, type) {
+            if (!type) {
+                if (/^✅|success/i.test(message)) type = 'success';
+                else if (/^❌|error|failed|invalid/i.test(message)) type = 'error';
+                else if (/^⚠️|warning/i.test(message)) type = 'warn';
+                else type = 'info';
+            }
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.setAttribute('role', 'status');
+            toast.textContent = message;
+            container.appendChild(toast);
+            const life = (type === 'error' || type === 'warn') ? 6000 : 3500;
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, life);
+        }
+
         let currentUser = null;
         let currentMeeting = null;
         let allMeetings = [];
@@ -453,27 +487,68 @@
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
-            if (!email || !password) { alert('Enter credentials'); return; }
+            if (!email || !password) { showAlert('Enter credentials'); return; }
 
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({ email: email, password: password });
                 if (error) throw error;
+
+                // Verify this account is actually provisioned as a field_exec in the
+                // server-side user_profiles table before granting access to this module.
+                // Without this, any valid EPS CRM login (telecaller, orders, etc.) could
+                // reach the Field Exec dashboard just by knowing this file's URL.
+                const { data: profile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profileError || profile?.role !== 'field_exec') {
+                    await supabase.auth.signOut();
+                    showAlert('Access denied. Field Exec role required.');
+                    return;
+                }
+
                 currentUser = data.user;
                 localStorage.setItem('eps_crm_user', JSON.stringify(data.user));
                 showDashboard();
                 loadAllData();
             } catch (error) {
-                alert('Login failed: ' + error.message);
+                showAlert('Login failed: ' + error.message);
             }
         }
 
         async function checkAuth() {
-            const storedUser = localStorage.getItem('eps_crm_user');
-            if (storedUser) {
-                currentUser = JSON.parse(storedUser);
+            // Verify against the real Supabase session, not just a localStorage flag -
+            // localStorage can be edited by anyone via devtools, so it must never be the
+            // sole gate for showing the dashboard or loading data.
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    localStorage.removeItem('eps_crm_user');
+                    showLoginForm();
+                    return;
+                }
+
+                const { data: profile } = await supabase
+                    .from('user_profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profile?.role !== 'field_exec') {
+                    await supabase.auth.signOut();
+                    localStorage.removeItem('eps_crm_user');
+                    showLoginForm();
+                    return;
+                }
+
+                currentUser = session.user;
+                localStorage.setItem('eps_crm_user', JSON.stringify(session.user));
                 showDashboard();
                 loadAllData();
-            } else {
+            } catch (error) {
+                console.error('Auth check error:', error);
                 showLoginForm();
             }
         }
@@ -628,11 +703,11 @@
             try {
                 const { error } = await supabase.from('meetings').update({ status: 'attended', attended_at: new Date().toISOString() }).eq('id', currentMeeting.id);
                 if (error) throw error;
-                alert('Marked attended!');
+                showAlert('Marked attended!');
                 closeMeetingModal();
                 loadAllData();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
@@ -649,11 +724,11 @@
 
             const title = document.createElement('h2');
             title.textContent = 'Meeting Feedback';
-            title.style.color = '#43e97b';
+            title.style.color = '#8E2A8C';
             modalDiv.appendChild(title);
 
             const infoDiv = document.createElement('div');
-            infoDiv.style.cssText = 'background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #43e97b;';
+            infoDiv.style.cssText = 'background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8E2A8C;';
             infoDiv.innerHTML = '<p><strong>Meeting:</strong> ' + escapeHtml(currentMeeting.contact_name) + '</p><p><strong>Date:</strong> ' + escapeHtml(currentMeeting.date) + '</p><p><strong>Time:</strong> ' + escapeHtml(currentMeeting.time) + '</p>';
             modalDiv.appendChild(infoDiv);
 
@@ -697,16 +772,16 @@
 
         async function saveFeedbackNow() {
             const notes = document.getElementById('feedbackNotes').value;
-            if (!notes.trim()) { alert('Add notes'); return; }
+            if (!notes.trim()) { showAlert('Add notes'); return; }
 
             try {
                 const { error } = await supabase.from('meetings').update({ feedback: notes, status: 'attended', attended_at: new Date().toISOString() }).eq('id', currentMeeting.id);
                 if (error) throw error;
-                alert('Feedback saved!');
+                showAlert('Feedback saved!');
                 closeFeedbackOverlay();
                 loadAllData();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
@@ -714,7 +789,7 @@
             const type = document.getElementById('activityType').value;
             const eventName = document.getElementById('activityEventName').value;
             const date = document.getElementById('activityDate').value;
-            if (!type || !eventName || !date) { alert('Fill required fields'); return; }
+            if (!type || !eventName || !date) { showAlert('Fill required fields'); return; }
 
             try {
                 const { error } = await supabase.from('activities').insert({
@@ -725,14 +800,14 @@
                     notes: document.getElementById('activityNotes').value
                 });
                 if (error) throw error;
-                alert('Activity logged!');
+                showAlert('Activity logged!');
                 document.getElementById('activityType').value = '';
                 document.getElementById('activityEventName').value = '';
                 document.getElementById('activityDate').value = '';
                 document.getElementById('activityNotes').value = '';
                 loadActivities();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
@@ -779,14 +854,14 @@
                 if (error) throw error;
                 loadActivities();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
         async function saveBusinessCard() {
             const name = document.getElementById('cardContactName').value;
             const company = document.getElementById('cardCompany').value;
-            if (!name || !company) { alert('Fill required fields'); return; }
+            if (!name || !company) { showAlert('Fill required fields'); return; }
 
             try {
                 const designation = document.getElementById('cardDesignation').value;
@@ -825,7 +900,7 @@
                 });
                 if (contactError) throw contactError;
 
-                alert('Card saved & added to contacts!');
+                showAlert('Card saved & added to contacts!');
                 document.getElementById('cardContactName').value = '';
                 document.getElementById('cardCompany').value = '';
                 document.getElementById('cardDesignation').value = '';
@@ -836,12 +911,12 @@
                 document.getElementById('cardNotes').value = '';
                 loadBusinessCards();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
         function openCreateMeetingModal() {
-            alert('Create meeting feature');
+            showAlert('Create meeting feature');
         }
 
         function loadGoalProgress() {
@@ -882,7 +957,7 @@
             progress[goalType].push(entry);
             localStorage.setItem(key, JSON.stringify(progress));
             
-            alert('✅ ' + goalType + ' added!');
+            showAlert('✅ ' + goalType + ' added!');
             loadGoalProgress();
         }
 
@@ -908,7 +983,7 @@
                 return;
             }
             
-            let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #43e97b; color: white;"><th style="padding: 10px; text-align: left;">Date</th><th style="padding: 10px; text-align: left;">Time</th><th style="padding: 10px; text-align: left;">Goal Type</th></tr></thead><tbody>';
+            let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #8E2A8C; color: white;"><th style="padding: 10px; text-align: left;">Date</th><th style="padding: 10px; text-align: left;">Time</th><th style="padding: 10px; text-align: left;">Goal Type</th></tr></thead><tbody>';
             
             allEntries.forEach(entry => {
                 html += '<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 10px;">' + entry.date + '</td><td style="padding: 10px;">' + entry.time + '</td><td style="padding: 10px;"><strong>' + entry.type + '</strong></td></tr>';
@@ -924,7 +999,7 @@
             const directorName = document.getElementById('directorName').value;
             
             if (!firmName || !billingName || !directorName) {
-                alert('Please fill all required fields (marked with *)');
+                showAlert('Please fill all required fields (marked with *)');
                 return;
             }
 
@@ -961,16 +1036,16 @@
                     .select();
 
                 if (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 } else {
-                    alert('✅ Client registration submitted successfully!');
+                    showAlert('✅ Client registration submitted successfully!');
                     document.getElementById('clientRegForm').reset();
                     document.getElementById('pickupAddressesList').innerHTML = '<p style="color: #999; margin: 0;">No addresses added yet</p>';
                     document.getElementById('pickupAddressesData').value = '';
                     loadSubmittedRegistrations();
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
@@ -979,7 +1054,7 @@
             const address = input.value.trim();
 
             if (!address) {
-                alert('Please enter an address');
+                showAlert('Please enter an address');
                 return;
             }
 
@@ -1066,7 +1141,7 @@
                     .single();
 
                 if (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     return;
                 }
 
@@ -1091,10 +1166,10 @@
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
 
-                alert('File downloaded! You can print to PDF or edit it.');
+                showAlert('File downloaded! You can print to PDF or edit it.');
 
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message);
             }
         }
 
