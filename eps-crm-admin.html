@@ -12,38 +12,38 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        header { background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
         header h1 { font-size: 2em; }
         .header-actions { display: flex; gap: 15px; flex-wrap: wrap; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-primary { background: #f59e0b; color: white; }
-        .btn-primary:hover { background: #d97706; }
-        .btn-secondary { background: white; color: #f093fb; border: 1px solid #f093fb; }
+        .btn-primary { background: #D4AF37; color: #3a2e00; }
+        .btn-primary:hover { background: #b3901f; }
+        .btn-secondary { background: white; color: #8E2A8C; border: 1px solid #8E2A8C; }
         .btn-secondary:hover { background: #f0f0f0; }
         .btn-danger { background: #ef4444; color: white; }
-        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); }
         .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 400px; }
-        .login-box h2 { color: #f093fb; margin-bottom: 30px; text-align: center; }
+        .login-box h2 { color: #8E2A8C; margin-bottom: 30px; text-align: center; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #555; margin-bottom: 8px; font-weight: 500; }
         .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
-        .form-group input:focus { outline: none; border-color: #f093fb; box-shadow: 0 0 5px rgba(240, 147, 251, 0.3); }
+        .form-group input:focus { outline: none; border-color: #8E2A8C; box-shadow: 0 0 5px rgba(142, 42, 140, 0.3); }
         .dashboard { display: none; }
         .dashboard.active { display: block; }
         .section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-        .section-title { font-size: 1.5em; color: #f093fb; margin-bottom: 20px; border-bottom: 2px solid #f093fb; padding-bottom: 10px; }
+        .section-title { font-size: 1.5em; color: #8E2A8C; margin-bottom: 20px; border-bottom: 2px solid #8E2A8C; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .metric-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .metric-card { background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
         .metric-card h3 { font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; }
         .metric-card .value { font-size: 2em; font-weight: bold; }
         .metric-card .icon { font-size: 2.5em; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #f093fb; color: white; padding: 12px; text-align: left; font-weight: bold; }
+        th { background: #8E2A8C; color: white; padding: 12px; text-align: left; font-weight: bold; }
         td { padding: 12px; border-bottom: 1px solid #ddd; font-size: 0.9em; }
         tr:hover { background: #f5f5f5; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999; border-bottom: 3px solid transparent; transition: 0.3s; }
-        .tab-btn.active { color: #f093fb; border-bottom-color: #f093fb; }
+        .tab-btn.active { color: #8E2A8C; border-bottom-color: #8E2A8C; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .chart-container { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; height: 300px; }
@@ -54,25 +54,36 @@
         .status-danger { background: #fee2e2; color: #991b1b; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); }
         .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); }
-        .modal-content h2 { color: #f093fb; margin-bottom: 20px; }
+        .modal-content h2 { color: #8E2A8C; margin-bottom: 20px; }
         .close { color: #999; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close:hover { color: #000; }
         .btn-info { background: #3b82f6; color: white; }
         .btn-info:hover { background: #2563eb; }
         @media (max-width: 768px) { header { flex-direction: column; } .chart-grid { grid-template-columns: 1fr; } }
+
+        /* Toast notifications (replaces native showAlert() popups) */
+        #toastContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+        .toast { padding: 14px 18px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-size: 0.9em; font-weight: 500; white-space: pre-line; animation: toastIn 0.25s ease; }
+        .toast-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .toast-error { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+        .toast-info { background: #f3e9f3; color: #5c1b5a; border-left: 4px solid #8E2A8C; }
+        .toast-warn { background: #fdf6e3; color: #7a611c; border-left: 4px solid #D4AF37; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
+    <div id="toastContainer"></div>
+
     <div id="loginSection" class="login-container">
         <div class="login-box">
             <h2>📊 Admin Module</h2>
             <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="loginEmail" placeholder="dilip@epsworldwide.in">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" placeholder="your@epsworldwide.in" autocomplete="username" aria-label="Email address">
             </div>
             <div class="form-group">
-                <label>Password:</label>
-                <input type="password" id="loginPassword" placeholder="Dilip@123">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" aria-label="Password">
             </div>
             <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="login()">Login</button>
         </div>
@@ -131,7 +142,7 @@
                             <div class="value" id="teamActiveUsers">0</div>
                         </div>
                     </div>
-                    <h3 style="margin-top: 30px; color: #f093fb;">📅 Daily Team Performance & Target Achievement</h3>
+                    <h3 style="margin-top: 30px; color: #8E2A8C;">📅 Daily Team Performance & Target Achievement</h3>
                     <div style="overflow-x: auto;">
                         <table id="teamTable">
                             <thead>
@@ -151,7 +162,7 @@
                         </table>
                     </div>
 
-                    <h3 style="margin-top: 30px; color: #f093fb;">📊 Weekly Team Performance & Target Achievement</h3>
+                    <h3 style="margin-top: 30px; color: #8E2A8C;">📊 Weekly Team Performance & Target Achievement</h3>
                     <div style="overflow-x: auto;">
                         <table id="weeklyTeamTable">
                             <thead>
@@ -171,7 +182,7 @@
                         </table>
                     </div>
 
-                    <h3 style="margin-top: 30px; color: #f093fb;">📈 Monthly Team Performance & Target Achievement</h3>
+                    <h3 style="margin-top: 30px; color: #8E2A8C;">📈 Monthly Team Performance & Target Achievement</h3>
                     <div style="overflow-x: auto;">
                         <table id="monthlyTeamTable">
                             <thead>
@@ -193,14 +204,14 @@
                     
                     <!-- Daily Report Download -->
                     <div style="margin-top: 30px;">
-                        <h3 style="color: #f093fb; margin-bottom: 15px;">📅 Daily Report - Download</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 15px;">📅 Daily Report - Download</h3>
                         <button class="btn btn-primary" onclick="downloadDailyReportPDF()">📄 Download Daily PDF</button>
                         <button class="btn btn-primary" onclick="downloadDailyReportExcel()">📊 Download Daily Excel</button>
                     </div>
                     
                     <!-- Monthly Report Download -->
                     <div style="margin-top: 30px;">
-                        <h3 style="color: #f093fb; margin-bottom: 15px;">📊 Monthly Report - Download</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 15px;">📊 Monthly Report - Download</h3>
                         <button class="btn btn-primary" onclick="downloadMonthlyReportPDF()">📄 Download Monthly PDF</button>
                         <button class="btn btn-primary" onclick="downloadMonthlyReportExcel()">📊 Download Monthly Excel</button>
                     </div>
@@ -231,7 +242,7 @@
                             <div class="value" id="ordersPending">0</div>
                         </div>
                     </div>
-                    <h3 style="margin-top: 30px; color: #f093fb;">Today's Orders Details</h3>
+                    <h3 style="margin-top: 30px; color: #8E2A8C;">Today's Orders Details</h3>
                     <div style="overflow-x: auto;">
                         <table id="ordersTable">
                             <thead>
@@ -257,7 +268,7 @@
                     
                     <!-- Daily Targets -->
                     <div style="margin-bottom: 30px;">
-                        <h3 style="color: #f093fb; margin-bottom: 15px; font-size: 1.2em;">📅 Daily Targets</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 15px; font-size: 1.2em;">📅 Daily Targets</h3>
                         <table>
                             <thead>
                                 <tr>
@@ -281,7 +292,7 @@
 
                     <!-- Weekly Targets -->
                     <div style="margin-bottom: 30px;">
-                        <h3 style="color: #f093fb; margin-bottom: 15px; font-size: 1.2em;">📊 Weekly Targets</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 15px; font-size: 1.2em;">📊 Weekly Targets</h3>
                         <table>
                             <thead>
                                 <tr>
@@ -305,7 +316,7 @@
 
                     <!-- Monthly Targets -->
                     <div style="margin-bottom: 30px;">
-                        <h3 style="color: #f093fb; margin-bottom: 15px; font-size: 1.2em;">📈 Monthly Targets</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 15px; font-size: 1.2em;">📈 Monthly Targets</h3>
                         <table>
                             <thead>
                                 <tr>
@@ -333,15 +344,15 @@
                     <h2 class="section-title">Monthly Performance (Overall Metrics)</h2>
                     <div class="chart-grid">
                         <div class="chart-container">
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">Calls Trend</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Calls Trend</h3>
                             <canvas id="callsChart"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">Orders by Status</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">Orders by Status</h3>
                             <canvas id="ordersStatusChart"></canvas>
                         </div>
                     </div>
-                    <h3 style="margin-top: 30px; color: #f093fb;">Revenue Distribution</h3>
+                    <h3 style="margin-top: 30px; color: #8E2A8C;">Revenue Distribution</h3>
                     <div style="overflow-x: auto;">
                         <table id="revenueTable">
                             <thead>
@@ -364,20 +375,20 @@
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
                         <div>
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">📞 Top Callers</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">📞 Top Callers</h3>
                             <div id="topCallersBoard"></div>
                         </div>
                         <div>
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">📅 Most Meetings</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">📅 Most Meetings</h3>
                             <div id="topMeetingsBoard"></div>
                         </div>
                         <div>
-                            <h3 style="color: #f093fb; margin-bottom: 15px;">⭐ Top Performers</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 15px;">⭐ Top Performers</h3>
                             <div id="topPerformersBoard"></div>
                         </div>
                     </div>
 
-                    <h3 style="color: #f093fb; margin-bottom: 15px;">📊 Overall Monthly Leaderboard</h3>
+                    <h3 style="color: #8E2A8C; margin-bottom: 15px;">📊 Overall Monthly Leaderboard</h3>
                     <table>
                         <thead>
                             <tr>
@@ -429,7 +440,7 @@
                 <!-- Edit Incentive Modal -->
                 <div id="editIncentiveModal" class="modal">
                     <div class="modal-content">
-                        <span class="close" onclick="closeEditIncentiveModal()">&times;</span>
+                        <span class="close" onclick="closeEditIncentiveModal()" role="button" tabindex="0" aria-label="Close">&times;</span>
                         <h2>✏️ Edit Employee Incentive</h2>
                         
                         <p><strong>Employee:</strong> <span id="editEmpName"></span></p>
@@ -472,7 +483,7 @@
                     <!-- Vendor Form View -->
                     <div id="vendorFormView">
                         <div class="section" style="max-width: 800px;">
-                            <h3 style="color: #f093fb; margin-bottom: 20px;">Vendor Registration Form</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 20px;">Vendor Registration Form</h3>
 
                             <!-- Section 1: Basic Info -->
                             <h4 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Basic Information</h4>
@@ -618,7 +629,7 @@
 
                     <!-- Vendor List View -->
                     <div id="vendorListView" style="display: none;">
-                        <h3 style="color: #f093fb; margin-bottom: 20px;">Registered Vendors</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 20px;">Registered Vendors</h3>
                         <table>
                             <thead>
                                 <tr>
@@ -641,8 +652,8 @@
                 <!-- Vendor Detail Modal -->
                 <div id="vendorDetailModal" class="modal">
                     <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
-                        <span class="close" onclick="closeVendorDetail()">&times;</span>
-                        <h2 style="color: #f093fb; margin-bottom: 20px;">🤝 Vendor Details</h2>
+                        <span class="close" onclick="closeVendorDetail()" role="button" tabindex="0" aria-label="Close">&times;</span>
+                        <h2 style="color: #8E2A8C; margin-bottom: 20px;">🤝 Vendor Details</h2>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <!-- Left Column -->
@@ -711,7 +722,7 @@
                     <!-- Contract Form View -->
                     <div id="contractFormView">
                         <div class="section" style="max-width: 800px;">
-                            <h3 style="color: #f093fb; margin-bottom: 20px;">Add New Client Contract</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 20px;">Add New Client Contract</h3>
 
                             <h4 style="color: #666; margin-bottom: 10px;">Client Information</h4>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -790,7 +801,7 @@
 
                     <!-- Contracts List View -->
                     <div id="contractListView" style="display: none;">
-                        <h3 style="color: #f093fb; margin-bottom: 20px;">📋 All Client Contracts</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 20px;">📋 All Client Contracts</h3>
                         
                         <div style="margin-bottom: 15px;">
                             <input type="text" id="contractSearchBox" placeholder="Search by client name, company..." onkeyup="searchContracts()" style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
@@ -831,7 +842,7 @@
                     <!-- Vehicle Form View -->
                     <div id="vehicleFormView">
                         <div class="section" style="max-width: 900px;">
-                            <h3 style="color: #f093fb; margin-bottom: 20px;">Add New Vehicle</h3>
+                            <h3 style="color: #8E2A8C; margin-bottom: 20px;">Add New Vehicle</h3>
 
                             <h4 style="color: #666; margin-bottom: 10px;">Vehicle Information</h4>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -982,7 +993,7 @@
 
                     <!-- Vehicle List View -->
                     <div id="vehicleListView" style="display: none;">
-                        <h3 style="color: #f093fb; margin-bottom: 20px;">📋 All Vehicles</h3>
+                        <h3 style="color: #8E2A8C; margin-bottom: 20px;">📋 All Vehicles</h3>
                         
                         <div style="margin-bottom: 15px;">
                             <input type="text" id="vehicleSearchBox" placeholder="Search by registration or model..." onkeyup="searchVehicles()" style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
@@ -1106,7 +1117,7 @@
                         </div>
                     </div>
 
-                    <h3 style="color: #f093fb; margin-bottom: 15px;">Employee Directory</h3>
+                    <h3 style="color: #8E2A8C; margin-bottom: 15px;">Employee Directory</h3>
                     <table>
                         <thead>
                             <tr>
@@ -1132,8 +1143,8 @@
         <div id="employeeModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center;">
             <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 id="modalTitle" style="color: #f093fb;">Add New Employee</h2>
-                    <span onclick="closeEmployeeModal()" style="font-size: 2em; cursor: pointer; color: #999;">&times;</span>
+                    <h2 id="modalTitle" style="color: #8E2A8C;">Add New Employee</h2>
+                    <span onclick="closeEmployeeModal()" style="font-size: 2em; cursor: pointer; color: #999;" role="button" tabindex="0" aria-label="Close">&times;</span>
                 </div>
                 <form id="employeeForm" onsubmit="saveEmployee(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div style="grid-column: 1 / -1;">
@@ -1199,6 +1210,36 @@
             const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
             window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            // Toast notification helper - replaces native window.alert popups
+            // everywhere in this file. If no type is passed, infer it from the message
+            // (existing calls already lead with an emoji/word like "Error" or "✅").
+            window.showAlert = function(message, type) {
+                if (!type) {
+                    if (/^✅|success/i.test(message)) type = 'success';
+                    else if (/^❌|error|failed|invalid|not found|too large/i.test(message)) type = 'error';
+                    else if (/^⚠️|warning/i.test(message)) type = 'warn';
+                    else type = 'info';
+                }
+                let container = document.getElementById('toastContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toastContainer';
+                    document.body.appendChild(container);
+                }
+                const toast = document.createElement('div');
+                toast.className = 'toast toast-' + type;
+                toast.setAttribute('role', 'status');
+                toast.textContent = message;
+                container.appendChild(toast);
+                const life = (type === 'error' || type === 'warn') ? 6000 : 3500;
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.3s';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, life);
+            };
+
             const escapeHtml = window.escapeHtml = function(value) {
                 return String(value ?? '').replace(/[&<>"']/g, function(ch) {
                     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
@@ -1231,7 +1272,7 @@
                 const password = document.getElementById('loginPassword').value;
 
                 if (!email || !password) {
-                    alert('Please enter email and password');
+                    showAlert('Please enter email and password');
                     return;
                 }
 
@@ -1239,7 +1280,7 @@
                     const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
                     
                     if (error) {
-                        alert('Login failed: ' + error.message);
+                        showAlert('Login failed: ' + error.message);
                         return;
                     }
 
@@ -1260,7 +1301,7 @@
                     window.loadContracts();
                     window.loadVehicles();
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -1302,17 +1343,17 @@
 
                     if (contactsRes.error) {
                         console.error('Contacts error:', contactsRes.error);
-                        alert('Error loading contacts: ' + contactsRes.error.message);
+                        showAlert('Error loading contacts: ' + contactsRes.error.message);
                         return;
                     }
                     if (meetingsRes.error) {
                         console.error('Meetings error:', meetingsRes.error);
-                        alert('Error loading meetings: ' + meetingsRes.error.message);
+                        showAlert('Error loading meetings: ' + meetingsRes.error.message);
                         return;
                     }
                     if (callsRes.error) {
                         console.error('Calls error:', callsRes.error);
-                        alert('Error loading calls: ' + callsRes.error.message);
+                        showAlert('Error loading calls: ' + callsRes.error.message);
                         return;
                     }
 
@@ -1380,7 +1421,7 @@
                     subscribeToRealTimeUpdates();
                 } catch (error) {
                     console.error('Error loading data:', error);
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -1637,7 +1678,7 @@
                                     datasets: [{
                                         label: 'Calls',
                                         data: [Math.ceil(calls.length * 0.3), Math.ceil(calls.length * 0.5), Math.ceil(calls.length * 0.7), calls.length],
-                                        borderColor: '#f093fb',
+                                        borderColor: '#8E2A8C',
                                         backgroundColor: 'rgba(240, 147, 251, 0.1)',
                                         tension: 0.4,
                                         fill: true
@@ -1923,7 +1964,7 @@
                     topCallers.forEach((entry, i) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 5px; margin-bottom: 10px;';
-                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].calls + ' calls</strong></div>';
+                        div.innerHTML = '<div style="flex: 1;"><span style="background: #8E2A8C; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].calls + ' calls</strong></div>';
                         callsBoard.appendChild(div);
                     });
                 }
@@ -1936,7 +1977,7 @@
                     topMeetings.forEach((entry, i) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 5px; margin-bottom: 10px;';
-                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].meetings + ' meetings</strong></div>';
+                        div.innerHTML = '<div style="flex: 1;"><span style="background: #8E2A8C; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].meetings + ' meetings</strong></div>';
                         meetingsBoard.appendChild(div);
                     });
                 }
@@ -1949,7 +1990,7 @@
                     topPerformers.forEach((entry, i) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 5px; margin-bottom: 10px;';
-                        div.innerHTML = '<div style="flex: 1;"><span style="background: #f093fb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].score.toFixed(0) + ' pts</strong></div>';
+                        div.innerHTML = '<div style="flex: 1;"><span style="background: #8E2A8C; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; display: inline-flex;">' + (i + 1) + '</span> ' + escapeHtml(entry[0]) + '</div><div><strong>' + entry[1].score.toFixed(0) + ' pts</strong></div>';
                         performersBoard.appendChild(div);
                     });
                 }
@@ -2068,12 +2109,12 @@
                         if (res.error) throw res.error;
                         
                         window.loadIncentives();
-                        alert('✅ Calculated ' + incentivesToCreate.length + ' employee incentives for ' + currentMonth + '\n\n(Telecaller & Field Executive only)');
+                        showAlert('✅ Calculated ' + incentivesToCreate.length + ' employee incentives for ' + currentMonth + '\n\n(Telecaller & Field Executive only)');
                     } else {
-                        alert('ℹ️ All employees already have incentives calculated for ' + currentMonth);
+                        showAlert('ℹ️ All employees already have incentives calculated for ' + currentMonth);
                     }
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     console.error(error);
                 }
             };
@@ -2110,9 +2151,9 @@
                     if (res.error) throw res.error;
 
                     window.loadIncentives();
-                    alert('✅ Test incentive data created!\n\n(Telecaller & Field Executive only)\n\nNow you can see:\n- Monthly Salary\n- Achievement %\n- Earned Incentive\n- Total Earning\n- Mark as Paid functionality');
+                    showAlert('✅ Test incentive data created!\n\n(Telecaller & Field Executive only)\n\nNow you can see:\n- Monthly Salary\n- Achievement %\n- Earned Incentive\n- Total Earning\n- Mark as Paid functionality');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     console.error(error);
                 }
             };
@@ -2188,9 +2229,9 @@
                     const res = await window.supabaseClient.from('employee_incentives').update({ status: 'paid' }).eq('id', incId);
                     if (res.error) throw res.error;
                     window.loadIncentives();
-                    alert('Incentive marked as paid!');
+                    showAlert('Incentive marked as paid!');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -2243,13 +2284,13 @@
                     if (bonusType === 'fixed') {
                         newIncentive = parseFloat(document.getElementById('fixedAmount').value);
                         if (isNaN(newIncentive) || newIncentive < 0) {
-                            alert('Please enter a valid amount');
+                            showAlert('Please enter a valid amount');
                             return;
                         }
                     } else {
                         const percentage = parseFloat(document.getElementById('percentageAmount').value);
                         if (isNaN(percentage) || percentage < 0 || percentage > 100) {
-                            alert('Please enter a valid percentage (0-100)');
+                            showAlert('Please enter a valid percentage (0-100)');
                             return;
                         }
                         newIncentive = (window.currentEditingSalary * percentage) / 100;
@@ -2264,9 +2305,9 @@
 
                     window.closeEditIncentiveModal();
                     window.loadIncentives();
-                    alert('✅ Incentive updated successfully!');
+                    showAlert('✅ Incentive updated successfully!');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     console.error(error);
                 }
             };
@@ -2295,7 +2336,7 @@
                     const manufacturer = document.getElementById('manufacturer').value.trim();
 
                     if (!regNumber || !vehicleType || !manufacturer) {
-                        alert('❌ Please fill all required fields (marked with *)');
+                        showAlert('❌ Please fill all required fields (marked with *)');
                         return;
                     }
 
@@ -2313,7 +2354,7 @@
                         if (fileInput.files.length > 0) {
                             const file = fileInput.files[0];
                             if (file.size > 5 * 1024 * 1024) {
-                                alert('❌ File ' + docType + ' is too large (Max 5MB)');
+                                showAlert('❌ File ' + docType + ' is too large (Max 5MB)');
                                 return;
                             }
 
@@ -2372,11 +2413,11 @@
                     }
 
                     await logAuditAction('CREATE', 'Vehicle', { registration_number: regNumber, vehicle_type: vehicleType, manufacturer: manufacturer });
-                    alert('✅ Vehicle added successfully!\n\nRegistration: ' + regNumber + '\n\nDocuments: ' + Object.keys(documents).length + ' uploaded');
+                    showAlert('✅ Vehicle added successfully!\n\nRegistration: ' + regNumber + '\n\nDocuments: ' + Object.keys(documents).length + ' uploaded');
                     window.resetVehicleForm();
                     window.switchVehicleView('list');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     console.error(error);
                 }
             };
@@ -2466,7 +2507,7 @@
             window.viewVehicleDetails = function(vehicleId) {
                 const vehicle = window.allVehicles.find(v => v.id === vehicleId);
                 if (!vehicle) {
-                    alert('Vehicle not found');
+                    showAlert('Vehicle not found');
                     return;
                 }
 
@@ -2496,7 +2537,7 @@
                     '=== NOTES ===\n' +
                     (vehicle.notes || 'No notes');
 
-                alert(details);
+                showAlert(details);
             };
 
             window.deleteVehicle = async function(vehicleId) {
@@ -2508,9 +2549,9 @@
                     if (res.error) throw res.error;
                     window.loadVehicles();
                     await logAuditAction('DELETE', 'Vehicle', { vehicle_id: vehicleId });
-                    alert('✅ Vehicle deleted successfully!');
+                    showAlert('✅ Vehicle deleted successfully!');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -2559,9 +2600,9 @@
                 });
 
                 if (alerts.length === 0) {
-                    alert('✅ All vehicles are in good status!\n\nNo pending services or expired documents.');
+                    showAlert('✅ All vehicles are in good status!\n\nNo pending services or expired documents.');
                 } else {
-                    alert('⚠️ SERVICE & DOCUMENT ALERTS\n\n' + alerts.join('\n'));
+                    showAlert('⚠️ SERVICE & DOCUMENT ALERTS\n\n' + alerts.join('\n'));
                 }
             };
 
@@ -2588,12 +2629,12 @@
                     const endDate = document.getElementById('contractEndDate').value;
 
                     if (!clientName || !startDate || !endDate) {
-                        alert('❌ Please fill all required fields (marked with *)');
+                        showAlert('❌ Please fill all required fields (marked with *)');
                         return;
                     }
 
                     if (new Date(endDate) <= new Date(startDate)) {
-                        alert('❌ End date must be after start date');
+                        showAlert('❌ End date must be after start date');
                         return;
                     }
 
@@ -2615,12 +2656,12 @@
                     const res = await window.supabaseClient.from('client_contracts').insert([contractData]);
                     if (res.error) throw res.error;
 
-                    alert('✅ Contract added successfully!\n\nClient: ' + clientName);
+                    showAlert('✅ Contract added successfully!\n\nClient: ' + clientName);
                     await logAuditAction('CREATE', 'Contract', { client_name: clientName, contract_type: contractData.contract_type, contract_value: contractData.contract_value });
                     window.resetContractForm();
                     window.switchContractView('list');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     console.error(error);
                 }
             };
@@ -2686,11 +2727,11 @@
             window.viewContractDetails = function(contractId) {
                 const contract = window.allContracts.find(c => c.id === contractId);
                 if (!contract) {
-                    alert('Contract not found');
+                    showAlert('Contract not found');
                     return;
                 }
 
-                alert('📄 Contract Details\n\n' + 
+                showAlert('📄 Contract Details\n\n' + 
                       'Client: ' + contract.client_name + '\n' +
                       'Company: ' + (contract.company_name || 'N/A') + '\n' +
                       'Contact: ' + (contract.contact_person || 'N/A') + '\n' +
@@ -2712,9 +2753,9 @@
                     if (res.error) throw res.error;
                     window.loadContracts();
                     await logAuditAction('DELETE', 'Contract', { contract_id: contractId });
-                    alert('✅ Contract deleted successfully!');
+                    showAlert('✅ Contract deleted successfully!');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -2778,7 +2819,7 @@
                     const formDate = document.getElementById('formDate').value;
 
                     if (!vendorName || !phoneNo || !emailId || !contactPerson || !panNo || !beneficiaryName || !bankName || !accountNo || !ifscCode || !formCompletedBy || !formDate) {
-                        alert('❌ Please fill all required fields (marked with *)');
+                        showAlert('❌ Please fill all required fields (marked with *)');
                         return;
                     }
 
@@ -2812,12 +2853,12 @@
 
                     const res = await window.supabaseClient.from('vendor_registrations').insert([vendorData]);
                     if (res.error) throw res.error;
-                    alert('✅ Vendor registered successfully!\n\nVendor: ' + vendorName);
+                    showAlert('✅ Vendor registered successfully!\n\nVendor: ' + vendorName);
                     await logAuditAction('CREATE', 'Vendor', { vendor_name: vendorName, phone: phoneNo, email: emailId });
                     window.resetVendorForm();
                     window.switchVendorView('list');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                     console.error(error);
                 }
             };
@@ -2873,14 +2914,14 @@
                     const row = tbody.insertRow();
                     const statusClass = vendor.vendor_registered ? 'status-success' : 'status-warning';
                     const statusText = vendor.vendor_registered ? '✅ Registered' : '⏳ Pending';
-                    row.innerHTML = '<td style="cursor: pointer; color: #f093fb; font-weight: bold;" onclick="viewVendorDetails(\'' + vendor.id + '\')">' + escapeHtml(vendor.vendor_name) + '</td><td>' + escapeHtml(vendor.contact_person) + '</td><td>' + escapeHtml(vendor.phone) + '</td><td>' + escapeHtml(vendor.email) + '</td><td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td><td>' + escapeHtml(vendor.registration_code || 'N/A') + '</td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em;" onclick="approveVendor(\'' + vendor.id + '\')">✏️ Approve</button></td>';
+                    row.innerHTML = '<td style="cursor: pointer; color: #8E2A8C; font-weight: bold;" onclick="viewVendorDetails(\'' + vendor.id + '\')">' + escapeHtml(vendor.vendor_name) + '</td><td>' + escapeHtml(vendor.contact_person) + '</td><td>' + escapeHtml(vendor.phone) + '</td><td>' + escapeHtml(vendor.email) + '</td><td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td><td>' + escapeHtml(vendor.registration_code || 'N/A') + '</td><td><button class="btn btn-info" style="padding: 5px 10px; font-size: 0.8em;" onclick="approveVendor(\'' + vendor.id + '\')">✏️ Approve</button></td>';
                 });
             };
 
             window.viewVendorDetails = function(vendorId) {
                 const vendor = window.allVendors.find(v => v.id === vendorId);
                 if (!vendor) {
-                    alert('Vendor not found');
+                    showAlert('Vendor not found');
                     return;
                 }
 
@@ -2939,9 +2980,9 @@
                     window.closeVendorDetail();
                     window.loadVendors();
                     await logAuditAction('DELETE', 'Vendor', { vendor_id: window.currentVendorId });
-                    alert('✅ Vendor deleted successfully!');
+                    showAlert('✅ Vendor deleted successfully!');
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -2954,9 +2995,9 @@
                         .eq('id', vendorId);
                     if (res.error) throw res.error;
                     window.loadVendors();
-                    alert('✅ Vendor approved! Registration Code: ' + code);
+                    showAlert('✅ Vendor approved! Registration Code: ' + code);
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -3020,7 +3061,7 @@
                         window.loadEmployees();
                         window.closeEmployeeModal();
                         await logAuditAction('CREATE', 'Employee', { employee_name: name, email: email, role: role });
-                        alert('Employee saved successfully!');
+                        showAlert('Employee saved successfully!');
                     } else {
                         const empId = document.getElementById('employeeForm').dataset.empId;
                         const res = await window.supabaseClient.from('employees').update(payload).eq('id', empId);
@@ -3028,10 +3069,10 @@
                         window.loadEmployees();
                         window.closeEmployeeModal();
                         await logAuditAction('UPDATE', 'Employee', { employee_id: empId, employee_name: name, email: email, role: role });
-                        alert('Employee saved successfully!');
+                        showAlert('Employee saved successfully!');
                     }
                 } catch (error) {
-                    alert('Error: ' + error.message);
+                    showAlert('Error: ' + error.message);
                 }
             };
 
@@ -3060,9 +3101,9 @@
                         if (res.error) throw res.error;
                         window.loadEmployees();
                         await logAuditAction('DELETE', 'Employee', { employee_id: empId });
-                        alert('Employee deleted!');
+                        showAlert('Employee deleted!');
                     } catch (error) {
-                        alert('Error: ' + error.message);
+                        showAlert('Error: ' + error.message);
                     }
                 }
             };
@@ -3194,7 +3235,7 @@
             function showAuditDetails(encodedLog) {
                 const log = JSON.parse(atob(encodedLog));
                 const details = JSON.stringify(log.details || {}, null, 2);
-                alert(
+                showAlert(
                     'Audit Details:\n\n' +
                     'User: ' + log.user_email + '\n' +
                     'Role: ' + (log.user_role || 'N/A') + '\n' +
