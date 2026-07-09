@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS CRM - Complete Payroll Dashboard</title>
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -65,13 +66,19 @@
 
         .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3); }
 
-        .message { 
-            padding: 8px 12px; 
-            background: #d4edda; 
-            color: #155724; 
-            border-left: 4px solid #28a745; 
-            margin: 0; 
+        .message {
+            padding: 8px 12px;
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+            margin: 0;
             font-size: 0.8em;
+        }
+
+        .message.warn {
+            background: #fff3cd;
+            color: #856404;
+            border-left-color: #ffc107;
         }
 
         .table-wrapper {
@@ -251,8 +258,20 @@
         let allData = [];
         let currentMonth = '2026-04';
         let changes = {};
+        let usingLiveData = false; // true once data actually came from Supabase
 
-        const employees = [
+        const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // SECURITY NOTE: this used to be a hardcoded array of all 23 employees'
+        // real names/salaries/loans shipped in the page source (readable by
+        // anyone with the URL, logged in or not). It has been moved to a
+        // Supabase table (`employees`, protected by RLS - see
+        // supabase-payroll-migration.sql). This local copy only exists as a
+        // one-time fallback so the page keeps working until that migration is
+        // run, and should be deleted once `usingLiveData` is always true.
+        const FALLBACK_EMPLOYEES_DO_NOT_SHIP_LONG_TERM = [
             { sr_no: 1, name: 'Rizwan Patel', branch: 'EPS LTD', gross_salary: 29000, leave_pending: 46, advance: 0, loan: 5000 },
             { sr_no: 2, name: 'Mahendra Thorse', branch: 'EPS LTD', gross_salary: 44000, leave_pending: 131, advance: 0, loan: 0 },
             { sr_no: 3, name: 'Sopan Sable', branch: 'EPS LTD', gross_salary: 29100, leave_pending: 41, advance: 1500, loan: 0 },
@@ -286,6 +305,44 @@
                 loadData();
             } else {
                 window.location.href = 'eps-crm-dashboard.html';
+            }
+        }
+
+        async function fetchEmployees() {
+            try {
+                const { data, error } = await supabase
+                    .from('employees')
+                    .select('sr_no, name, branch, gross_salary, leave_pending, advance, loan')
+                    .order('sr_no', { ascending: true });
+
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    usingLiveData = true;
+                    return data;
+                }
+            } catch (err) {
+                console.warn('Could not load employees from Supabase, using local fallback:', err.message || err);
+            }
+
+            usingLiveData = false;
+            showMessage('⚠️ Showing local sample data - run supabase-payroll-migration.sql and refresh to load the live, database-backed employee list.', true);
+            return FALLBACK_EMPLOYEES_DO_NOT_SHIP_LONG_TERM;
+        }
+
+        async function fetchPayrollEntries(month) {
+            if (!usingLiveData) return {};
+            try {
+                const { data, error } = await supabase
+                    .from('payroll_entries')
+                    .select('*')
+                    .eq('month', month);
+                if (error) throw error;
+                const byEmp = {};
+                (data || []).forEach(row => { byEmp[row.sr_no] = row; });
+                return byEmp;
+            } catch (err) {
+                console.warn('Could not load payroll entries from Supabase:', err.message || err);
+                return {};
             }
         }
 
@@ -376,26 +433,35 @@
             emp.leave_next = emp.leave_available - emp.leave_adjusted;
         }
 
-        function loadData() {
+        async function loadData() {
             const totalDays = getDaysInMonth(currentMonth);
-            
+            const employees = await fetchEmployees();
+            const savedEntries = await fetchPayrollEntries(currentMonth);
+            const localEntries = usingLiveData ? {} : JSON.parse(localStorage.getItem('eps_crm_payroll_' + currentMonth) || '{}');
+
             allData = employees.map(emp => {
-                const data = { ...emp, attendance: {} };
-                
-                // Initialize attendance
+                const saved = savedEntries[emp.sr_no] || localEntries[emp.sr_no] || null;
+                const data = { ...emp, attendance: (saved && saved.attendance) || {} };
+
+                // Initialize attendance (defaulting Sundays to WO) for any day not already saved
                 for (let d = 1; d <= totalDays; d++) {
+                    if (data.attendance[d]) continue;
                     const date = new Date(currentMonth + `-${String(d).padStart(2, '0')}`);
                     data.attendance[d] = date.getDay() === 0 ? 'WO' : 'P';
                 }
-                
-                // Initialize editable fields
-                data.ot_days = 0;
-                data.holidays = 0;
-                data.halfday = 0;
-                data.leave_adjusted = 0;
-                data.salary_done = 'No';
-                data.remarks = '';
-                
+
+                // Editable fields - restored from a previous save if one exists
+                data.ot_days = saved?.ot_days ?? 0;
+                data.holidays = saved?.holidays ?? 0;
+                data.halfday = saved?.halfday ?? 0;
+                data.leave_adjusted = saved?.leave_adjusted ?? 0;
+                data.salary_done = saved?.salary_done ?? 'No';
+                data.salary_date = saved?.salary_date ?? '';
+                data.through = saved?.through ?? '';
+                data.remarks = saved?.remarks ?? '';
+                if (saved?.advance !== undefined) data.advance = saved.advance;
+                if (saved?.loan !== undefined) data.loan = saved.loan;
+
                 calculateAllFields(data, totalDays);
                 return data;
             });
@@ -438,8 +504,8 @@
             let rowsHTML = '';
             allData.forEach((emp, idx) => {
                 let cells = `<td class="sticky">${emp.sr_no}</td>`;
-                cells += `<td class="sticky"><strong>${emp.name}</strong></td>`;
-                cells += `<td class="sticky">${emp.branch}</td>`;
+                cells += `<td class="sticky"><strong>${escapeHtml(emp.name)}</strong></td>`;
+                cells += `<td class="sticky">${escapeHtml(emp.branch)}</td>`;
                 cells += `<td class="sticky">₹${emp.gross_salary}</td>`;
                 
                 // Attendance dates
@@ -479,10 +545,10 @@
                 cells += `<td><input type="number" value="${emp.loan}" onchange="updateEmp(${idx}, 'loan', this.value)"></td>`;
                 cells += `<td class="calc">₹${emp.total_deduction}</td>`;
                 cells += `<td class="calc">₹${emp.net_salary}</td>`;
-                cells += `<td><select onchange="updateEmp(${idx}, 'salary_done', this.value)"><option>No</option><option>Yes</option></select></td>`;
-                cells += `<td><input type="date" onchange="updateEmp(${idx}, 'salary_date', this.value)"></td>`;
-                cells += `<td><input type="text" placeholder="Cash/Check/Transfer" onchange="updateEmp(${idx}, 'through', this.value)"></td>`;
-                cells += `<td><input type="text" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)"></td>`;
+                cells += `<td><select onchange="updateEmp(${idx}, 'salary_done', this.value)"><option${emp.salary_done === 'No' ? ' selected' : ''}>No</option><option${emp.salary_done === 'Yes' ? ' selected' : ''}>Yes</option></select></td>`;
+                cells += `<td><input type="date" value="${escapeHtml(emp.salary_date || '')}" onchange="updateEmp(${idx}, 'salary_date', this.value)"></td>`;
+                cells += `<td><input type="text" value="${escapeHtml(emp.through || '')}" placeholder="Cash/Check/Transfer" onchange="updateEmp(${idx}, 'through', this.value)"></td>`;
+                cells += `<td><input type="text" value="${escapeHtml(emp.remarks || '')}" placeholder="Remarks" onchange="updateEmp(${idx}, 'remarks', this.value)"></td>`;
                 
                 rowsHTML += `<tr>${cells}</tr>`;
             });
@@ -540,12 +606,47 @@
             `;
         }
 
-        function saveChanges() {
+        async function saveChanges() {
             if (Object.keys(changes).length === 0) {
                 showMessage('ℹ️ No changes');
                 return;
             }
-            showMessage('✅ Payroll saved successfully!');
+
+            const rows = allData.map(emp => ({
+                sr_no: emp.sr_no,
+                month: currentMonth,
+                attendance: emp.attendance,
+                ot_days: emp.ot_days,
+                holidays: emp.holidays,
+                halfday: emp.halfday,
+                leave_adjusted: emp.leave_adjusted,
+                advance: emp.advance,
+                loan: emp.loan,
+                salary_done: emp.salary_done,
+                salary_date: emp.salary_date || null,
+                through: emp.through || null,
+                remarks: emp.remarks || null
+            }));
+
+            if (usingLiveData) {
+                try {
+                    const { error } = await supabase
+                        .from('payroll_entries')
+                        .upsert(rows, { onConflict: 'sr_no,month' });
+                    if (error) throw error;
+                    showMessage('✅ Payroll saved to database!');
+                    changes = {};
+                    return;
+                } catch (err) {
+                    console.error('Supabase save failed, falling back to local storage:', err.message || err);
+                }
+            }
+
+            // Fallback: at least don't silently lose the edits.
+            const localEntries = JSON.parse(localStorage.getItem('eps_crm_payroll_' + currentMonth) || '{}');
+            rows.forEach(row => { localEntries[row.sr_no] = row; });
+            localStorage.setItem('eps_crm_payroll_' + currentMonth, JSON.stringify(localEntries));
+            showMessage('⚠️ Saved to this browser only (not the database) - run supabase-payroll-migration.sql to enable real saving.', true);
             changes = {};
         }
 
@@ -572,10 +673,16 @@
             filterTable();
         }
 
-        function showMessage(msg) {
+        function showMessage(msg, warn) {
             const box = document.getElementById('messageBox');
-            box.innerHTML = `<div class="message">${msg}</div>`;
-            setTimeout(() => { box.innerHTML = ''; }, 2500);
+            box.innerHTML = `<div class="message${warn ? ' warn' : ''}">${escapeHtml(msg)}</div>`;
+            setTimeout(() => { box.innerHTML = ''; }, warn ? 6000 : 2500);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
         }
     </script>
 </body>
