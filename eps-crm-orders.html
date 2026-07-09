@@ -34,7 +34,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%);
             color: white;
             padding: 30px;
             border-radius: 10px;
@@ -81,7 +81,7 @@
 
         .btn-secondary {
             background: white;
-            color: #667eea;
+            color: #8E2A8C;
         }
 
         .btn-secondary:hover {
@@ -116,7 +116,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%);
         }
 
         .login-box {
@@ -129,7 +129,7 @@
         }
 
         .login-box h2 {
-            color: #667eea;
+            color: #8E2A8C;
             margin-bottom: 30px;
             text-align: center;
         }
@@ -175,13 +175,13 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #8E2A8C;
             box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #8E2A8C;
             box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
         }
 
@@ -207,9 +207,9 @@
 
         .section-title {
             font-size: 1.5em;
-            color: #667eea;
+            color: #8E2A8C;
             margin-bottom: 20px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #8E2A8C;
             padding-bottom: 10px;
         }
 
@@ -221,7 +221,7 @@
         }
 
         .metric-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8E2A8C 0%, #6b1f69 100%);
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -275,7 +275,7 @@
         }
 
         th {
-            background: #667eea;
+            background: #8E2A8C;
             color: white;
             padding: 12px;
             text-align: left;
@@ -293,13 +293,13 @@
 
         tr:hover {
             background: #ffffff;
-            outline: 2px solid #667eea;
+            outline: 2px solid #8E2A8C;
             outline-offset: -1px;
         }
 
         body.dark-mode tr:hover {
             background: #1a1a1a;
-            outline: 2px solid #667eea;
+            outline: 2px solid #8E2A8C;
             outline-offset: -1px;
         }
 
@@ -343,9 +343,9 @@
 
         .modal-header {
             font-size: 1.5em;
-            color: #667eea;
+            color: #8E2A8C;
             margin-bottom: 20px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #8E2A8C;
             padding-bottom: 10px;
             display: flex;
             justify-content: space-between;
@@ -357,7 +357,7 @@
             border: none;
             font-size: 1.5em;
             cursor: pointer;
-            color: #667eea;
+            color: #8E2A8C;
         }
 
         .invoice-modal {
@@ -373,14 +373,14 @@
         }
 
         .invoice-header {
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #8E2A8C;
             padding-bottom: 20px;
             margin-bottom: 20px;
             text-align: center;
         }
 
         .invoice-header h2 {
-            color: #667eea;
+            color: #8E2A8C;
             margin-bottom: 5px;
         }
 
@@ -405,7 +405,7 @@
             padding: 15px 0;
             font-size: 1.2em;
             font-weight: bold;
-            color: #667eea;
+            color: #8E2A8C;
         }
 
         .invoice-actions {
@@ -498,20 +498,31 @@
                 display: none;
             }
         }
+
+        /* Toast notifications (replaces native showAlert() popups) */
+        #toastContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+        .toast { padding: 14px 18px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-size: 0.9em; font-weight: 500; white-space: pre-line; animation: toastIn 0.25s ease; }
+        .toast-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .toast-error { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #ef4444; }
+        .toast-info { background: #f3e9f3; color: #5c1b5a; border-left: 4px solid #8E2A8C; }
+        .toast-warn { background: #fdf6e3; color: #7a611c; border-left: 4px solid #D4AF37; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
+    <div id="toastContainer"></div>
+
     <!-- Login Section -->
     <div id="loginSection" class="login-container">
         <div class="login-box">
             <h2>📦 Orders Module</h2>
             <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="loginEmail" placeholder="orders@eps.com">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" placeholder="your@epsworldwide.in" autocomplete="username" aria-label="Email address">
             </div>
             <div class="form-group">
-                <label>Password:</label>
-                <input type="password" id="loginPassword" placeholder="orders123">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" aria-label="Password">
             </div>
             <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="login()">Login</button>
             <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="goBack()">Back to Dashboard</button>
@@ -534,7 +545,7 @@
 
             <!-- Tab Navigation -->
             <div style="display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; flex-wrap: wrap;">
-                <button class="tab-btn active" onclick="switchOrdersTab('dashboard')" style="padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #667eea; border-bottom: 3px solid #667eea;">📊 Dashboard</button>
+                <button class="tab-btn active" onclick="switchOrdersTab('dashboard')" style="padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #8E2A8C; border-bottom: 3px solid #8E2A8C;">📊 Dashboard</button>
                 <button class="tab-btn" onclick="switchOrdersTab('create')" style="padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999;">➕ Create Order</button>
                 <button class="tab-btn" onclick="switchOrdersTab('orders')" style="padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #999;">📋 View Orders</button>
             </div>
@@ -583,7 +594,7 @@
                     </div>
 
                     <!-- Employee Details -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">👤 Employee Details</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">👤 Employee Details</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Employee Name *</label>
@@ -596,7 +607,7 @@
                     </div>
 
                     <!-- Customer Details -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">🛍️ Customer Details</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">🛍️ Customer Details</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Customer Name *</label>
@@ -619,7 +630,7 @@
                     </div>
 
                     <!-- Sender Address -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">📍 Sender Address</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">📍 Sender Address</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Address *</label>
@@ -632,7 +643,7 @@
                     </div>
 
                     <!-- Receiver Details -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">📦 Receiver Details</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">📦 Receiver Details</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Receiver Name *</label>
@@ -655,7 +666,7 @@
                     </div>
 
                     <!-- Origin & Destination -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">🗺️ Origin & Destination</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">🗺️ Origin & Destination</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Origin City *</label>
@@ -668,7 +679,7 @@
                     </div>
 
                     <!-- Service Type -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">⚙️ Service Type</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">⚙️ Service Type</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Service Type *</label>
@@ -682,7 +693,7 @@
                     </div>
 
                     <!-- Shipping Method -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">🚚 Shipping Method</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">🚚 Shipping Method</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Shipping Method *</label>
@@ -698,7 +709,7 @@
                     </div>
 
                     <!-- Order Details -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">📦 Order Details</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">📦 Order Details</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Number of Boxes *</label>
@@ -731,7 +742,7 @@
                     </div>
 
                     <!-- Payment Details -->
-                    <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">💳 Payment Details</h3>
+                    <h3 style="color: #8E2A8C; margin-top: 20px; margin-bottom: 10px;">💳 Payment Details</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Order Amount (₹) *</label>
@@ -802,15 +813,15 @@
             <!-- Charts -->
             <div class="charts-grid">
                 <div class="chart-container">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Service Distribution</h3>
+                    <h3 style="color: #8E2A8C; margin-bottom: 15px;">Service Distribution</h3>
                     <canvas id="serviceChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Order Status</h3>
+                    <h3 style="color: #8E2A8C; margin-bottom: 15px;">Order Status</h3>
                     <canvas id="statusChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Monthly Revenue</h3>
+                    <h3 style="color: #8E2A8C; margin-bottom: 15px;">Monthly Revenue</h3>
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
@@ -822,7 +833,7 @@
         <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
             <div class="modal-header">
                 <span>✏️ Edit Order</span>
-                <button class="close-btn" onclick="closeModal('editModal')">✕</button>
+                <button class="close-btn" onclick="closeModal('editModal')" aria-label="Close">✕</button>
             </div>
             
             <!-- Order Reference (Read-only) -->
@@ -838,7 +849,7 @@
             </div>
 
             <!-- Employee Details -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">👤 Employee Details</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">👤 Employee Details</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Employee Name:</label>
@@ -851,7 +862,7 @@
             </div>
 
             <!-- Customer Details -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">🛍️ Customer Details</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">🛍️ Customer Details</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Customer Name:</label>
@@ -874,7 +885,7 @@
             </div>
 
             <!-- Sender Address -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📍 Sender Address</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">📍 Sender Address</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Address:</label>
@@ -887,7 +898,7 @@
             </div>
 
             <!-- Receiver Details -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📦 Receiver Details</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">📦 Receiver Details</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Receiver Name:</label>
@@ -910,7 +921,7 @@
             </div>
 
             <!-- Route -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">🗺️ Origin & Destination</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">🗺️ Origin & Destination</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Origin City:</label>
@@ -923,7 +934,7 @@
             </div>
 
             <!-- Service & Shipping -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">⚙️ Service & Shipping</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">⚙️ Service & Shipping</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Service Type:</label>
@@ -948,7 +959,7 @@
             </div>
 
             <!-- Order Details -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📦 Order Details</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">📦 Order Details</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Number of Boxes:</label>
@@ -981,7 +992,7 @@
             </div>
 
             <!-- Payment Details -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">💳 Payment Details</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">💳 Payment Details</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Order Amount (₹):</label>
@@ -1003,7 +1014,7 @@
             </div>
 
             <!-- Status -->
-            <h4 style="color: #667eea; margin-top: 15px; margin-bottom: 10px;">📊 Status</h4>
+            <h4 style="color: #8E2A8C; margin-top: 15px; margin-bottom: 10px;">📊 Status</h4>
             <div class="form-row">
                 <div class="form-group">
                     <label>Order Status:</label>
@@ -1027,7 +1038,7 @@
         <div class="modal-content invoice-modal">
             <div class="modal-header">
                 <span>🧾 Invoice</span>
-                <button class="close-btn" onclick="closeModal('invoiceModal')">✕</button>
+                <button class="close-btn" onclick="closeModal('invoiceModal')" aria-label="Close">✕</button>
             </div>
             <div id="invoiceContent"></div>
             <div class="invoice-actions">
@@ -1176,17 +1187,17 @@
 
             if (tabName === 'dashboard') {
                 document.getElementById('dashboardTab').style.display = 'block';
-                buttons[0].style.color = '#667eea';
-                buttons[0].style.borderBottom = '3px solid #667eea';
+                buttons[0].style.color = '#8E2A8C';
+                buttons[0].style.borderBottom = '3px solid #8E2A8C';
             } else if (tabName === 'create') {
                 document.getElementById('createTab').style.display = 'block';
-                buttons[1].style.color = '#667eea';
-                buttons[1].style.borderBottom = '3px solid #667eea';
+                buttons[1].style.color = '#8E2A8C';
+                buttons[1].style.borderBottom = '3px solid #8E2A8C';
             } else if (tabName === 'orders') {
                 document.getElementById('ordersTab').style.display = 'block';
                 document.getElementById('chartsSection').style.display = 'block';
-                buttons[2].style.color = '#667eea';
-                buttons[2].style.borderBottom = '3px solid #667eea';
+                buttons[2].style.color = '#8E2A8C';
+                buttons[2].style.borderBottom = '3px solid #8E2A8C';
             }
         }
 
@@ -1232,7 +1243,7 @@
             if (!employeeName || !customerName || !customerEmail || !customerPhone || !senderAddress || !senderPincode || 
                 !receiverName || !receiverPhone || !receiverAddress || !receiverPincode || !origin || !destination || 
                 !boxes || !weight || !itemDescription || !amount) {
-                alert('❌ Please fill in all required fields (marked with *)');
+                showAlert('❌ Please fill in all required fields (marked with *)');
                 return;
             }
 
@@ -1311,12 +1322,12 @@
                     orderData.paymentId = response.razorpay_payment_id;
                     orderData.status = 'paid';
                     
-                    alert('✅ Payment successful!\nPayment ID: ' + response.razorpay_payment_id);
+                    showAlert('✅ Payment successful!\nPayment ID: ' + response.razorpay_payment_id);
                     saveOrder(orderData);
                 },
                 modal: {
                     ondismiss: function() {
-                        alert('❌ Payment cancelled');
+                        showAlert('❌ Payment cancelled');
                     }
                 }
             };
@@ -1363,7 +1374,7 @@
                     }]);
 
                 if (error) {
-                    alert('❌ Error saving order: ' + error.message);
+                    showAlert('❌ Error saving order: ' + error.message);
                     console.error('Supabase error:', error);
                     return;
                 }
@@ -1375,10 +1386,10 @@
                 switchOrdersTab('orders');
                 resetOrderForm();
 
-                alert('✅ Order ' + orderData.id + ' created successfully!');
+                showAlert('✅ Order ' + orderData.id + ' created successfully!');
                 showInvoice(orderData.id);
             } catch (error) {
-                alert('❌ Error saving order: ' + error.message);
+                showAlert('❌ Error saving order: ' + error.message);
                 console.error('Error:', error);
             }
         }
@@ -1395,7 +1406,7 @@
             const reversedOrders = [...window.orders].reverse();
             
             reversedOrders.forEach(order => {
-                const paymentBgColor = order.paymentMethod === 'Razorpay' ? '#667eea' : '#10b981';
+                const paymentBgColor = order.paymentMethod === 'Razorpay' ? '#8E2A8C' : '#10b981';
                 const paymentIcon = order.paymentMethod === 'Razorpay' ? '💳' : '💵';
 
                 const row = tbody.insertRow();
@@ -1675,16 +1686,16 @@
                     .eq('order_id', editingOrderId);
 
                 if (error) {
-                    alert('❌ Error updating order: ' + error.message);
+                    showAlert('❌ Error updating order: ' + error.message);
                     return;
                 }
 
                 displayOrders();
                 updateDashboard();
                 closeModal('editModal');
-                alert('✅ Order updated successfully');
+                showAlert('✅ Order updated successfully');
             } catch (error) {
-                alert('❌ Error updating order: ' + error.message);
+                showAlert('❌ Error updating order: ' + error.message);
                 console.error('Error:', error);
             }
         }
@@ -1698,16 +1709,16 @@
                         .eq('order_id', orderId);
 
                     if (error) {
-                        alert('❌ Error deleting order: ' + error.message);
+                        showAlert('❌ Error deleting order: ' + error.message);
                         return;
                     }
 
                     window.orders = window.orders.filter(o => o.id !== orderId);
                     displayOrders();
                     updateDashboard();
-                    alert('✅ Order deleted');
+                    showAlert('✅ Order deleted');
                 } catch (error) {
-                    alert('❌ Error deleting order: ' + error.message);
+                    showAlert('❌ Error deleting order: ' + error.message);
                     console.error('Error:', error);
                 }
             }
@@ -1771,7 +1782,7 @@
                         labels: Object.keys(shippingMethods),
                         datasets: [{
                             data: Object.values(shippingMethods),
-                            backgroundColor: ['#667eea', '#764ba2', '#f59e0b']
+                            backgroundColor: ['#8E2A8C', '#6b1f69', '#f59e0b']
                         }]
                     },
                     options: {
@@ -1816,7 +1827,7 @@
                         datasets: [{
                             label: 'Revenue (₹)',
                             data: months.map(m => monthlyRevenue[m]),
-                            borderColor: '#667eea',
+                            borderColor: '#8E2A8C',
                             backgroundColor: 'rgba(102, 126, 234, 0.1)',
                             tension: 0.4,
                             fill: true
@@ -1851,6 +1862,29 @@
             });
         }
 
+        // Toast notification helper - replaces native window.alert popups.
+        // If no type is passed, infer it from the message text itself.
+        function showAlert(message, type) {
+            if (!type) {
+                if (/^✅|success/i.test(message)) type = 'success';
+                else if (/^❌|error|failed|invalid/i.test(message)) type = 'error';
+                else if (/^⚠️|warning/i.test(message)) type = 'warn';
+                else type = 'info';
+            }
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.setAttribute('role', 'status');
+            toast.textContent = message;
+            container.appendChild(toast);
+            const life = (type === 'error' || type === 'warn') ? 6000 : 3500;
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, life);
+        }
+
         function initSupabase() {
             if (typeof supabase !== 'undefined') {
                 const supabaseUrl = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
@@ -1869,7 +1903,7 @@
 
         async function login() {
             if (!supabaseClient) {
-                alert('❌ Supabase not initialized. Please refresh the page.');
+                showAlert('❌ Supabase not initialized. Please refresh the page.');
                 return;
             }
 
@@ -1877,7 +1911,7 @@
             const password = document.getElementById('loginPassword').value.trim();
 
             if (!email || !password) {
-                alert('❌ Please enter email and password');
+                showAlert('❌ Please enter email and password');
                 return;
             }
 
@@ -1890,14 +1924,24 @@
                 if (error) throw error;
 
                 if (!data.user) {
-                    alert('❌ Login failed');
+                    showAlert('❌ Login failed');
                     return;
                 }
 
-                const userRole = data.user.user_metadata?.role;
-                if (userRole !== 'orders') {
+                // IMPORTANT: role must be checked against the server-side user_profiles
+                // table, NOT auth user_metadata. user_metadata is editable by the user
+                // themselves via supabase.auth.updateUser(), so trusting it here would let
+                // any authenticated account grant itself the "orders" role from the browser
+                // console. user_profiles is populated/edited by an admin only.
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('user_profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profileError || profile?.role !== 'orders') {
                     await supabaseClient.auth.signOut();
-                    alert('❌ Access denied. Orders role required.');
+                    showAlert('❌ Access denied. Orders role required.');
                     return;
                 }
 
@@ -1913,7 +1957,7 @@
                 loadInitialData();
 
             } catch (error) {
-                alert('❌ Login failed: ' + error.message);
+                showAlert('❌ Login failed: ' + error.message);
             }
         }
 
@@ -1922,11 +1966,13 @@
                 await supabaseClient.auth.signOut();
             }
             localStorage.removeItem('eps_crm_currentUser');
-            location.href = 'https://eps-crm.vercel.app';
+            // Relative path so this works on any deployment (Vercel preview URLs,
+            // the custom domain, localhost, etc.) instead of only the one hardcoded host.
+            location.href = 'eps-crm-dashboard.html';
         }
 
         function goBack() {
-            location.href = 'https://eps-crm.vercel.app';
+            location.href = 'eps-crm-dashboard.html';
         }
 
         function subscribeToOrdersRealTime() {
@@ -1971,42 +2017,43 @@
 
                 if (!supabaseClient) {
                     console.error('❌ Supabase failed to initialize');
-                    alert('❌ Connection error. Please refresh the page.');
+                    showAlert('❌ Connection error. Please refresh the page.');
                     return;
                 }
 
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
-                
-                if (session && session.user.user_metadata?.role === 'orders') {
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('dashboardSection').classList.add('active');
-                    document.getElementById('userEmail').textContent = session.user.email;
-                    
-                    localStorage.setItem('eps_crm_currentUser', JSON.stringify({
-                        email: session.user.email,
-                        module: 'orders',
-                        id: session.user.id
-                    }));
-                    
-                    await loadInitialData();
-                } else {
-                    const user = getCurrentUser();
-                    if (user && user.module === 'orders') {
+
+                // Always re-verify the role from user_profiles (server-controlled),
+                // never from user_metadata or localStorage alone (both are client-editable
+                // and must not be trusted for authorization decisions).
+                if (session) {
+                    const { data: profile } = await supabaseClient
+                        .from('user_profiles')
+                        .select('role')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (profile?.role === 'orders') {
                         document.getElementById('loginSection').style.display = 'none';
                         document.getElementById('dashboardSection').classList.add('active');
-                        document.getElementById('userEmail').textContent = user.email;
+                        document.getElementById('userEmail').textContent = session.user.email;
+
+                        localStorage.setItem('eps_crm_currentUser', JSON.stringify({
+                            email: session.user.email,
+                            module: 'orders',
+                            id: session.user.id
+                        }));
+
                         await loadInitialData();
+                        return;
                     }
                 }
+
+                // No valid session, or the session's real role isn't "orders" -
+                // do not fall back to trusting localStorage, show the login form instead.
+                localStorage.removeItem('eps_crm_currentUser');
             } catch (error) {
                 console.error('Session check error:', error.message);
-                const user = getCurrentUser();
-                if (user && user.module === 'orders') {
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('dashboardSection').classList.add('active');
-                    document.getElementById('userEmail').textContent = user.email;
-                    await loadInitialData();
-                }
             }
         });
 
