@@ -2,6 +2,6 @@
   "name": "eps-crm",
   "version": "1.0.0",
   "description": "EPS CRM System - Cloud-based with Supabase",
-  "main": "eps-crm-cloud.html",
+  "main": "eps-crm-dashboard.html",
   "private": true
 }
