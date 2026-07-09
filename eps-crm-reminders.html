@@ -234,19 +234,31 @@
             color: #8E2A8C;
         }
         
-        .notification {
+        #toastContainer {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #27ae60;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+        }
+
+        .notification {
             color: white;
             padding: 15px 20px;
             border-radius: 5px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1000;
             animation: slideInRight 0.3s ease-in-out;
+            font-weight: 500;
         }
-        
+
+        .notification-success { background: #27ae60; }
+        .notification-error { background: #e74c3c; }
+        .notification-info { background: #8E2A8C; }
+        .notification-warn { background: #D4AF37; color: #3a2e00; }
+
         @keyframes slideInRight {
             from {
                 transform: translateX(400px);
@@ -257,9 +269,24 @@
                 opacity: 1;
             }
         }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            header { padding: 14px; flex-wrap: wrap; gap: 10px; }
+            header h1 { font-size: 20px; }
+            .tabs { flex-wrap: wrap; gap: 6px; padding: 10px; }
+            .tab-btn { padding: 8px 12px; font-size: 13px; }
+            .reminder-card { flex-direction: column; align-items: stretch; gap: 12px; }
+            .reminder-actions { flex-wrap: wrap; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .filter-section { flex-wrap: wrap; }
+            #toastContainer { left: 12px; right: 12px; max-width: none; top: 12px; }
+        }
     </style>
 </head>
 <body>
+    <div id="toastContainer"></div>
+
     <header>
         <div>
             <h1>🔔 Smart Reminders</h1>
@@ -333,15 +360,25 @@
         const SUPABASE_URL = 'https://rbxxvlrmcvrqentmctfb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_h65WSAQnbio1n_nlmHZNKQ_U27itQKz';
         const supabaseReminders = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
+
+        // Escapes free-text values (contact names, notes) before they go into
+        // innerHTML, to prevent stored XSS from data entered by any user.
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
+        }
+
         let currentUser = null;
         let allReminders = [];
         let currentTab = 'urgent';
-        
+
         async function initAuth() {
             const { data: { session } } = await supabaseReminders.auth.getSession();
             if (!session) {
-                window.location.href = 'https://www.epscrm.in';
+                // Relative path so this works on any deployment (Vercel preview URLs,
+                // the custom domain, localhost, etc.) instead of only one hardcoded host.
+                window.location.href = 'eps-crm-dashboard.html';
                 return;
             }
             
@@ -497,10 +534,10 @@
             return `
                 <div class="reminder-card ${cardClass}">
                     <div class="reminder-content">
-                        <h3>${reminder.title}</h3>
+                        <h3>${escapeHtml(reminder.title)}</h3>
                         <p>📅 <strong>${dateStr}</strong> at ${timeStr}</p>
-                        <p>${reminder.description}</p>
-                        <span class="reminder-badge badge-${reminder.type.toLowerCase()}">${reminder.type}</span>
+                        <p>${escapeHtml(reminder.description)}</p>
+                        <span class="reminder-badge badge-${escapeHtml(reminder.type.toLowerCase())}">${escapeHtml(reminder.type)}</span>
                         ${reminder.status === 'completed' ? '<span class="reminder-badge badge-completed">✓ Completed</span>' : ''}
                     </div>
                     <div class="reminder-actions">
@@ -523,7 +560,7 @@
                 showNotification('✅ Reminder marked as completed!');
                 loadReminders();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showAlert('Error: ' + error.message, 'error');
             }
         }
         
@@ -548,16 +585,29 @@
             loadReminders();
         }
         
-        function showNotification(message) {
+        function showNotification(message, type) {
+            if (!type) {
+                if (/^✅|success/i.test(message)) type = 'success';
+                else if (/^❌|error|failed/i.test(message)) type = 'error';
+                else if (/^⚠️|warning/i.test(message)) type = 'warn';
+                else type = 'info';
+            }
+            const container = document.getElementById('toastContainer');
             const notif = document.createElement('div');
-            notif.className = 'notification';
+            notif.className = 'notification notification-' + type;
+            notif.setAttribute('role', 'status');
             notif.textContent = message;
-            document.body.appendChild(notif);
-            
+            container.appendChild(notif);
+
             setTimeout(() => {
-                notif.remove();
-            }, 3000);
+                notif.style.transition = 'opacity 0.3s';
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 300);
+            }, type === 'error' || type === 'warn' ? 6000 : 3000);
         }
+
+        // Alias so this page matches the showAlert() naming used across the rest of the app
+        const showAlert = showNotification;
         
         async function logout() {
             await supabaseReminders.auth.signOut();
