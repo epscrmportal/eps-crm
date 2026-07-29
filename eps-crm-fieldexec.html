@@ -979,7 +979,15 @@
             }
 
             try {
-                const { error } = await supabase.from('meetings').insert({
+                // If the typed name matches an existing CRM contact, link the real
+                // contact_id so this meeting shows up against that contact's record.
+                // Otherwise leave it unset (requires meetings.contact_id to be
+                // nullable - see supabase-meetings-migration.sql).
+                const matchedContact = (allContacts || []).find(
+                    c => (c.name || '').trim().toLowerCase() === contactName.toLowerCase()
+                );
+
+                const payload = {
                     contact_name: company ? `${contactName} (${company})` : contactName,
                     assigned_to: currentUser.email,
                     date: date,
@@ -987,7 +995,10 @@
                     agenda: agenda,
                     status: 'scheduled',
                     created_by: currentUser.email
-                });
+                };
+                if (matchedContact) payload.contact_id = matchedContact.id;
+
+                const { error } = await supabase.from('meetings').insert(payload);
 
                 if (error) throw error;
 
