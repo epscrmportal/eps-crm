@@ -433,6 +433,39 @@
         </div>
     </div>
 
+    <div id="createMeetingModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #8E2A8C; margin-bottom: 20px;">Create Meeting</h2>
+            <div class="form-group">
+                <label for="newMeetingContact">Contact Name *</label>
+                <input type="text" id="newMeetingContact" list="fieldExecContactsList" placeholder="Who are you meeting?" aria-label="Contact name">
+                <datalist id="fieldExecContactsList"></datalist>
+            </div>
+            <div class="form-group">
+                <label for="newMeetingCompany">Company</label>
+                <input type="text" id="newMeetingCompany" placeholder="Company (optional)" aria-label="Company">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label for="newMeetingDate">Date *</label>
+                    <input type="date" id="newMeetingDate" aria-label="Meeting date">
+                </div>
+                <div class="form-group">
+                    <label for="newMeetingTime">Time *</label>
+                    <input type="time" id="newMeetingTime" aria-label="Meeting time">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="newMeetingAgenda">Agenda / Notes</label>
+                <textarea id="newMeetingAgenda" rows="3" placeholder="What's this meeting about?" aria-label="Meeting agenda"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="submitCreateMeeting()">Create Meeting</button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="closeCreateMeetingModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="meetingModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle" style="color: #8E2A8C; margin-bottom: 20px;">Meeting Details</h2>
@@ -916,7 +949,56 @@
         }
 
         function openCreateMeetingModal() {
-            showAlert('Create meeting feature');
+            document.getElementById('newMeetingContact').value = '';
+            document.getElementById('newMeetingCompany').value = '';
+            document.getElementById('newMeetingDate').value = '';
+            document.getElementById('newMeetingTime').value = '';
+            document.getElementById('newMeetingAgenda').value = '';
+
+            // Offer existing CRM contacts as quick-pick suggestions
+            const list = document.getElementById('fieldExecContactsList');
+            list.innerHTML = (allContacts || []).map(c => `<option value="${escapeHtml(c.name || '')}">`).join('');
+
+            document.getElementById('createMeetingModal').classList.add('active');
+        }
+
+        function closeCreateMeetingModal() {
+            document.getElementById('createMeetingModal').classList.remove('active');
+        }
+
+        async function submitCreateMeeting() {
+            const contactName = document.getElementById('newMeetingContact').value.trim();
+            const company = document.getElementById('newMeetingCompany').value.trim();
+            const date = document.getElementById('newMeetingDate').value;
+            const time = document.getElementById('newMeetingTime').value;
+            const agenda = document.getElementById('newMeetingAgenda').value.trim();
+
+            if (!contactName || !date || !time) {
+                showAlert('Contact name, date and time are required', 'error');
+                return;
+            }
+
+            try {
+                const { error } = await supabase.from('meetings').insert({
+                    contact_name: company ? `${contactName} (${company})` : contactName,
+                    assigned_to: currentUser.email,
+                    date: date,
+                    time: time,
+                    agenda: agenda,
+                    status: 'scheduled',
+                    created_by: currentUser.email
+                });
+
+                if (error) throw error;
+
+                showAlert('✅ Meeting created!', 'success');
+                closeCreateMeetingModal();
+                await loadMeetings();
+                displayMeetings();
+                updateMetrics();
+            } catch (error) {
+                showAlert('Error creating meeting: ' + error.message, 'error');
+            }
         }
 
         function loadGoalProgress() {
